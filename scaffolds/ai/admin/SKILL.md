@@ -1,21 +1,23 @@
 ---
 name: deployer-php
-description: Server and site deployment concierge for DeployerPHP. Helps with provisioning servers (AWS, DigitalOcean), deploying PHP applications, managing services (Nginx, PHP-FPM, MySQL, Redis), configuring crons and supervisors, and debugging deployment issues. Use when working with deployer.yml inventory or running deployer CLI commands. Also use when investigating the deployed version of a site - checking how the deployment stores sessions, handles caching, reads environment variables, or any production configuration. For questions about "how does the deployed site work" or "what's running on the server", use server:run to inspect the deployed application.
+description: Full-access deployment concierge for DeployerPHP. Helps with provisioning servers (AWS, DigitalOcean), deploying PHP applications, managing services (Nginx, PHP-FPM, MySQL, Redis), configuring crons and supervisors, and debugging deployment issues. Use when working with deployer.yml inventory or running deployer CLI commands. Also use when investigating the deployed version of a site - checking how the deployment stores sessions, handles caching, reads environment variables, or any production configuration. For questions about "how does the deployed site work" or "what's running on the server", use server:run to inspect the deployed application.
 ---
 
-# DeployerPHP
+# DeployerPHP (Admin Tier)
 
-DeployerPHP is a server and site deployment tool for PHP applications. It manages servers, sites, and services through a CLI.
+DeployerPHP is a server and site deployment tool for PHP applications. It manages servers, sites, and services through a CLI. This tier provides **full access** to all DeployerPHP capabilities.
 
 ## Role
 
-You are a deployment concierge. You can:
+You are a deployment concierge with full administrative access. You can:
 
 - **Understand** inventory and current state by reading `deployer.yml` and server info
 - **Guide** users through multi-step workflows (server setup, site deployment, cloud provisioning)
 - **Execute** DeployerPHP commands for server, site, and service management
 - **Debug** deployment and infrastructure issues using logs and status commands
 - **Maintain** appropriate safety guardrails for destructive operations
+
+> **Note:** Interactive SSH commands (`server:ssh`, `site:ssh`) are excluded from this tier as AI agents cannot operate interactive terminals. Use `server:run` instead to execute specific commands.
 
 ## Inventory
 
@@ -68,7 +70,7 @@ sites:
 
 Sites are deployed to `/home/deployer/{domain}/`:
 
-```
+```text
 /home/deployer/example.com/
 ├── current -> releases/20240115_120000   # Symlink to active release
 ├── releases/
@@ -181,9 +183,10 @@ Complete sequence for setting up scheduled tasks.
 | `server:install`  | Install server packages (Nginx, PHP, deployer user)                | No          |
 | `server:delete`   | Remove server from inventory (optionally terminate cloud instance) | **Yes**     |
 | `server:firewall` | Configure UFW firewall rules                                       | No          |
-| `server:ssh`      | Open SSH session to server                                         | No          |
 | `server:logs`     | View server logs (system, services, sites)                         | No          |
 | `server:run`      | Execute command on server                                          | Depends     |
+
+> **Note:** `server:ssh` is excluded - use `server:run` for non-interactive commands.
 
 ### Site Management
 
@@ -193,10 +196,11 @@ Complete sequence for setting up scheduled tasks.
 | `site:deploy`      | Deploy site (clone, build, activate)             | No          |
 | `site:https`       | Enable HTTPS with Let's Encrypt                  | No          |
 | `site:delete`      | Remove site from server and inventory            | **Yes**     |
-| `site:ssh`         | Open SSH session to site directory               | No          |
 | `site:shared:push` | Upload files to shared directory                 | No          |
 | `site:shared:pull` | Download files from shared directory             | No          |
 | `site:rollback`    | (Informational) Explains forward-only deployment | No          |
+
+> **Note:** `site:ssh` is excluded - use `server:run` for non-interactive commands.
 
 ### Service Control
 
@@ -234,12 +238,12 @@ All service commands follow the pattern `{service}:{action}`.
 
 ### Scaffolding
 
-| Command                | Description                                                     |
-| ---------------------- | --------------------------------------------------------------- |
-| `scaffold:ai`          | Generate AI agent skill (this file)                             |
-| `scaffold:scripts`     | Generate deployment scripts (`.deployer/scripts/`)              |
-| `scaffold:crons`       | Generate cron script templates (`.deployer/crons/`)             |
-| `scaffold:supervisors` | Generate supervisor script templates (`.deployer/supervisors/`) |
+| Command                | Description                                                             |
+| ---------------------- | ----------------------------------------------------------------------- |
+| `scaffold:ai`          | Generate AI agent skill (observer, debugger, or admin tier)             |
+| `scaffold:scripts`     | Generate deployment scripts (`.deployer/scripts/`)                      |
+| `scaffold:crons`       | Generate cron script templates (`.deployer/crons/`)                     |
+| `scaffold:supervisors` | Generate supervisor script templates (`.deployer/supervisors/`)         |
 
 ### Cloud Providers
 
@@ -285,9 +289,6 @@ deployer server:logs --server=production --service=nginx,php8.3-fpm --lines=100
 
 # Site-specific logs (access, crons, supervisors for one site)
 deployer server:logs --server=production --site=example.com --lines=100
-
-# Interactive selection
-deployer server:logs --server=production
 ```
 
 Available log sources:
@@ -418,3 +419,15 @@ All commands support non-interactive execution. After each command, a "Non-inter
 - Automation scripts
 - CI/CD pipelines
 - Documentation
+
+### Shell Command Limitations
+
+The `server:run` command executes via non-interactive SSH without a terminal (no PTY). **Never use interactive commands** that require keyboard input—they will hang indefinitely.
+
+| Avoid                  | Use Instead                          |
+| ---------------------- | ------------------------------------ |
+| `less`, `more`         | `cat`, `head -n`, `tail -n`          |
+| `top`, `htop`          | `top -b -n 1`, `ps aux`              |
+| `vim`, `vi`, `nano`    | `cat` to view, `sed` for edits       |
+| `mysql`, `psql` (REPL) | Single queries with `-e` flag        |
+| `ssh` (nested)         | Not supported                        |
