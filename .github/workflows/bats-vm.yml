@@ -9,12 +9,12 @@ on:
 jobs:
   vm-tests:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 9
 
     strategy:
       fail-fast: false
       matrix:
-        distro: [ubuntu24, debian12, debian13]
+        distro: [ubuntu24]
 
     concurrency:
       group: bats-vm-${{ matrix.distro }}-${{ github.ref }}

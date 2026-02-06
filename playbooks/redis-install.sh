@@ -18,7 +18,6 @@ set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
 [[ -z $DEPLOYER_OUTPUT_FILE ]] && echo "Error: DEPLOYER_OUTPUT_FILE required" && exit 1
-[[ -z $DEPLOYER_DISTRO ]] && echo "Error: DEPLOYER_DISTRO required" && exit 1
 [[ -z $DEPLOYER_PERMS ]] && echo "Error: DEPLOYER_PERMS required" && exit 1
 export DEPLOYER_PERMS
 
@@ -27,31 +26,6 @@ export DEPLOYER_PERMS
 
 # Credentials (generated in main)
 REDIS_PASS=""
-
-# ----
-# Conflict Detection
-# ----
-
-#
-# Check for Valkey conflict before installation
-
-check_valkey_conflict() {
-	# Check if Valkey service is running
-	if systemctl is-active --quiet valkey 2> /dev/null || systemctl is-active --quiet valkey-server 2> /dev/null; then
-		echo "Error: Valkey is already installed and running on this server" >&2
-		echo "Both Redis and Valkey use port 6379 and cannot coexist." >&2
-		echo "Please uninstall Valkey first if you want to use Redis." >&2
-		exit 1
-	fi
-
-	# Check if Valkey packages are installed (even if service is stopped)
-	if dpkg -l valkey-server 2> /dev/null | grep -q '^ii'; then
-		echo "Error: Valkey packages are installed on this server" >&2
-		echo "Both Redis and Valkey use port 6379 and cannot coexist." >&2
-		echo "Please remove Valkey packages first: apt-get purge valkey-server" >&2
-		exit 1
-	fi
-}
 
 # ----
 # Installation Functions
@@ -184,9 +158,6 @@ config_logrotate() {
 # ----
 
 main() {
-	# Check for Valkey conflict FIRST (before any installation)
-	check_valkey_conflict
-
 	# Check if Redis is already installed - exit gracefully if so
 	if systemctl is-active --quiet redis-server 2> /dev/null; then
 		echo "-> Redis server is already installed and running"
