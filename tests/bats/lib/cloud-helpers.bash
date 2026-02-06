@@ -9,42 +9,51 @@
 export CLOUD_TEST_KEY_PATH="${CLOUD_TEST_KEY_PATH:-${BATS_TEST_ROOT}/fixtures/keys/id_test.pub}"
 
 # ----
+# Run-Scoped Resource Isolation
+# ----
+# Set by bats.sh before invoking bats. Fallback for direct bats invocation.
+
+export BATS_RUN_SUFFIX="${BATS_RUN_SUFFIX:-unknown}"
+
+# ----
 # AWS Test Configuration
 # ----
-# Instance sizing - t3.small (2 vCPU, 2 GB) recommended for faster installs
-# Minimum: t3.micro (2 vCPU burst, 1 GB)
+# Instance sizing and disk configuration
 
-export AWS_TEST_KEY_NAME="${AWS_TEST_KEY_NAME:-deployer-bats-aws}"
-export AWS_TEST_SERVER_NAME="${AWS_TEST_SERVER_NAME:-deployer-bats-aws}"
-export AWS_TEST_INSTANCE_TYPE="${AWS_TEST_INSTANCE_TYPE:-t3.small}"
-export AWS_TEST_AMI="${AWS_TEST_AMI:-}"
+export AWS_TEST_KEY_NAME="${AWS_TEST_KEY_NAME:-deployer-bats-aws-${BATS_RUN_SUFFIX}}"
+export AWS_TEST_SERVER_NAME="${AWS_TEST_SERVER_NAME:-deployer-bats-aws-${BATS_RUN_SUFFIX}}"
+export AWS_TEST_INSTANCE_TYPE="${AWS_TEST_INSTANCE_TYPE:-}"
+export AWS_TEST_IMAGE="${AWS_TEST_IMAGE:-}"
 export AWS_TEST_KEY_PAIR="${AWS_TEST_KEY_PAIR:-}"
 export AWS_TEST_VPC="${AWS_TEST_VPC:-}"
 export AWS_TEST_SUBNET="${AWS_TEST_SUBNET:-}"
 export AWS_TEST_PRIVATE_KEY_PATH="${AWS_TEST_PRIVATE_KEY_PATH:-$HOME/.ssh/id_ed25519}"
-export AWS_TEST_DISK_SIZE="${AWS_TEST_DISK_SIZE:-8}"
+export AWS_TEST_DISK_SIZE="${AWS_TEST_DISK_SIZE:-}"
 
 # AWS DNS/Site Test Configuration
 export AWS_TEST_DOMAIN="${AWS_TEST_DOMAIN:-deployeraws.eu}"
 export AWS_TEST_HOSTED_ZONE="${AWS_TEST_HOSTED_ZONE:-deployeraws.eu}"
+export AWS_TEST_DNS_ROOT="r${BATS_RUN_SUFFIX}"
+export AWS_TEST_DNS_WWW="www-r${BATS_RUN_SUFFIX}"
 
 # ----
 # DigitalOcean Test Configuration
 # ----
-# Droplet sizing - s-2vcpu-2gb recommended for faster installs
-# Minimum: s-1vcpu-1gb
+# Droplet sizing and VPC configuration
 
-export DO_TEST_KEY_NAME="${DO_TEST_KEY_NAME:-deployer-bats-do}"
-export DO_TEST_SERVER_NAME="${DO_TEST_SERVER_NAME:-deployer-bats-do}"
+export DO_TEST_KEY_NAME="${DO_TEST_KEY_NAME:-deployer-bats-do-${BATS_RUN_SUFFIX}}"
+export DO_TEST_SERVER_NAME="${DO_TEST_SERVER_NAME:-deployer-bats-do-${BATS_RUN_SUFFIX}}"
 export DO_TEST_SSH_KEY_ID="${DO_TEST_SSH_KEY_ID:-}"
 export DO_TEST_PRIVATE_KEY_PATH="${DO_TEST_PRIVATE_KEY_PATH:-$HOME/.ssh/id_ed25519}"
 export DO_TEST_REGION="${DO_TEST_REGION:-}"
-export DO_TEST_SIZE="${DO_TEST_SIZE:-s-2vcpu-2gb}"
+export DO_TEST_SIZE="${DO_TEST_SIZE:-}"
 export DO_TEST_IMAGE="${DO_TEST_IMAGE:-}"
-export DO_TEST_VPC_UUID="${DO_TEST_VPC_UUID:-default}"
+export DO_TEST_VPC_UUID="${DO_TEST_VPC_UUID:-}"
 
 # DigitalOcean DNS/Site Test Configuration
 export DO_TEST_DOMAIN="${DO_TEST_DOMAIN:-deployerdo.eu}"
+export DO_TEST_DNS_ROOT="r${BATS_RUN_SUFFIX}"
+export DO_TEST_DNS_WWW="www-r${BATS_RUN_SUFFIX}"
 
 # ----
 # Cloudflare Test Configuration
@@ -52,6 +61,8 @@ export DO_TEST_DOMAIN="${DO_TEST_DOMAIN:-deployerdo.eu}"
 # DNS-only provider - uses AWS-provisioned server IP for record values
 
 export CF_TEST_DOMAIN="${CF_TEST_DOMAIN:-deployercf.eu}"
+export CF_TEST_DNS_ROOT="r${BATS_RUN_SUFFIX}"
+export CF_TEST_DNS_WWW="www-r${BATS_RUN_SUFFIX}"
 
 # ----
 # Shared Deployment Test Configuration
@@ -71,18 +82,80 @@ export CLOUD_TEST_APP_MESSAGE="${CLOUD_TEST_APP_MESSAGE:-DeployerPHP-BATS-Test-S
 aws_credentials_available() {
 	[[ -n "${AWS_ACCESS_KEY_ID:-}" ]] \
 		&& [[ -n "${AWS_SECRET_ACCESS_KEY:-}" ]] \
-		&& [[ -n "${AWS_DEFAULT_REGION:-}${AWS_REGION:-}" ]]
+		&& [[ -n "${AWS_REGION:-}" ]]
 }
 
 # Check if AWS provision test configuration is complete
 aws_provision_config_available() {
 	aws_credentials_available \
 		&& [[ -n "$AWS_TEST_INSTANCE_TYPE" ]] \
-		&& [[ -n "$AWS_TEST_AMI" ]] \
+		&& [[ -n "$AWS_TEST_IMAGE" ]] \
 		&& [[ -n "$AWS_TEST_KEY_PAIR" ]] \
 		&& [[ -n "$AWS_TEST_VPC" ]] \
 		&& [[ -n "$AWS_TEST_SUBNET" ]] \
+		&& [[ -n "$AWS_TEST_DISK_SIZE" ]] \
 		&& [[ -f "$AWS_TEST_PRIVATE_KEY_PATH" ]]
+}
+
+# ----
+# Requirement Guards (fail with diagnostics when config is missing)
+# ----
+
+# Require AWS credentials or fail with diagnostics
+require_aws_credentials() {
+	if aws_credentials_available; then return 0; fi
+	echo "AWS credentials not configured"
+	[[ -z "${AWS_ACCESS_KEY_ID:-}" ]] && echo "  Missing: AWS_ACCESS_KEY_ID"
+	[[ -z "${AWS_SECRET_ACCESS_KEY:-}" ]] && echo "  Missing: AWS_SECRET_ACCESS_KEY"
+	[[ -z "${AWS_REGION:-}" ]] && echo "  Missing: AWS_REGION"
+	return 1
+}
+
+# Require full AWS provisioning config or fail with diagnostics
+require_aws_provision_config() {
+	if aws_provision_config_available; then return 0; fi
+	echo "AWS provisioning configuration incomplete"
+	[[ -z "${AWS_ACCESS_KEY_ID:-}" ]] && echo "  Missing: AWS_ACCESS_KEY_ID"
+	[[ -z "${AWS_SECRET_ACCESS_KEY:-}" ]] && echo "  Missing: AWS_SECRET_ACCESS_KEY"
+	[[ -z "${AWS_REGION:-}" ]] && echo "  Missing: AWS_REGION"
+	[[ -z "$AWS_TEST_INSTANCE_TYPE" ]] && echo "  Missing: AWS_TEST_INSTANCE_TYPE"
+	[[ -z "$AWS_TEST_IMAGE" ]] && echo "  Missing: AWS_TEST_IMAGE"
+	[[ -z "$AWS_TEST_KEY_PAIR" ]] && echo "  Missing: AWS_TEST_KEY_PAIR"
+	[[ -z "$AWS_TEST_VPC" ]] && echo "  Missing: AWS_TEST_VPC"
+	[[ -z "$AWS_TEST_SUBNET" ]] && echo "  Missing: AWS_TEST_SUBNET"
+	[[ -z "$AWS_TEST_DISK_SIZE" ]] && echo "  Missing: AWS_TEST_DISK_SIZE"
+	[[ ! -f "$AWS_TEST_PRIVATE_KEY_PATH" ]] && echo "  Missing: SSH key at $AWS_TEST_PRIVATE_KEY_PATH"
+	return 1
+}
+
+# Require Cloudflare credentials or fail with diagnostics
+require_cf_credentials() {
+	if cf_credentials_available; then return 0; fi
+	echo "Cloudflare credentials not configured"
+	[[ -z "${CLOUDFLARE_API_TOKEN:-}" ]] && [[ -z "${CF_API_TOKEN:-}" ]] && echo "  Missing: CLOUDFLARE_API_TOKEN or CF_API_TOKEN"
+	return 1
+}
+
+# Require DO credentials or fail with diagnostics
+require_do_credentials() {
+	if do_credentials_available; then return 0; fi
+	echo "DigitalOcean credentials not configured"
+	[[ -z "${DIGITALOCEAN_API_TOKEN:-}" ]] && [[ -z "${DO_API_TOKEN:-}" ]] && echo "  Missing: DIGITALOCEAN_API_TOKEN or DO_API_TOKEN"
+	return 1
+}
+
+# Require full DO provisioning config or fail with diagnostics
+require_do_provision_config() {
+	if do_provision_config_available; then return 0; fi
+	echo "DigitalOcean provisioning configuration incomplete"
+	[[ -z "${DIGITALOCEAN_API_TOKEN:-}" ]] && [[ -z "${DO_API_TOKEN:-}" ]] && echo "  Missing: DIGITALOCEAN_API_TOKEN or DO_API_TOKEN"
+	[[ -z "$DO_TEST_SSH_KEY_ID" ]] && echo "  Missing: DO_TEST_SSH_KEY_ID"
+	[[ -z "$DO_TEST_REGION" ]] && echo "  Missing: DO_TEST_REGION"
+	[[ -z "$DO_TEST_SIZE" ]] && echo "  Missing: DO_TEST_SIZE"
+	[[ -z "$DO_TEST_IMAGE" ]] && echo "  Missing: DO_TEST_IMAGE"
+	[[ -z "$DO_TEST_VPC_UUID" ]] && echo "  Missing: DO_TEST_VPC_UUID"
+	[[ ! -f "$DO_TEST_PRIVATE_KEY_PATH" ]] && echo "  Missing: SSH key at $DO_TEST_PRIVATE_KEY_PATH"
+	return 1
 }
 
 # Cleanup AWS test key (idempotent - ignores "not found")
@@ -95,11 +168,28 @@ aws_cleanup_test_key() {
 
 # Cleanup AWS provisioned test server (idempotent - ignores "not found")
 aws_cleanup_test_server() {
-	"$DEPLOYER_BIN" server:delete \
+	"$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" server:delete \
 		--server="$AWS_TEST_SERVER_NAME" \
 		--force \
 		--yes \
 		--destroy-cloud 2> /dev/null || true
+}
+
+# Cleanup AWS test DNS records (idempotent - ignores "not found")
+aws_cleanup_test_dns() {
+	"$DEPLOYER_BIN" aws:dns:delete \
+		--zone="$AWS_TEST_HOSTED_ZONE" \
+		--type="A" \
+		--name="$AWS_TEST_DNS_ROOT" \
+		--force \
+		--yes 2> /dev/null || true
+
+	"$DEPLOYER_BIN" aws:dns:delete \
+		--zone="$AWS_TEST_HOSTED_ZONE" \
+		--type="A" \
+		--name="$AWS_TEST_DNS_WWW" \
+		--force \
+		--yes 2> /dev/null || true
 }
 
 # ----
@@ -118,6 +208,7 @@ do_provision_config_available() {
 		&& [[ -n "$DO_TEST_REGION" ]] \
 		&& [[ -n "$DO_TEST_SIZE" ]] \
 		&& [[ -n "$DO_TEST_IMAGE" ]] \
+		&& [[ -n "$DO_TEST_VPC_UUID" ]] \
 		&& [[ -f "$DO_TEST_PRIVATE_KEY_PATH" ]]
 }
 
@@ -135,7 +226,7 @@ do_extract_key_id_from_output() {
 # Note: Must strip ANSI/control codes and match 8-digit IDs (not short numbers in escapes)
 do_find_key_id_by_name() {
 	local key_name="$1"
-	"$DEPLOYER_BIN" do:key:list 2> /dev/null \
+	"$DEPLOYER_BIN" --no-ansi do:key:list 2> /dev/null \
 		| LC_ALL=C tr -cd '[:print:]\n' \
 		| grep "$key_name" \
 		| grep -oE '[0-9]{7,8}' \
@@ -157,11 +248,28 @@ do_cleanup_test_key() {
 
 # Cleanup DO provisioned test server (idempotent - ignores "not found")
 do_cleanup_test_server() {
-	"$DEPLOYER_BIN" server:delete \
+	"$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" server:delete \
 		--server="$DO_TEST_SERVER_NAME" \
 		--force \
 		--yes \
 		--destroy-cloud 2> /dev/null || true
+}
+
+# Cleanup DO test DNS records (idempotent - ignores "not found")
+do_cleanup_test_dns() {
+	"$DEPLOYER_BIN" do:dns:delete \
+		--zone="$DO_TEST_DOMAIN" \
+		--type="A" \
+		--name="$DO_TEST_DNS_ROOT" \
+		--force \
+		--yes 2> /dev/null || true
+
+	"$DEPLOYER_BIN" do:dns:delete \
+		--zone="$DO_TEST_DOMAIN" \
+		--type="A" \
+		--name="$DO_TEST_DNS_WWW" \
+		--force \
+		--yes 2> /dev/null || true
 }
 
 # ----
@@ -171,6 +279,23 @@ do_cleanup_test_server() {
 # Check if Cloudflare credentials are configured
 cf_credentials_available() {
 	[[ -n "${CLOUDFLARE_API_TOKEN:-}${CF_API_TOKEN:-}" ]]
+}
+
+# Cleanup Cloudflare test DNS records (idempotent - ignores "not found")
+cf_cleanup_test_dns() {
+	"$DEPLOYER_BIN" cf:dns:delete \
+		--zone="$CF_TEST_DOMAIN" \
+		--type="A" \
+		--name="$CF_TEST_DNS_ROOT" \
+		--force \
+		--yes 2> /dev/null || true
+
+	"$DEPLOYER_BIN" cf:dns:delete \
+		--zone="$CF_TEST_DOMAIN" \
+		--type="A" \
+		--name="$CF_TEST_DNS_WWW" \
+		--force \
+		--yes 2> /dev/null || true
 }
 
 # ----
@@ -183,7 +308,7 @@ cf_credentials_available() {
 # Note: Parses text output since --format=json still includes banner
 get_server_ip() {
 	local server_name="$1"
-	"$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" server:info \
+	"$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:info \
 		--server="$server_name" 2> /dev/null \
 		| grep -E '^▒ Host:' \
 		| sed 's/.*Host:[[:space:]]*//'
@@ -255,4 +380,49 @@ wait_for_http() {
 		echo "No response received"
 	fi
 	return 1
+}
+
+# ----
+# Fail-Fast Support
+# ----
+# Sequential cloud tests (provision → install → DNS → deploy) should abort
+# after the first failure to avoid wasting CI time and cloud API calls.
+# Uses a sentinel file in BATS_FILE_TMPDIR (per-file, auto-cleaned by BATS).
+
+# Mark current test as failed (call from teardown)
+# BATS_TEST_COMPLETED is empty when test body failed, "1" when passed
+cloud_mark_failed() {
+	if [[ -z "${BATS_TEST_COMPLETED:-}" ]]; then
+		printf '%s' "${BATS_TEST_DESCRIPTION:-unknown}" > "${BATS_FILE_TMPDIR}/cloud_failed"
+	fi
+}
+
+# Skip remaining tests if a previous test failed (call from setup)
+cloud_check_failed() {
+	if [[ -f "${BATS_FILE_TMPDIR}/cloud_failed" ]]; then
+		local failed_test
+		failed_test=$(<"${BATS_FILE_TMPDIR}/cloud_failed")
+		skip "Aborted: '${failed_test}' failed"
+	fi
+}
+
+# ----
+# Orchestration (cleanup all resources for a provider)
+# ----
+
+# Full AWS cleanup (most expensive first)
+aws_cleanup_all() {
+	aws_cleanup_test_server
+	aws_cleanup_test_dns
+	cf_cleanup_test_dns
+	cleanup_test_site "$AWS_TEST_DOMAIN"
+	aws_cleanup_test_key
+}
+
+# Full DO cleanup (most expensive first)
+do_cleanup_all() {
+	do_cleanup_test_server
+	do_cleanup_test_dns
+	cleanup_test_site "$DO_TEST_DOMAIN"
+	do_cleanup_test_key
 }

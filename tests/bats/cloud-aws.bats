@@ -4,7 +4,7 @@
 # Tests: aws:key:add, aws:key:list, aws:key:delete, aws:provision
 #
 # Prerequisites:
-#   - AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION in environment
+#   - AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION in environment
 #   - Valid AWS credentials with EC2 permissions
 #   - SSH private key at ~/.ssh/id_ed25519
 
@@ -16,20 +16,26 @@ load 'lib/cloud-helpers'
 # ----
 
 setup_file() {
-	# Skip all tests if AWS credentials not configured
-	if ! aws_credentials_available; then
-		skip "AWS credentials not configured"
-	fi
+	require_aws_credentials
+	require_cf_credentials
+	aws_cleanup_all
+}
 
-	# Clean up any leftover test key from previous runs
-	aws_cleanup_test_key
+teardown_file() {
+	if ! aws_credentials_available; then
+		return 0
+	fi
+	aws_cleanup_all
+	rm -f "$TEST_INVENTORY"
 }
 
 setup() {
-	# Skip individual test if credentials unavailable
-	if ! aws_credentials_available; then
-		skip "AWS credentials not configured"
-	fi
+	cloud_check_failed
+	require_aws_credentials
+}
+
+teardown() {
+	cloud_mark_failed
 }
 
 # ----
@@ -96,10 +102,7 @@ setup() {
 # ----
 
 @test "aws:provision creates EC2 instance and adds to inventory" {
-	# Skip if AWS credentials or SSH key not available
-	if ! aws_provision_config_available; then
-		skip "AWS credentials not configured or SSH key missing"
-	fi
+	require_aws_provision_config
 
 	# Cleanup any leftover test server
 	aws_cleanup_test_server
@@ -107,7 +110,7 @@ setup() {
 	run_deployer aws:provision \
 		--name="$AWS_TEST_SERVER_NAME" \
 		--instance-type="$AWS_TEST_INSTANCE_TYPE" \
-		--ami="$AWS_TEST_AMI" \
+		--image="$AWS_TEST_IMAGE" \
 		--key-pair="$AWS_TEST_KEY_PAIR" \
 		--private-key-path="$AWS_TEST_PRIVATE_KEY_PATH" \
 		--vpc="$AWS_TEST_VPC" \
@@ -127,13 +130,10 @@ setup() {
 }
 
 @test "server:install configures AWS provisioned server" {
-	# Skip if AWS credentials or SSH key not available
-	if ! aws_provision_config_available; then
-		skip "AWS credentials not configured or SSH key missing"
-	fi
+	require_aws_provision_config
 
 	# Full install takes time - use longer timeout
-	run timeout 600 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" server:install \
+	run timeout 600 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:install \
 		--server="$AWS_TEST_SERVER_NAME" \
 		--generate-deploy-key \
 		--timezone="UTC" \
@@ -154,10 +154,7 @@ setup() {
 # ----
 
 @test "aws:dns:set creates A record for root domain" {
-	# Skip if AWS credentials or SSH key not available
-	if ! aws_provision_config_available; then
-		skip "AWS credentials not configured or SSH key missing"
-	fi
+	require_aws_provision_config
 
 	# Get server IP from inventory
 	local server_ip
@@ -168,7 +165,7 @@ setup() {
 	run_deployer aws:dns:set \
 		--zone="$AWS_TEST_HOSTED_ZONE" \
 		--type="A" \
-		--name="@" \
+		--name="$AWS_TEST_DNS_ROOT" \
 		--value="$server_ip" \
 		--ttl="60"
 
@@ -181,10 +178,7 @@ setup() {
 }
 
 @test "aws:dns:set creates A record for www subdomain" {
-	# Skip if AWS credentials or SSH key not available
-	if ! aws_provision_config_available; then
-		skip "AWS credentials not configured or SSH key missing"
-	fi
+	require_aws_provision_config
 
 	# Get server IP from inventory
 	local server_ip
@@ -195,7 +189,7 @@ setup() {
 	run_deployer aws:dns:set \
 		--zone="$AWS_TEST_HOSTED_ZONE" \
 		--type="A" \
-		--name="www" \
+		--name="$AWS_TEST_DNS_WWW" \
 		--value="$server_ip" \
 		--ttl="60"
 
@@ -211,14 +205,8 @@ setup() {
 # cf:dns:set
 # ----
 
-@test "cf:dns:set creates A record for root domain (proxied)" {
-	# Skip if AWS credentials/SSH key not available OR Cloudflare credentials missing
-	if ! aws_provision_config_available; then
-		skip "AWS credentials not configured or SSH key missing"
-	fi
-	if ! cf_credentials_available; then
-		skip "Cloudflare credentials not configured"
-	fi
+@test "cf:dns:set creates A record for root domain (non-proxied)" {
+	require_aws_provision_config
 
 	# Get server IP from inventory
 	local server_ip
@@ -229,10 +217,10 @@ setup() {
 	run_deployer cf:dns:set \
 		--zone="$CF_TEST_DOMAIN" \
 		--type="A" \
-		--name="@" \
+		--name="$CF_TEST_DNS_ROOT" \
 		--value="$server_ip" \
 		--ttl="60" \
-		--proxied
+		--no-proxied
 
 	debug_output
 
@@ -244,13 +232,7 @@ setup() {
 }
 
 @test "cf:dns:set creates A record for www subdomain (non-proxied)" {
-	# Skip if AWS credentials/SSH key not available OR Cloudflare credentials missing
-	if ! aws_provision_config_available; then
-		skip "AWS credentials not configured or SSH key missing"
-	fi
-	if ! cf_credentials_available; then
-		skip "Cloudflare credentials not configured"
-	fi
+	require_aws_provision_config
 
 	# Get server IP from inventory
 	local server_ip
@@ -261,7 +243,7 @@ setup() {
 	run_deployer cf:dns:set \
 		--zone="$CF_TEST_DOMAIN" \
 		--type="A" \
-		--name="www" \
+		--name="$CF_TEST_DNS_WWW" \
 		--value="$server_ip" \
 		--ttl="60" \
 		--no-proxied
@@ -280,13 +262,7 @@ setup() {
 # ----
 
 @test "cf:dns:list shows created records" {
-	# Skip if AWS credentials/SSH key not available OR Cloudflare credentials missing
-	if ! aws_provision_config_available; then
-		skip "AWS credentials not configured or SSH key missing"
-	fi
-	if ! cf_credentials_available; then
-		skip "Cloudflare credentials not configured"
-	fi
+	require_aws_provision_config
 
 	run_deployer cf:dns:list \
 		--zone="$CF_TEST_DOMAIN"
@@ -303,18 +279,12 @@ setup() {
 # ----
 
 @test "cf:dns:delete removes www A record" {
-	# Skip if AWS credentials/SSH key not available OR Cloudflare credentials missing
-	if ! aws_provision_config_available; then
-		skip "AWS credentials not configured or SSH key missing"
-	fi
-	if ! cf_credentials_available; then
-		skip "Cloudflare credentials not configured"
-	fi
+	require_aws_provision_config
 
 	run_deployer cf:dns:delete \
 		--zone="$CF_TEST_DOMAIN" \
 		--type="A" \
-		--name="www" \
+		--name="$CF_TEST_DNS_WWW" \
 		--force \
 		--yes
 
@@ -327,18 +297,12 @@ setup() {
 }
 
 @test "cf:dns:delete removes root A record" {
-	# Skip if AWS credentials/SSH key not available OR Cloudflare credentials missing
-	if ! aws_provision_config_available; then
-		skip "AWS credentials not configured or SSH key missing"
-	fi
-	if ! cf_credentials_available; then
-		skip "Cloudflare credentials not configured"
-	fi
+	require_aws_provision_config
 
 	run_deployer cf:dns:delete \
 		--zone="$CF_TEST_DOMAIN" \
 		--type="A" \
-		--name="@" \
+		--name="$CF_TEST_DNS_ROOT" \
 		--force \
 		--yes
 
@@ -355,10 +319,7 @@ setup() {
 # ----
 
 @test "site:create creates site on AWS provisioned server" {
-	# Skip if AWS credentials or SSH key not available
-	if ! aws_provision_config_available; then
-		skip "AWS credentials not configured or SSH key missing"
-	fi
+	require_aws_provision_config
 
 	# Cleanup any leftover test site
 	cleanup_test_site "$AWS_TEST_DOMAIN"
@@ -383,10 +344,7 @@ setup() {
 # ----
 
 @test "site:shared:push uploads .env to AWS site" {
-	# Skip if AWS credentials or SSH key not available
-	if ! aws_provision_config_available; then
-		skip "AWS credentials not configured or SSH key missing"
-	fi
+	require_aws_provision_config
 
 	run_deployer site:shared:push \
 		--domain="$AWS_TEST_DOMAIN" \
@@ -406,16 +364,14 @@ setup() {
 # ----
 
 @test "site:deploy deploys application to AWS site" {
-	# Skip if AWS credentials or SSH key not available
-	if ! aws_provision_config_available; then
-		skip "AWS credentials not configured or SSH key missing"
-	fi
+	require_aws_provision_config
 
 	# Deploy takes time - use longer timeout
-	run timeout 300 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" site:deploy \
+	run timeout 300 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi site:deploy \
 		--domain="$AWS_TEST_DOMAIN" \
 		--repo="$CLOUD_TEST_DEPLOY_REPO" \
 		--branch="$CLOUD_TEST_DEPLOY_BRANCH" \
+		--force \
 		--yes
 
 	debug_output
@@ -431,10 +387,7 @@ setup() {
 # ----
 
 @test "deployed AWS site responds to HTTP requests" {
-	# Skip if AWS credentials or SSH key not available
-	if ! aws_provision_config_available; then
-		skip "AWS credentials not configured or SSH key missing"
-	fi
+	require_aws_provision_config
 
 	# Get server IP to bypass DNS (faster than waiting for propagation)
 	local server_ip
@@ -449,10 +402,7 @@ setup() {
 # ----
 
 @test "server:delete removes AWS instance and cleans up resources" {
-	# Skip if AWS credentials or SSH key not available
-	if ! aws_provision_config_available; then
-		skip "AWS credentials not configured or SSH key missing"
-	fi
+	require_aws_provision_config
 
 	run_deployer server:delete \
 		--server="$AWS_TEST_SERVER_NAME" \

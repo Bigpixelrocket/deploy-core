@@ -32,7 +32,7 @@ Set your AWS credentials as environment variables:
 ```shell
 export AWS_ACCESS_KEY_ID="your-access-key"
 export AWS_SECRET_ACCESS_KEY="your-secret-key"
-export AWS_DEFAULT_REGION="us-east-1"
+export AWS_REGION="your-region"
 ```
 
 Or create a `.env` file in your project:
@@ -40,7 +40,7 @@ Or create a `.env` file in your project:
 ```env
 AWS_ACCESS_KEY_ID=your-access-key
 AWS_SECRET_ACCESS_KEY=your-secret-key
-AWS_DEFAULT_REGION=us-east-1
+AWS_REGION=your-region
 ```
 
 ### IAM Permissions
@@ -166,6 +166,11 @@ You'll be prompted for server details, instance configuration, and network setti
 If any step fails after the instance is created, DeployerPHP automatically rolls back by releasing the Elastic IP and terminating the instance.
 
 After provisioning, run `deployer server:install` to set up the server.
+
+> [!NOTE]
+> The command replay uses durable OS image slugs (e.g., `ubuntu-24.04`, `debian-12`) that resolve to the latest AMI at runtime, so you can safely reuse the output in CI pipelines without worrying about image deprecation.
+
+<!-- -->
 
 > [!NOTE]
 > When you delete a server provisioned through AWS, DeployerPHP also terminates the EC2 instance and releases the Elastic IP.

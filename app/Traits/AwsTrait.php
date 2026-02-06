@@ -31,7 +31,7 @@ trait AwsTrait
      * Initialize AWS API with credentials from environment.
      *
      * Retrieves AWS credentials (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
-     * and region (AWS_DEFAULT_REGION or AWS_REGION) from environment variables,
+     * and region (AWS_REGION) from environment variables,
      * configures the AWS service, and verifies authentication with STS.
      * Displays error messages and exits on failure.
      *
@@ -47,7 +47,7 @@ trait AwsTrait
             $secretAccessKey = $this->env->get(['AWS_SECRET_ACCESS_KEY']);
 
             /** @var string $region */
-            $region = $this->env->get(['AWS_DEFAULT_REGION', 'AWS_REGION']);
+            $region = $this->env->get(['AWS_REGION']);
 
             // Initialize AWS API
             $this->io->promptSpin(
@@ -56,10 +56,9 @@ trait AwsTrait
             );
 
             return Command::SUCCESS;
-        } catch (\InvalidArgumentException) {
+        } catch (\InvalidArgumentException $e) {
             // Credential configuration issue
-            $this->nay('AWS credentials not found in environment.');
-            $this->nay('Set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_DEFAULT_REGION in your .env file.');
+            $this->nay($e->getMessage());
 
             return Command::FAILURE;
         } catch (\RuntimeException $e) {
@@ -277,24 +276,26 @@ trait AwsTrait
     }
 
     /**
-     * Validate AMI against available images.
+     * Validate OS image slug against available images.
      *
-     * @param array<string, string> $validImages Available AMIs
+     * @param array<string, string> $validImages Available images (slug => description)
      *
      * @return string|null Error message if invalid, null if valid
      */
-    protected function validateAwsImage(mixed $ami, array $validImages): ?string
+    protected function validateAwsImageSlug(mixed $image, array $validImages): ?string
     {
-        if (!is_string($ami)) {
-            return 'AMI must be a string';
+        if (!is_string($image)) {
+            return 'Image must be a string';
         }
 
-        if ('' === trim($ami)) {
-            return 'AMI cannot be empty';
+        if ('' === trim($image)) {
+            return 'Image cannot be empty';
         }
 
-        if (!isset($validImages[$ami])) {
-            return "Invalid AMI: '{$ami}' is not available in this region";
+        if (!isset($validImages[$image])) {
+            $validSlugs = implode(', ', array_keys($validImages));
+
+            return "Invalid image: '{$image}'. Available images: {$validSlugs}";
         }
 
         return null;
