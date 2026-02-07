@@ -11,6 +11,12 @@ namespace DeployerPHP\Services\Aws;
  */
 class AwsInstanceService extends BaseAwsService
 {
+    private const BATS_TEST_SUITE = 'bats-cloud';
+
+    private const BATS_TEST_PROVIDER = 'aws';
+
+    private const MANAGED_BY = 'deployer';
+
     /**
      * Create a new EC2 instance with the specified configuration.
      *
@@ -60,10 +66,11 @@ class AwsInstanceService extends BaseAwsService
                 'TagSpecifications' => [
                     [
                         'ResourceType' => 'instance',
-                        'Tags' => [
-                            ['Key' => 'Name', 'Value' => $name],
-                            ['Key' => 'ManagedBy', 'Value' => 'deployer'],
-                        ],
+                        'Tags' => $this->buildResourceTags($name),
+                    ],
+                    [
+                        'ResourceType' => 'volume',
+                        'Tags' => $this->buildResourceTags($name, "{$name}-root"),
                     ],
                 ],
             ];
@@ -109,29 +116,40 @@ class AwsInstanceService extends BaseAwsService
         $ec2 = $this->createEc2Client();
 
         try {
-            $result = $ec2->describeInstances([
-                'InstanceIds' => [$instanceId],
-            ]);
+            /** @var string $status */
+            $status = $this->withAwsRetry(
+                attemptCallback: function () use ($ec2, $instanceId): string {
+                    $result = $ec2->describeInstances([
+                        'InstanceIds' => [$instanceId],
+                    ]);
 
-            /** @var list<array<string, mixed>> $reservations */
-            $reservations = $result['Reservations'] ?? [];
+                    /** @var list<array<string, mixed>> $reservations */
+                    $reservations = $result['Reservations'] ?? [];
 
-            if (empty($reservations) || empty($reservations[0]['Instances'])) {
-                throw new \RuntimeException("Instance {$instanceId} not found");
-            }
+                    if (empty($reservations) || empty($reservations[0]['Instances'])) {
+                        throw new \RuntimeException("Instance {$instanceId} not found");
+                    }
 
-            /** @var list<array<string, mixed>> $instances */
-            $instances = $reservations[0]['Instances'];
-            /** @var array<string, mixed> $instance */
-            $instance = $instances[0];
-            /** @var array<string, mixed> $state */
-            $state = $instance['State'];
-            /** @var string $stateName */
-            $stateName = $state['Name'];
+                    /** @var list<array<string, mixed>> $instances */
+                    $instances = $reservations[0]['Instances'];
+                    /** @var array<string, mixed> $instance */
+                    $instance = $instances[0];
+                    /** @var array<string, mixed> $state */
+                    $state = $instance['State'];
+                    /** @var string $stateName */
+                    $stateName = $state['Name'];
 
-            return $stateName;
+                    return $stateName;
+                },
+                operationDescription: "get instance status for {$instanceId}",
+                retryAttempts: 6,
+                retryDelaySeconds: 1,
+                shouldRetry: fn (\Throwable $e): bool => $this->isRetryableInstanceStatusException($e),
+            );
+
+            return $status;
         } catch (\Throwable $e) {
-            throw new \RuntimeException("Failed to get instance status: {$e->getMessage()}", 0, $e);
+            throw new \RuntimeException("Failed to get instance status: {$e->getMessage()}", previous: $e);
         }
     }
 
@@ -290,7 +308,7 @@ class AwsInstanceService extends BaseAwsService
      *
      * @throws \RuntimeException If allocation fails
      */
-    public function allocateElasticIp(): array
+    public function allocateElasticIp(string $serverName): array
     {
         $ec2 = $this->createEc2Client();
 
@@ -300,9 +318,7 @@ class AwsInstanceService extends BaseAwsService
                 'TagSpecifications' => [
                     [
                         'ResourceType' => 'elastic-ip',
-                        'Tags' => [
-                            ['Key' => 'ManagedBy', 'Value' => 'deployer'],
-                        ],
+                        'Tags' => $this->buildResourceTags($serverName),
                     ],
                 ],
             ]);
@@ -319,6 +335,45 @@ class AwsInstanceService extends BaseAwsService
         } catch (\Throwable $e) {
             throw new \RuntimeException('Failed to allocate Elastic IP: ' . $e->getMessage(), 0, $e);
         }
+    }
+
+    /**
+     * @return array<int, array{Key: string, Value: string}>
+     */
+    private function buildResourceTags(string $serverName, ?string $resourceName = null): array
+    {
+        $tags = [
+            ['Key' => 'Name', 'Value' => $resourceName ?? $serverName],
+            ['Key' => 'ManagedBy', 'Value' => self::MANAGED_BY],
+        ];
+
+        $runSuffix = $this->extractBatsRunSuffix($serverName);
+
+        if (null !== $runSuffix) {
+            $tags[] = ['Key' => 'TestSuite', 'Value' => self::BATS_TEST_SUITE];
+            $tags[] = ['Key' => 'TestProvider', 'Value' => self::BATS_TEST_PROVIDER];
+            $tags[] = ['Key' => 'TestRunSuffix', 'Value' => $runSuffix];
+        }
+
+        return $tags;
+    }
+
+    private function extractBatsRunSuffix(string $name): ?string
+    {
+        if (1 !== preg_match('/^deployer-bats-aws-([a-zA-Z0-9]+)$/', $name, $matches)) {
+            return null;
+        }
+
+        return $matches[1];
+    }
+
+    private function isRetryableInstanceStatusException(\Throwable $e): bool
+    {
+        $message = strtolower($e->getMessage());
+
+        return $this->isRetryableAwsException($e)
+            || str_contains($message, 'invalidinstanceid.notfound')
+            || str_contains($message, 'does not exist');
     }
 
     /**
