@@ -8,6 +8,7 @@ use DeployerPHP\Builders\SiteServerBuilder;
 use DeployerPHP\DTOs\ServerDTO;
 use DeployerPHP\DTOs\SiteDTO;
 use DeployerPHP\DTOs\SiteServerDTO;
+use DeployerPHP\Enums\WwwMode;
 use DeployerPHP\Exceptions\ValidationException;
 use DeployerPHP\Repositories\ServerRepository;
 use DeployerPHP\Repositories\SiteRepository;
@@ -301,6 +302,65 @@ trait SitesTrait
         }
 
         return $domain;
+    }
+
+    /**
+     * Detect whether a domain is a subdomain.
+     *
+     * Uses two-part ccTLD suffix inference (example.co.uk, example.com.au).
+     */
+    protected function isSubdomain(string $domain): bool
+    {
+        $domain = $this->normalizeDomain($domain);
+        $labels = explode('.', (string) $domain);
+        $labelCount = count($labels);
+
+        // Known second-level suffix labels used with ccTLDs.
+        $ccSecondLevelLabels = ['ac', 'co', 'com', 'edu', 'gov', 'net', 'org'];
+        $tld = $labels[$labelCount - 1] ?? '';
+        $secondLevel = $labels[$labelCount - 2] ?? '';
+
+        $isCcTld = 2 === strlen($tld);
+        $isTwoPartSuffix = $isCcTld && in_array($secondLevel, $ccSecondLevelLabels, true);
+        $apexLabelCount = $isTwoPartSuffix ? 3 : 2;
+
+        return $labelCount > $apexLabelCount;
+    }
+
+    /**
+     * Validate WWW mode input.
+     *
+     * @return string|null Error message if invalid, null if valid
+     */
+    protected function validateWwwMode(mixed $value): ?string
+    {
+        if (! is_string($value)) {
+            return 'WWW mode must be a string';
+        }
+
+        if (! WwwMode::isSelectable($value)) {
+            return sprintf(
+                "Invalid WWW mode '%s'. Allowed: %s",
+                $value,
+                implode(', ', WwwMode::values(includeUnknown: false))
+            );
+        }
+
+        return null;
+    }
+
+    /**
+     * Determine whether a site should have a WWW alias.
+     *
+     * Subdomains never get a WWW alias, regardless of requested mode.
+     */
+    protected function hasWww(string $domain, string $wwwMode): bool
+    {
+        if ($this->isSubdomain($domain)) {
+            return false;
+        }
+
+        return WwwMode::NONE->value !== $wwwMode;
     }
 
     /**

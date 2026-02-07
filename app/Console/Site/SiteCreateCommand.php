@@ -7,6 +7,7 @@ namespace DeployerPHP\Console\Site;
 use DeployerPHP\Builders\SiteBuilder;
 use DeployerPHP\Builders\SiteServerBuilder;
 use DeployerPHP\Contracts\BaseCommand;
+use DeployerPHP\Enums\WwwMode;
 use DeployerPHP\Exceptions\ValidationException;
 use DeployerPHP\Traits\PlaybooksTrait;
 use DeployerPHP\Traits\ServersTrait;
@@ -39,7 +40,12 @@ class SiteCreateCommand extends BaseCommand
             ->addOption('domain', null, InputOption::VALUE_REQUIRED, 'Domain name')
             ->addOption('server', null, InputOption::VALUE_REQUIRED, 'Server name')
             ->addOption('php-version', null, InputOption::VALUE_REQUIRED, 'PHP version to use')
-            ->addOption('www-mode', null, InputOption::VALUE_REQUIRED, 'WWW handling mode (redirect-to-root, redirect-to-www, none)')
+            ->addOption(
+                'www-mode',
+                null,
+                InputOption::VALUE_REQUIRED,
+                'WWW handling mode (' . implode(', ', WwwMode::values(includeUnknown: false)) . ')'
+            )
             ->addOption('web-root', null, InputOption::VALUE_REQUIRED, 'Public web directory (default: public)');
     }
 
@@ -83,6 +89,7 @@ class SiteCreateCommand extends BaseCommand
             'domain' => $domain,
             'phpVersion' => $phpVersion,
             'wwwMode' => $wwwMode,
+            'hasWww' => $hasWww,
             'webRoot' => $webRoot,
         ] = $siteInfo;
 
@@ -90,6 +97,8 @@ class SiteCreateCommand extends BaseCommand
             ->domain($domain)
             ->server($server->name)
             ->phpVersion($phpVersion)
+            ->wwwMode($wwwMode)
+            ->hasWww($hasWww)
             ->webRoot($webRoot)
             ->build();
 
@@ -158,7 +167,7 @@ class SiteCreateCommand extends BaseCommand
             'Point <fg=cyan>@</> (root) to <fg=cyan>' . $server->host . '</>',
         ];
 
-        if ('none' !== $wwwMode) {
+        if (WwwMode::NONE->value !== $wwwMode) {
             $dnsSteps[] = 'Point <fg=cyan>www</> to <fg=cyan>' . $server->host . '</>';
         }
 
@@ -245,7 +254,7 @@ class SiteCreateCommand extends BaseCommand
      * Gather site details from user input or CLI options.
      *
      * @param array<string, mixed> $info Server information from serverInfo()
-     * @return array{domain: string, phpVersion: string, wwwMode: string, webRoot: string}|int
+     * @return array{domain: string, phpVersion: string, wwwMode: string, hasWww: bool, webRoot: string}|int
      */
     protected function gatherSiteDeets(array $info): array|int
     {
@@ -269,36 +278,9 @@ class SiteCreateCommand extends BaseCommand
             // Detect subdomain and determine WWW handling
             // ----
 
-            $wwwModes = [
-                'redirect-to-root' => 'Redirect www to non-www',
-                'redirect-to-www' => 'Redirect non-www to www',
-                'none' => 'Do not configure a www alias',
-            ];
+            $wwwModes = WwwMode::selectableOptions();
 
-            $validateWwwMode = fn (mixed $value): ?string => in_array($value, array_keys($wwwModes), true)
-                ? null
-                : sprintf(
-                    "Invalid WWW mode '%s'. Allowed: %s",
-                    is_scalar($value) ? (string) $value : gettype($value),
-                    implode(', ', array_keys($wwwModes))
-                );
-
-            /** @var string $host */
-            $host = parse_url('https://' . $domain, PHP_URL_HOST);
-            $host = strtolower($host);
-
-            $labels = explode('.', $host);
-            $labelCount = count($labels);
-
-            // Known second-level suffix labels used with ccTLDs (example.co.uk, example.com.au).
-            $ccSecondLevelLabels = ['ac', 'co', 'com', 'edu', 'gov', 'net', 'org'];
-            $tld = $labels[$labelCount - 1] ?? '';
-            $secondLevel = $labels[$labelCount - 2] ?? '';
-
-            $isCcTld = 2 === strlen($tld);
-            $isTwoPartSuffix = $isCcTld && in_array($secondLevel, $ccSecondLevelLabels, true);
-            $apexLabelCount = $isTwoPartSuffix ? 3 : 2;
-            $isSubdomain = $labelCount > $apexLabelCount;
+            $isSubdomain = $this->isSubdomain($domain);
 
             /** @var mixed $requestedWwwMode */
             $requestedWwwMode = $this->io->getOptionValue('www-mode');
@@ -309,19 +291,19 @@ class SiteCreateCommand extends BaseCommand
                         throw new ValidationException('WWW mode must be a string');
                     }
 
-                    $validationError = $validateWwwMode($requestedWwwMode);
+                    $validationError = $this->validateWwwMode($requestedWwwMode);
 
                     if (null !== $validationError) {
                         throw new ValidationException($validationError);
                     }
 
-                    if ('none' !== $requestedWwwMode) {
+                    if (WwwMode::NONE->value !== $requestedWwwMode) {
                         $this->warn("Ignoring --www-mode={$requestedWwwMode} for subdomain '{$domain}'. Using 'none'.");
                     }
                 }
 
                 $this->info("Detected subdomain '{$domain}'. WWW mode automatically set to 'none'.");
-                $wwwMode = 'none';
+                $wwwMode = WwwMode::NONE->value;
             } else {
                 /** @var string $wwwMode */
                 $wwwMode = $this->io->getValidatedOptionOrPrompt(
@@ -329,12 +311,14 @@ class SiteCreateCommand extends BaseCommand
                     fn ($validate) => $this->io->promptSelect(
                         label: "How should 'www.{$domain}' be handled?",
                         options: $wwwModes,
-                        default: 'redirect-to-root',
+                        default: WwwMode::REDIRECT_TO_ROOT->value,
                         validate: $validate
                     ),
-                    $validateWwwMode
+                    fn ($value) => $this->validateWwwMode($value)
                 );
             }
+
+            $hasWww = $this->hasWww($domain, $wwwMode);
 
             //
             // Web root directory
@@ -374,6 +358,7 @@ class SiteCreateCommand extends BaseCommand
             'domain' => $domain,
             'phpVersion' => $phpVersion,
             'wwwMode' => $wwwMode,
+            'hasWww' => $hasWww,
             'webRoot' => $webRoot,
         ];
     }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace DeployerPHP\DTOs;
 
+use DeployerPHP\Enums\WwwMode;
+
 readonly class SiteDTO
 {
     /**
@@ -14,6 +16,8 @@ readonly class SiteDTO
      * @param ?string $branch The repository branch for git sites (null if not yet configured).
      * @param string $server Server name associated with the site.
      * @param string $phpVersion The PHP version configured for this site (e.g. "8.3").
+     * @param string $wwwMode The configured WWW mode (`redirect-to-root`, `redirect-to-www`, `none`, or `unknown`).
+     * @param bool $hasWww Whether the site is expected to have a `www` alias.
      * @param string $webRoot The public web directory relative to current/ (e.g. "public", "web", or "" for root).
      * @param array<int, CronDTO> $crons Array of cron jobs configured for this site.
      * @param array<int, SupervisorDTO> $supervisors Array of supervisor programs configured for this site.
@@ -24,6 +28,8 @@ readonly class SiteDTO
         public ?string $branch,
         public string $server,
         public string $phpVersion,
+        public string $wwwMode = WwwMode::UNKNOWN->value,
+        public bool $hasWww = false,
         public string $webRoot = 'public',
         /** @var array<int, CronDTO> */
         public array $crons = [],

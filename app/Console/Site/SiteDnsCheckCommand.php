@@ -47,19 +47,18 @@ class SiteDnsCheckCommand extends BaseCommand
         }
 
         $wwwDomain = 'www.' . $site->domain;
+        $shouldCheckWww = $site->hasWww;
+        $wwwIps = [
+            'ipv4' => [],
+            'ipv6' => [],
+        ];
 
         try {
-            /** @var array{ipv4: array<int, string>, ipv6: array<int, string>} $apexIps */
-            $apexIps = $this->io->promptSpin(
-                fn () => $this->http->resolveGoogleIps($site->domain),
-                "Resolving DNS for '{$site->domain}'..."
-            );
+            $apexIps = $this->resolveDnsWithRetry($site->domain);
 
-            /** @var array{ipv4: array<int, string>, ipv6: array<int, string>} $wwwIps */
-            $wwwIps = $this->io->promptSpin(
-                fn () => $this->http->resolveGoogleIps($wwwDomain),
-                "Resolving DNS for '{$wwwDomain}'..."
-            );
+            if ($shouldCheckWww) {
+                $wwwIps = $this->resolveDnsWithRetry($wwwDomain);
+            }
         } catch (\RuntimeException $e) {
             $this->nay($e->getMessage());
 
@@ -68,7 +67,9 @@ class SiteDnsCheckCommand extends BaseCommand
 
         $this->displayDnsDeets($site->domain, $apexIps);
 
-        if (0 < count($wwwIps['ipv4']) || 0 < count($wwwIps['ipv6'])) {
+        if (! $shouldCheckWww) {
+            $this->info("Skipping '{$wwwDomain}' lookup because this site has no WWW alias configured");
+        } elseif (0 < count($wwwIps['ipv4']) || 0 < count($wwwIps['ipv6'])) {
             $this->displayDnsDeets($wwwDomain, $wwwIps);
         } else {
             $this->info("No resolved IPs found for '{$wwwDomain}'");
@@ -105,5 +106,26 @@ class SiteDnsCheckCommand extends BaseCommand
     private function formatIps(array $ips): string
     {
         return [] === $ips ? 'None' : implode(', ', $ips);
+    }
+
+    /**
+     * Resolve DNS records for a domain with retry/backoff.
+     *
+     * @return array{ipv4: array<int, string>, ipv6: array<int, string>}
+     */
+    private function resolveDnsWithRetry(string $domain): array
+    {
+        /** @var array{ipv4: array<int, string>, ipv6: array<int, string>} $ips */
+        $ips = $this->io->promptSpin(
+            fn () => $this->retry->run(
+                attemptCallback: fn () => $this->http->resolveGoogleIps($domain),
+                operationDescription: "resolve DNS records for '{$domain}' via Google DNS",
+                retryAttempts: 4,
+                retryDelaySeconds: 1
+            ),
+            "Resolving DNS for '{$domain}'..."
+        );
+
+        return $ips;
     }
 }
