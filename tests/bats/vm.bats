@@ -889,13 +889,13 @@ assert_kv_auth_via_credentials() {
 # scaffold commands
 # ----
 
-@test "scaffold:ai creates codex debugger skill from template" {
+@test "scaffold:ai creates agents debugger skill from template" {
 	local destination="${BATS_TEST_TMPDIR}/scaffold-ai"
-	local skill_path="${destination}/.codex/skills/deployer-php/SKILL.md"
+	local skill_path="${destination}/.agents/skills/deployerphp-debugger/SKILL.md"
 	mkdir -p "$destination"
 
 	run_deployer scaffold:ai \
-		--agent="codex" \
+		--agent=".agents" \
 		--tier="debugger" \
 		--destination="$destination"
 
@@ -905,12 +905,12 @@ assert_kv_auth_via_credentials() {
 	assert_success_output
 	assert_output_contains "Finished scaffolding ai"
 	assert_command_replay "scaffold:ai"
-	assert_output_contains "--agent='codex'"
+	assert_output_contains "--agent='.agents'"
 	assert_output_contains "--tier='debugger'"
 	assert_output_contains "--destination='${destination}'"
 
 	[ -f "${skill_path}" ]
-	cmp -s "${skill_path}" "${PROJECT_ROOT}/scaffolds/ai/debugger/SKILL.md"
+	cmp -s "${skill_path}" "${PROJECT_ROOT}/scaffolds/ai/deployerphp-debugger/SKILL.md"
 }
 
 @test "scaffold:scripts creates script templates from scaffolds" {

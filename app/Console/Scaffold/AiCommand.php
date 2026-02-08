@@ -21,26 +21,20 @@ class AiCommand extends BaseCommand
 
     /** @var array<string, string> */
     private const AGENT_DIRS = [
-        'claude' => '.claude',
-        'codex' => '.codex',
-        'cursor' => '.cursor',
-        'opencode' => '.opencode',
+        '.agents' => '.agents',
+        '.claude' => '.claude',
     ];
 
     /** @var array<string, string> */
     private const AGENT_LABELS = [
-        'claude' => 'Claude',
-        'codex' => 'Codex',
-        'cursor' => 'Cursor',
-        'opencode' => 'OpenCode',
+        '.agents' => "'.agents/' directory (Codex, Cursor, OpenCode)",
+        '.claude' => "'.claude/' directory (Claude Code)",
     ];
 
     /** @var list<string> */
     private const AGENT_ORDER = [
-        'claude',
-        'codex',
-        'cursor',
-        'opencode',
+        '.agents',
+        '.claude',
     ];
 
     /** @var array<string, string> */
@@ -60,7 +54,7 @@ class AiCommand extends BaseCommand
     {
         parent::configure();
         $this->configureScaffoldOptions();
-        $this->addOption('agent', null, InputOption::VALUE_REQUIRED, 'AI agent (Claude, Codex, Cursor, OpenCode)');
+        $this->addOption('agent', null, InputOption::VALUE_REQUIRED, 'AI agent directory (.agents or .claude)');
         $this->addOption('tier', null, InputOption::VALUE_REQUIRED, 'Skill tier (observer, debugger, admin)');
     }
 
@@ -109,12 +103,9 @@ class AiCommand extends BaseCommand
     protected function buildTargetPath(string $destinationDir, string $type, array $context): string
     {
         $agentDir = self::AGENT_DIRS[$context['agent']];
+        $skillDir = sprintf('deployerphp-%s', $context['tier']);
 
-        if ('opencode' === $context['agent']) {
-            return $this->fs->joinPaths($destinationDir, $agentDir, 'skill', 'deployer-php');
-        }
-
-        return $this->fs->joinPaths($destinationDir, $agentDir, 'skills', 'deployer-php');
+        return $this->fs->joinPaths($destinationDir, $agentDir, 'skills', $skillDir);
     }
 
     /**
@@ -126,8 +117,9 @@ class AiCommand extends BaseCommand
     {
         /** @var string $tier */
         $tier = $context['tier'];
+        $templateDir = sprintf('deployerphp-%s', $tier);
 
-        return $this->fs->joinPaths(dirname(__DIR__, 3), 'scaffolds', $type, $tier);
+        return $this->fs->joinPaths(dirname(__DIR__, 3), 'scaffolds', $type, $templateDir);
     }
 
     /**
@@ -210,7 +202,7 @@ class AiCommand extends BaseCommand
 
         /** @var string */
         return $this->io->promptSelect(
-            label: 'No AI agent directory found. Which one should we create?',
+            label: 'No AI agent directory found. Which one should we create? .agents supports Codex, Cursor, OpenCode',
             options: $options
         );
     }

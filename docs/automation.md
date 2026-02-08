@@ -70,18 +70,16 @@ Run the `scaffold:ai` command from your project directory:
 deployer scaffold:ai
 ```
 
-DeployerPHP will select the AI agent using this flow:
+DeployerPHP will select the AI agent directory using this flow:
 
-1. If exactly one agent directory exists (e.g., `.claude`, `.codex`, `.cursor`, `.opencode`), it is selected automatically.
+1. If exactly one supported directory exists (`.agents` or `.claude`), it is selected automatically.
 2. If multiple agent directories exist, you'll be prompted to choose which one to use.
 3. If no agent directories exist, you'll be prompted to choose which one to create.
 
-The supported agents are:
+The supported directories are:
 
-- **Claude**: Creates skills in `.claude/skills/`
-- **Codex**: Creates skills in `.codex/skills/`
-- **Cursor**: Creates skills in `.cursor/skills/`
-- **OpenCode**: Creates skills in `.opencode/skill/` (also discovers `.claude/skills/`)
+- **`.agents`**: Shared skills directory for Codex, Cursor, and OpenCode (`.agents/skills/`)
+- **`.claude`**: Claude skills directory (`.claude/skills/`)
 
 > [!NOTE]
 > The selection flow above is based on whether agent directories already exist in your project.
