@@ -132,16 +132,8 @@ assert_lifecycle_command_success() {
 	assert_command_replay "$command"
 }
 
-get_first_installed_php_fpm_version() {
-	get_installed_php_fpm_versions | head -1
-}
-
 get_installed_php_fpm_versions() {
 	ssh_exec "ls -1 /etc/php/*/fpm/php-fpm.conf 2>/dev/null | sed -nE 's|/etc/php/([^/]+)/fpm/php-fpm.conf|\\1|p' | sort -Vr | uniq"
-}
-
-get_available_php_fpm_versions() {
-	ssh_exec "apt-cache pkgnames | grep -E '^php8\\.[0-9]+-fpm$' | sed -E 's/^php([0-9]+\\.[0-9]+)-fpm$/\\1/' | sort -Vr | uniq"
 }
 
 extract_display_connection_string() {
@@ -358,12 +350,14 @@ assert_kv_auth_via_credentials() {
 @test "server:install completes successfully with generated deploy key" {
 	add_test_server
 
+	local primary_php_version="${VM_TEST_PHP_PRIMARY_VERSION:-8.5}"
+
 	# Full install takes time - use longer timeout
 	run timeout 300 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:install \
 		--server="$TEST_SERVER_NAME" \
 		--generate-deploy-key \
 		--timezone="UTC" \
-		--php-version="8.4" \
+		--php-version="$primary_php_version" \
 		--php-extensions="cli,fpm,curl,mbstring"
 
 	debug_output
@@ -425,13 +419,9 @@ assert_kv_auth_via_credentials() {
 @test "server:install with custom deploy key uses provided key" {
 	add_test_server
 
-	local primary_php_version available_php_versions secondary_php_version
-	primary_php_version="$(get_first_installed_php_fpm_version)"
-	[[ -n "$primary_php_version" ]]
-
-	available_php_versions="$(get_available_php_fpm_versions)"
-	secondary_php_version="$(printf '%s\n' "$available_php_versions" | grep -vx "$primary_php_version" | head -1)"
-	[[ -n "$secondary_php_version" ]]
+	local primary_php_version secondary_php_version
+	primary_php_version="${VM_TEST_PHP_PRIMARY_VERSION:-8.5}"
+	secondary_php_version="${VM_TEST_PHP_SECONDARY_VERSION:-8.4}"
 
 	# Get the public key content from our test key
 	local expected_key
