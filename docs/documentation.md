@@ -1,8 +1,15 @@
 # Documentation
 
-DeployerPHP documentation is organized as a progressive guide.
+<!-- toc -->
 
-Everything you need to deploy PHP applications:
+- [Guides](#guides)
+- [References](#references)
+- [Cloud Providers](#cloud-providers)
+- [Images](#images)
+
+<!-- /toc -->
+
+DeployerPHP documentation is split into guides and references. Use guides for workflows and operational decisions, and use references for fast command lookup.
 
 <a name="guides"></a>
 
@@ -11,17 +18,52 @@ Everything you need to deploy PHP applications:
 - [Introduction](../README.md)
 - [Installation](installation.md)
 - [Zero to Deploy](zero-to-deploy.md)
+- [Automation & AI Guide](automation.md)
+- [Managing Servers](managing-servers.md)
+- [Managing Sites](managing-sites.md)
+- [Managing Services](managing-services.md)
+- [Managing Databases](managing-databases.md)
+- [Cloud Providers](cloud-providers.md)
+- [Cron Jobs & Processes](cron-and-processes.md)
+- [Scaffolding](scaffolding.md)
 
 <a name="references"></a>
 
 ## References
 
-- [Managing Sites](managing-sites.md)
-- [Managing Servers](managing-servers.md)
-- [Managing Services](managing-services.md)
-- [Managing Databases](managing-databases.md)
-- [Cloud Providers](cloud-providers.md)
-- [Automation & AI](automation.md)
+### Server & Site Operations
+
+- [Server Reference](reference-server.md)
+- [Site Reference](reference-site.md)
+
+### Scheduling & Process Control
+
+- [Cron Reference](reference-cron.md)
+- [Supervisor Reference](reference-supervisor.md)
+
+### Web Runtime Services
+
+- [Nginx Reference](reference-nginx.md)
+- [PHP-FPM Reference](reference-php.md)
+
+### Data Services
+
+- [MariaDB Reference](reference-mariadb.md)
+- [PostgreSQL Reference](reference-postgresql.md)
+- [Redis Reference](reference-redis.md)
+- [Memcached Reference](reference-memcached.md)
+
+### Scaffolding
+
+- [Scaffold Reference](reference-scaffold.md)
+
+<a name="cloud-providers"></a>
+
+## Cloud Providers
+
+- [AWS Reference](reference-aws.md)
+- [Cloudflare Reference](reference-cloudflare.md)
+- [DigitalOcean Reference](reference-digitalocean.md)
 
 ## Images
 

@@ -2,60 +2,69 @@
 
 <!-- toc -->
 
-- [Nginx](#nginx)
-    - [Controlling Nginx](#controlling-nginx)
-    - [Viewing Logs](#viewing-logs)
-- [PHP-FPM](#php-fpm)
-    - [Controlling PHP-FPM](#controlling-php-fpm)
-    - [Installing Additional PHP Versions](#installing-additional-php-versions)
-    - [Viewing Logs](#viewing-logs-1)
+- [Service Lifecycle Pattern](#service-lifecycle-pattern)
+- [Web Runtime Services](#web-runtime-services)
+- [Data Services](#data-services)
+- [Troubleshooting Workflow](#troubleshooting-workflow)
+- [Related References](#related-references)
 
 <!-- /toc -->
 
-DeployerPHP installs Nginx and PHP-FPM during `server:install`. These services share a consistent command pattern for control: start, stop, and restart. This guide covers how to manage these core web services on your servers.
+Most operational incidents come down to service state, not deployment syntax. This guide helps you choose the right service action, validate impact, and recover quickly.
 
-## Nginx
+<a name="service-lifecycle-pattern"></a>
 
-Nginx serves as the web server for your applications, handling HTTP requests and proxying them to PHP-FPM. Site-specific Nginx configurations are managed automatically by `site:create` and `site:delete`, so you won't need to edit configuration files manually.
+## Service Lifecycle Pattern
 
-### Controlling Nginx
+Across DeployerPHP namespaces, service control follows the same pattern:
 
-```shell
-deployer nginx:start
-deployer nginx:stop
-deployer nginx:restart
-```
+- `*:start` brings a service online.
+- `*:stop` is for maintenance windows and controlled interventions.
+- `*:restart` is the usual recovery path after config or runtime updates.
 
-Use restart after making manual configuration changes or when troubleshooting connection issues.
+Use restarts intentionally. If you only need visibility, start with `server:info` and `server:logs` before touching service state.
 
-### Viewing Logs
+<a name="web-runtime-services"></a>
 
-To view Nginx service logs, use `server:logs` and select the nginx service. For site-specific access logs, select the site domain from the log sources.
+## Web Runtime Services
 
-## PHP-FPM
+Nginx and PHP-FPM are your core request path services.
 
-PHP-FPM (FastCGI Process Manager) processes PHP requests for your applications. During `server:install`, you select which PHP version to install. Each version runs its own PHP-FPM service.
+- Use `nginx:*` for web server control.
+- Use `php:*` for PHP runtime process control.
 
-### Controlling PHP-FPM
+When requests fail, check these first before investigating application code.
 
-```shell
-deployer php:start
-deployer php:stop
-deployer php:restart
-```
+<a name="data-services"></a>
 
-When you have multiple PHP versions installed, you can target a specific version or omit the version to control all installed versions at once.
+## Data Services
 
-### Installing Additional PHP Versions
+Data services follow the same lifecycle model, with install commands where applicable:
 
-To install additional PHP versions on an existing server, run `server:install` again:
+- Relational: `mariadb:*`, `postgresql:*`
+- Key-value/cache: `redis:*`, `memcached:*`
 
-```shell
-deployer server:install
-```
+Keep service operations small and reversible. Apply one change, validate, then continue.
 
-This adds the new PHP version alongside existing versions without affecting running sites. Each site uses its own PHP version as configured during `site:create`.
+<a name="troubleshooting-workflow"></a>
 
-### Viewing Logs
+## Troubleshooting Workflow
 
-To view PHP-FPM logs, use `server:logs` and select the PHP-FPM service for your version.
+A reliable sequence is:
+
+1. Inspect current state (`server:info`).
+2. Collect evidence (`server:logs`).
+3. Apply the least disruptive service action.
+4. Re-check logs and runtime state.
+
+> [!INFO]
+> Restart loops without diagnosis hide the real issue. Capture log context before and after any restart.
+
+## Related References
+
+- [Nginx Reference](reference-nginx.md)
+- [PHP-FPM Reference](reference-php.md)
+- [MariaDB Reference](reference-mariadb.md)
+- [PostgreSQL Reference](reference-postgresql.md)
+- [Redis Reference](reference-redis.md)
+- [Memcached Reference](reference-memcached.md)

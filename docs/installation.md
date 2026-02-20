@@ -62,6 +62,8 @@ Commands are organized into namespaces that represent what each group manages:
 - **`scaffold:*`**: Generate cron, hook, supervisor, and AI skills config files
 - **`aws:*`**, **`cf:*`**, **`do:*`**: Cloud provider integrations
 
+For namespace-by-namespace behavior details, see the [Documentation Index](documentation.md) and its command reference sections.
+
 ## The Inventory
 
 DeployerPHP tracks your servers and sites in an inventory file, which it initializes in your current working directory as `.deployer/inventory.yml`. This inventory file stores the details of servers you add and sites you create, so you don't have to re-enter connection details, domain names or IPs each time you run a command.
@@ -74,7 +76,7 @@ Besides the inventory, commands also automatically reference the `.env` file in 
 
 Running any DeployerPHP command should display which environment or inventory files are being actively referenced right at the top:
 
-```DeployerPHP
+```EXAMPLE nocopy
 ▒ ≡ DeployerPHP ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ▒
 ▒ Ver: ...
@@ -107,7 +109,7 @@ Every DeployerPHP command provides a non-interactive command replay at the end o
 
 Commands are meant to be composable, allowing you to copy and paste these replies as building blocks for your own scripts, workflows, or CI pipelines.
 
-```DeployerPHP nocopy
+```EXAMPLE nocopy
 .
 .
 .
@@ -123,4 +125,4 @@ $> deployer server:add  \
 
 ## Next Steps
 
-With the core concepts in place, the best next move is to run through your first real deployment workflow. For more information, see [Zero to Deploy](/docs/zero-to-deploy).
+With the core concepts in place, the best next move is to run through your first real deployment workflow. For more information, see [Zero to Deploy](zero-to-deploy.md).
