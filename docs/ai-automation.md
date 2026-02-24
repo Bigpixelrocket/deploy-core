@@ -33,7 +33,7 @@ The command detects which AI agent directories already exist in your project. If
 - **`.agents/`** - For Codex, Cursor, and OpenCode
 - **`.claude/`** - For Claude Code
 
-DeployerPHP will then prompt you for a permission tier and generate the SKILL inside a `skills/` subdirectory. Existing files are skipped by default — you'll need to explicitly request an overwrite to regenerate. You can always rerun the command and use the non-interactive command replay to target specific directories.
+DeployerPHP will then prompt you for a permission tier and generate the SKILL inside a `skills/` subdirectory. Existing files are skipped by default, so you'll need to explicitly request an overwrite to regenerate. You can always rerun the command and use the non-interactive command replay to target specific directories.
 
 This SKILL gives your AI agent all the context it needs to work with your DeployerPHP setup: knowledge of your inventory structure, your deployment layout, and a scoped set of commands matched to the permission tier you choose.
 
@@ -51,7 +51,7 @@ The Observer tier gives your AI agent read-only access. It can run the `server:i
 
 The log scope covers service logs like nginx, PHP-FPM, databases, supervisor, and cron, per-site access and error logs, and aggregate views across all sites or workers. The `server:run` command isn't available at this tier, so there's no arbitrary shell execution.
 
-> [!INFO]
+> [!NOTE]
 > The Observer tier is ideal for monitoring and log tracing scenarios where you want full visibility but with guardrails against the possibility of the AI agent running commands on your servers.
 
 <a name="debugger"></a>
@@ -62,7 +62,7 @@ The Debugger tier builds on Observer and adds the ability to run safe, non-destr
 
 Two categories are off-limits: state-changing commands (deploy, install, restart, delete, and similar) and interactive terminal programs like `less`, `top`, `vim`, or nested `ssh`.
 
-> [!INFO]
+> [!NOTE]
 > The Debugger tier enables AI agents to run complex investigation workflows for testing root-cause hypotheses while maintaining guardrails against unwanted side effects like data modification or downtime.
 
 <a name="admin"></a>

@@ -10,6 +10,8 @@
 
 Use the `server:*` commands to add servers, inspect runtime state, and perform remote operations.
 
+<a name="at-a-glance"></a>
+
 ## At a Glance
 
 | Command           | Use it when you need to...                             |
@@ -22,6 +24,8 @@ Use the `server:*` commands to add servers, inspect runtime state, and perform r
 | `server:run`      | execute one remote command                             |
 | `server:ssh`      | open an interactive remote session                     |
 | `server:delete`   | remove a server from inventory or decommission it      |
+
+<a name="details"></a>
 
 ## Details
 
@@ -41,9 +45,11 @@ Use `server:run` for scripted, one-shot checks. Use `server:ssh` when you need i
 
 `server:delete` handles inventory cleanup and can also remove linked cloud resources when applicable.
 
+<a name="safety-and-guardrails"></a>
+
 ## Safety and Guardrails
 
-> [!INFO]
+> [!NOTE]
 > `server:ssh` interactive mode requires the `pcntl` extension on your local PHP runtime.
 
 > [!IMPORTANT]

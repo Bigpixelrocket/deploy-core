@@ -9,7 +9,6 @@
 - [Provisioning](#provisioning)
 - [DNS Management](#dns-management)
 - [Safety and Guardrails](#safety-and-guardrails)
-- [Related](#related)
 
 <!-- /toc -->
 
@@ -111,7 +110,7 @@ You can create an IAM policy in the [AWS IAM Console](https://console.aws.amazon
 }
 ```
 
-> [!INFO]
+> [!NOTE]
 > If you only need DNS management, you can scope IAM permissions to Route53 and STS only.
 
 <a name="at-a-glance"></a>
@@ -168,7 +167,7 @@ deployer aws:dns:delete
 
 ## Safety and Guardrails
 
-> [!INFO]
+> [!NOTE]
 > Confirm account, region, and hosted zone context before mutating DNS or provisioning resources.
 
 > [!IMPORTANT]
@@ -181,9 +180,3 @@ When working with AWS resources, follow this order:
 3. Apply infrastructure and DNS changes.
 4. Verify outcome with `site:dns:check` and service checks.
 5. Confirm cleanup for any destructive operations.
-
-<a name="related"></a>
-
-## Related
-
-- [Operations](operations.md)
