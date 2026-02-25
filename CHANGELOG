@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.4] - 2026-02-25
+
+### Added
+
+- harden deploy permissions for cooperative deployer/www-data writes (#361)
+
+### Fixed
+
+- refine deploy permission handling for cooperative deployer/www-data writes (#363)
+- remove chmod error suppression now that script runs via sudo (#364)
+
+### Changed
+
+- remove manual janitor workflow_dispatch trigger (#365)
+
 ## [1.0.3] - 2026-02-25
 
 ### Breaking
