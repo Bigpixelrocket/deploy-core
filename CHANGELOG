@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.3] - 2026-02-25
 
 ### Breaking
 
@@ -8,6 +8,36 @@
 - Moved cron and supervisor scripts into `.deployer/scripts` (`cron*.sh`, `supervisor*.sh`)
 - Removed `scaffold:crons` and `scaffold:supervisors` in favor of `scaffold:scripts`
 - Default inventory path is now `.deployer/inventory.yml`; move existing `deployer.yml` or pass `--inventory`
+
+### Added
+
+- Add `site:shared:list` command to display all shared file and directory symlinks for a site
+- Add `site:dns:check` command for DNS resolution checks via Google Public DNS with retry/backoff
+- Validate DNS points to the server before enabling HTTPS via `site:https`
+- Add load, memory, and disk metrics to `server:info` output
+- Require OPcache PHP extension during server install
+- Add permission tier system for AI skills in `scaffold:ai`
+- Add OpenCode agent support to `scaffold:ai`
+- Add multi-agent scaffolding support in `scaffold:ai`
+- Add safety checks for existing shared files before overwriting in `site:shared:push`
+- Replace naive subdomain detection with PSL-based classification for accurate `www` mode detection
+
+### Fixed
+
+- Skip server info display for `server:run` and `server:ssh` to improve response time
+- Move shared directory creation before `link_shared_resources` in deployment
+- Reorder build steps to run after shared resource linking
+- Add `try_files` fallback to Nginx static file caching block
+- Harden and standardize all service install commands
+
+### Changed
+
+- Migrate cloud provisioning commands to `cloud` namespace (`cloud:aws:*`, `cloud:do:*`, `cloud:cf:*`)
+- Add type-to-confirm prompt for destructive deployment operations
+- Improve cloud server destruction options and `server:delete` clarity
+- Improve service install placeholder text and delete option descriptions
+- Use Laravel Prompts output tracking for accurate terminal spacing
+- Add trailing separator line to `server:info` output
 
 ## [1.0.2] - 2026-01-20
 
