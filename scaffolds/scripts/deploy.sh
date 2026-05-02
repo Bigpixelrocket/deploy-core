@@ -6,7 +6,7 @@ set -euo pipefail
 # Deploy Script - Link shared resources, build, and prepare for release activation
 # ----
 #
-# Environment variables provided by Deploy Core:
+# Environment variables provided by DeployCore:
 #   DEPLOY_RELEASE_PATH  - Absolute path to the new release directory
 #   DEPLOY_SHARED_PATH   - Absolute path to the shared/ directory
 #   DEPLOY_CURRENT_PATH  - Absolute path to the current/ symlink
