@@ -54,20 +54,40 @@ jobs:
 
       - name: Verify CI canary failures
         run: |
-          if vendor/bin/pint --test tests/CICanary.php; then
-            echo "ERROR: Pint should have failed on CICanary, it didn't"
-            exit 1
-          fi
+          for required_path in vendor/bin/pint vendor/bin/rector vendor/bin/phpstan; do
+            if [[ ! -x "${required_path}" ]]; then
+              echo "ERROR: Required CI canary binary is missing or not executable: ${required_path}"
+              exit 1
+            fi
+          done
 
-          if vendor/bin/rector --dry-run tests/CICanary.php --config rector-canary.php; then
-            echo "ERROR: Rector should have failed on CICanary, it didn't"
-            exit 1
-          fi
+          for required_path in tests/CICanary.php rector-canary.php; do
+            if [[ ! -f "${required_path}" ]]; then
+              echo "ERROR: Required CI canary file is missing: ${required_path}"
+              exit 1
+            fi
+          done
 
-          if vendor/bin/phpstan analyse tests/CICanary.php --level=10; then
-            echo "ERROR: PHPStan should have failed on CICanary, it didn't"
-            exit 1
-          fi
+          run_expect_canary_failure() {
+            local tool="$1"
+            shift
+            local output
+
+            if output="$("$@" 2>&1)"; then
+              echo "ERROR: ${tool} should have failed on tests/CICanary.php, it didn't"
+              exit 1
+            fi
+
+            if ! grep -q "CICanary.php" <<< "${output}"; then
+              echo "ERROR: ${tool} failed, but not for the CI canary target"
+              echo "${output}"
+              exit 1
+            fi
+          }
+
+          run_expect_canary_failure "Pint" vendor/bin/pint --test tests/CICanary.php
+          run_expect_canary_failure "Rector" vendor/bin/rector --dry-run tests/CICanary.php --config rector-canary.php
+          run_expect_canary_failure "PHPStan" vendor/bin/phpstan analyse tests/CICanary.php --level=10
 
       - name: Run Composer test suite
         run: composer test
