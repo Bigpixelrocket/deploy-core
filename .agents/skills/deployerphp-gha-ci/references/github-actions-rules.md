@@ -16,7 +16,6 @@ Rules for GitHub Actions workflows, reusable actions, and CI/CD configuration in
 | ----------------- | -------------- | ------- | ---------------------------- |
 | Quality Gates     | `pull_request` | 3min    | Fast feedback on PR quality  |
 | Integration Tests | `pull_request` | 9min    | Real-world testing           |
-| Automation        | Various        | N/A     | Dependabot automation        |
 
 **Quality Gate Workflows:**
 
@@ -31,10 +30,6 @@ Rules for GitHub Actions workflows, reusable actions, and CI/CD configuration in
 - `bats-vm.yml` - Server command tests (Lima VMs, 3-distro matrix)
 - `bats-cloud.yml` - Cloud provider tests (AWS/DO matrix)
 
-**Automation Workflows:**
-
-- `dependabot-automerge.yml` - Auto-approve and merge dependabot PRs
-
 ### Directory Structure
 
 ```text
@@ -46,8 +41,7 @@ Rules for GitHub Actions workflows, reusable actions, and CI/CD configuration in
 │   ├── rector.yml            # Automated refactoring
 │   ├── ci-canary.yml         # Linter verification
 │   ├── bats-vm.yml           # VM integration tests
-│   ├── bats-cloud.yml        # Cloud integration tests
-│   └── dependabot-automerge.yml
+│   └── bats-cloud.yml        # Cloud integration tests
 ├── actions/
 │   └── setup-php-composer/
 │       └── action.yml        # Reusable PHP setup
@@ -266,7 +260,6 @@ group: bats-cloud-${{ matrix.provider }}-${{ github.ref }}
 
 - Use minimal permissions for each workflow
 - Quality gates: `contents: read`
-- Dependabot automerge: `pull-requests: write`, `contents: write`
 
 ### Triggers
 

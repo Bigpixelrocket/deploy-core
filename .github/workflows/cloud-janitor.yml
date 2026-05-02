@@ -1,0 +1,51 @@
+name: Cloud Janitor
+
+permissions:
+  contents: read
+  actions: read
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+jobs:
+  janitor-sweep:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    concurrency:
+      group: bats-cloud-janitor
+      cancel-in-progress: false
+
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup PHP and Composer
+        uses: ./.github/actions/setup-php-composer
+
+      - name: Install janitor dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq curl
+          aws --version
+
+      - name: Setup environment file
+        run: |
+          cat <<'ENVEOF' > .env
+          ${{ secrets.DOTENV_FILE }}
+          ENVEOF
+
+      - name: Janitor scheduled sweep
+        run: |
+          set -a
+          # shellcheck disable=SC1091
+          source .env
+          set +a
+          tests/bats/lib/cloud-janitor.sh \
+            --mode=sweep \
+            --providers="aws,do,cf" \
+            --min-age-minutes=30
