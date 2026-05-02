@@ -11,8 +11,8 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Lucian Văcăroiu",
-            "email": "silviulucian@gmail.com"
+            "name": "Lucian Behind The Scenes",
+            "email": "loadinglucian@pm.me"
         }
     ],
     "require": {
@@ -50,20 +50,23 @@
         "bin/deployer"
     ],
     "scripts": {
-        "pall": [
-            "composer pint && composer pstan && composer rect && composer pest"
-        ],
-        "pest": [
-            "vendor/bin/pest --parallel --coverage --coverage-text"
-        ],
-        "pint": [
-            "vendor/bin/pint --parallel"
-        ],
-        "pstan": [
+        "lint": [
+            "vendor/bin/rector process",
+            "vendor/bin/pint --parallel",
             "vendor/bin/phpstan analyse --memory-limit=2G"
         ],
-        "rect": [
-            "vendor/bin/rector process"
+        "lint:check": [
+            "vendor/bin/rector process --dry-run",
+            "vendor/bin/pint --parallel --test",
+            "vendor/bin/phpstan analyse --memory-limit=2G"
+        ],
+        "test": [
+            "@lint:check",
+            "vendor/bin/pest --parallel --coverage --coverage-text"
+        ],
+        "ci:check": [
+            "Composer\\Config::disableProcessTimeout",
+            "@test"
         ],
         "bash": [
             "shfmt -i 0 -bn -ci -sr -w playbooks/*.sh"

@@ -1,0 +1,180 @@
+name: Test
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths: &test_paths
+      - ".github/**/*.yml"
+      - "app/**"
+      - "bin/**"
+      - "playbooks/**"
+      - "scaffolds/**"
+      - "tests/**"
+      - "**/*.php"
+      - "**/*.sh"
+      - "composer.json"
+      - "composer.lock"
+      - "phpstan.neon"
+      - "phpunit.xml"
+      - "pint.json"
+  push:
+    branches:
+      - main
+    paths: *test_paths
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    concurrency:
+      group: test-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup PHP and Composer
+        uses: ./.github/actions/setup-php-composer
+        with:
+          coverage: "true"
+
+      - name: Prepare Rector cache
+        run: mkdir -p /tmp/rector
+
+      - name: Cache Rector tmp dir
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: /tmp/rector
+          key: ${{ runner.os }}-rector-${{ github.event_name }}-${{ github.ref_name }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-rector-${{ github.event_name }}-${{ github.ref_name }}-
+
+      - name: Verify CI canary failures
+        run: |
+          if vendor/bin/pint --test tests/CICanary.php; then
+            echo "ERROR: Pint should have failed on CICanary, it didn't"
+            exit 1
+          fi
+
+          if vendor/bin/rector --dry-run tests/CICanary.php --config rector-canary.php; then
+            echo "ERROR: Rector should have failed on CICanary, it didn't"
+            exit 1
+          fi
+
+          if vendor/bin/phpstan analyse tests/CICanary.php --level=10; then
+            echo "ERROR: PHPStan should have failed on CICanary, it didn't"
+            exit 1
+          fi
+
+      - name: Run Composer test suite
+        run: composer test
+
+  vm-tests-ubuntu24:
+    name: vm-tests (ubuntu24)
+    needs: [test]
+    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    concurrency:
+      group: bats-vm-ubuntu24-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup PHP and Composer
+        uses: ./.github/actions/setup-php-composer
+
+      - name: Install BATS and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bats jq
+
+      - name: Setup Lima
+        uses: lima-vm/lima-actions/setup@55627e31b78637bf254a8b2a14da8ea7d12564e5 # v1
+
+      - name: Setup test fixtures
+        run: |
+          mkdir -p tests/bats/fixtures/keys tests/bats/fixtures/inventory
+          ssh-keygen -t ed25519 -f tests/bats/fixtures/keys/id_test -N "" -C "deployer-bats-test"
+
+      - name: Setup environment file
+        run: |
+          cat <<'EOF' > .env
+          ${{ secrets.DOTENV_FILE }}
+          EOF
+
+      - name: Run VM tests for ubuntu24
+        env:
+          CI: "true"
+          BATS_DISTRO: ubuntu24
+        run: ./bats.sh ci vm ubuntu24
+
+  cloud-tests:
+    name: cloud-tests (${{ matrix.provider }})
+    needs: [vm-tests-ubuntu24]
+    if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)) && needs.vm-tests-ubuntu24.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        provider: [do, aws]
+    concurrency:
+      group: bats-cloud-${{ matrix.provider }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    env:
+      CI: "true"
+      BATS_RUN_SUFFIX: ${{ github.run_id }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup PHP and Composer
+        uses: ./.github/actions/setup-php-composer
+
+      - name: Install BATS and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bats jq curl
+          aws --version
+
+      - name: Setup environment file
+        run: |
+          cat <<'EOF' > .env
+          ${{ secrets.DOTENV_FILE }}
+          EOF
+
+      - name: Setup SSH key for cloud provisioning
+        run: |
+          mkdir -p ~/.ssh tests/bats/fixtures/keys
+          echo "${{ secrets.SSH_PRIVATE_KEY_B64 }}" | base64 -d > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keygen -y -f ~/.ssh/id_ed25519 > ~/.ssh/id_ed25519.pub
+          cp ~/.ssh/id_ed25519.pub tests/bats/fixtures/keys/id_test.pub
+
+      - name: Run ${{ matrix.provider }} tests
+        run: |
+          set -a
+          # shellcheck disable=SC1091
+          source .env
+          set +a
+          ./bats.sh ci cloud "${{ matrix.provider }}"
+
+      - name: Cleanup cloud resources (backstop)
+        if: always()
+        run: |
+          set -a
+          # shellcheck disable=SC1091
+          source .env
+          set +a
+          tests/bats/lib/cloud-janitor.sh \
+            --mode=targeted \
+            --suffix="${BATS_RUN_SUFFIX}" \
+            --providers="${{ matrix.provider }}"
