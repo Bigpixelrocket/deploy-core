@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services\Do;
+namespace DeployCore\Services\Do;
 
-use DeployerPHP\Enums\Distribution;
+use DeployCore\Enums\Distribution;
 use DigitalOceanV2\Entity\Image as ImageEntity;
 use DigitalOceanV2\Entity\Region as RegionEntity;
 use DigitalOceanV2\Entity\Size as SizeEntity;

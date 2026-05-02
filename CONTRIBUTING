@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for considering contributing to DeployerPHP! We welcome contributions of all kinds: bug reports, documentation improvements, and code changes.
+Thank you for considering contributing to DeployCore! We welcome contributions of all kinds: bug reports, documentation improvements, and code changes.
 
 ## How to Contribute
 
@@ -12,7 +12,7 @@ For significant changes, please open an issue first to discuss your approach.
 
 ## Using Claude Code
 
-If you use [Claude Code](https://docs.anthropic.com/en/docs/claude-code), check out my [dotclaude](https://github.com/loadinglucian/dotclaude) repository for rules, commands and agents that I've used to streamline my workflow while working on DeployerPHP.
+If you use [Claude Code](https://docs.anthropic.com/en/docs/claude-code), check out my [dotclaude](https://github.com/loadinglucian/dotclaude) repository for rules, commands and agents that I've used to streamline my workflow while working on DeployCore.
 
 Or if you use [Codex](https://openai.com/codex/), [Cursor](https://cursor.com) or [OpenCode](https://opencode.ai/), I have a [dotagents](https://github.com/loadinglucian/dotagents) repository with equivalent agent SKILLs.
 
@@ -44,4 +44,4 @@ This Code of Conduct is adapted from the [Contributor Covenant](https://www.cont
 
 ---
 
-Thank you for helping make DeployerPHP better!
+Thank you for helping make DeployCore better!

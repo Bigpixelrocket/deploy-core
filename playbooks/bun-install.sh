@@ -12,9 +12,9 @@
 set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-[[ -z $DEPLOYER_OUTPUT_FILE ]] && echo "Error: DEPLOYER_OUTPUT_FILE required" && exit 1
-[[ -z $DEPLOYER_PERMS ]] && echo "Error: DEPLOYER_PERMS required" && exit 1
-export DEPLOYER_PERMS
+[[ -z $DEPLOY_OUTPUT_FILE ]] && echo "Error: DEPLOY_OUTPUT_FILE required" && exit 1
+[[ -z $DEPLOY_PERMS ]] && echo "Error: DEPLOY_PERMS required" && exit 1
+export DEPLOY_PERMS
 
 # Shared helpers are automatically inlined when executing playbooks remotely
 # source "$(dirname "$0")/helpers.sh"
@@ -36,7 +36,7 @@ main() {
 	fi
 
 	# Write output YAML
-	if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+	if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 		status: success
 	EOF
 		echo "Error: Failed to write output file" >&2

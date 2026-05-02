@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Console\Mariadb;
+namespace DeployCore\Console\Mariadb;
 
-use DeployerPHP\Contracts\BaseCommand;
-use DeployerPHP\Traits\PlaybooksTrait;
-use DeployerPHP\Traits\ServersTrait;
+use DeployCore\Contracts\BaseCommand;
+use DeployCore\Traits\PlaybooksTrait;
+use DeployCore\Traits\ServersTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -62,7 +62,7 @@ class MariadbStartCommand extends BaseCommand
             'mariadb-service',
             'Starting MariaDB service...',
             [
-                'DEPLOYER_ACTION' => 'start',
+                'DEPLOY_ACTION' => 'start',
             ],
         );
 

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Traits;
+namespace DeployCore\Traits;
 
-use DeployerPHP\DTOs\CronDTO;
-use DeployerPHP\DTOs\SiteDTO;
-use DeployerPHP\Exceptions\ValidationException;
-use DeployerPHP\Services\IoService;
+use DeployCore\DTOs\CronDTO;
+use DeployCore\DTOs\SiteDTO;
+use DeployCore\Exceptions\ValidationException;
+use DeployCore\Services\IoService;
 use Symfony\Component\Console\Command\Command;
 
 /**
@@ -34,7 +34,7 @@ trait CronsTrait
     // ----
 
     /**
-     * Scan .deployer/scripts/ directory recursively and return sorted list of cron scripts.
+     * Scan .deploy-core/scripts/ directory recursively and return sorted list of cron scripts.
      *
      * @param string $cronsDir Absolute path to scripts directory
      * @return array<int, string> Array of script paths relative to scripts directory
@@ -194,7 +194,7 @@ trait CronsTrait
     /**
      * Validate cron selection exists for site.
      *
-     * @param array<int, \DeployerPHP\DTOs\CronDTO> $crons Available crons for the site
+     * @param array<int, \DeployCore\DTOs\CronDTO> $crons Available crons for the site
      *
      * @return string|null Error message if invalid, null if valid
      */

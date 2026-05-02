@@ -72,7 +72,7 @@ Use `server:add` first, then run the `server:install` command. This keeps invent
 - **PHP version and extensions** with a curated set of pre-selected defaults (bcmath, curl, gd, intl, redis, and others). The extension list is filtered to what's actually available for your chosen PHP version, so you'll only see installable options
 - **Deploy key** for Git access. You can use a server-generated key pair (the default) or provide your own. After installation completes, the deploy public key is printed so you can add it to your Git provider
 
-`server:install` is additive. You can rerun it later to install additional PHP versions on the same server. When a PHP version is already installed, DeployerPHP detects it and prompts whether to set the new version as the default.
+`server:install` is additive. You can rerun it later to install additional PHP versions on the same server. When a PHP version is already installed, DeployCore detects it and prompts whether to set the new version as the default.
 
 <a name="diagnostics-and-operations"></a>
 
@@ -98,7 +98,7 @@ Use `server:run` for scripted, one-shot checks. Use `server:ssh` when you need i
 
 ### Decommissioning
 
-`server:delete` requires you to type the server name to confirm deletion. For cloud-provisioned servers, DeployerPHP detects the cloud provider and offers to destroy the cloud resource alongside the inventory entry. If cloud destruction fails, a "remove from inventory anyway?" fallback lets you clean up local state. The command also lists and removes all associated sites from inventory.
+`server:delete` requires you to type the server name to confirm deletion. For cloud-provisioned servers, DeployCore detects the cloud provider and offers to destroy the cloud resource alongside the inventory entry. If cloud destruction fails, a "remove from inventory anyway?" fallback lets you clean up local state. The command also lists and removes all associated sites from inventory.
 
 <a name="site-details"></a>
 
@@ -112,7 +112,7 @@ A stable flow is `site:create`, then `site:deploy`, then `site:dns:check` and `s
 
 `site:create` auto-detects subdomains (including two-part country-code TLDs like `.co.uk` and `.com.au`) and forces WWW mode to "none" for subdomain sites. Root domains keep the full WWW mode selection with "redirect to root" as the default.
 
-`site:deploy` validates that your deploy script exists in the repository before proceeding. If `.deployer/scripts/deploy.sh` is missing, you'll see a warning with a suggestion to run `scaffold:scripts` to generate it. Missing scripts don't block deployment, but they are skipped.
+`site:deploy` validates that your deploy script exists in the repository before proceeding. If `.deploy-core/scripts/deploy.sh` is missing, you'll see a warning with a suggestion to run `scaffold:scripts` to generate it. Missing scripts don't block deployment, but they are skipped.
 
 <a name="shared-file-operations"></a>
 

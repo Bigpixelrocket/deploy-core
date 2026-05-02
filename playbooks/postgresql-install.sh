@@ -20,18 +20,18 @@
 set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-[[ -z $DEPLOYER_OUTPUT_FILE ]] && echo "Error: DEPLOYER_OUTPUT_FILE required" && exit 1
-[[ -z $DEPLOYER_PERMS ]] && echo "Error: DEPLOYER_PERMS required" && exit 1
-export DEPLOYER_PERMS
+[[ -z $DEPLOY_OUTPUT_FILE ]] && echo "Error: DEPLOY_OUTPUT_FILE required" && exit 1
+[[ -z $DEPLOY_PERMS ]] && echo "Error: DEPLOY_PERMS required" && exit 1
+export DEPLOY_PERMS
 
 # Shared helpers are automatically inlined when executing playbooks remotely
 # source "$(dirname "$0")/helpers.sh"
 
 # Credentials (generated in main, used across functions)
 POSTGRES_PASS=""
-DEPLOYER_USER="deployer"
-DEPLOYER_PASS=""
-DEPLOYER_DATABASE="deployer"
+DEPLOY_USER="deployer"
+DEPLOY_PASS=""
+DEPLOY_DATABASE="deployer"
 
 # ----
 # Installation Functions
@@ -200,7 +200,7 @@ configure_auth() {
 	fi
 
 	# Check if we've already configured this
-	if grep -q "# DEPLOYER-MANAGED" "$pg_hba" 2> /dev/null; then
+	if grep -q "# DEPLOY-MANAGED" "$pg_hba" 2> /dev/null; then
 		echo "→ Authentication already configured, skipping..."
 		return 0
 	fi
@@ -213,7 +213,7 @@ configure_auth() {
 	# - local connections use scram-sha-256 for other users
 	# - host connections use scram-sha-256
 	if ! run_cmd tee "$pg_hba" > /dev/null <<- 'EOF'; then
-		# DEPLOYER-MANAGED PostgreSQL Client Authentication Configuration
+		# DEPLOY-MANAGED PostgreSQL Client Authentication Configuration
 		# TYPE  DATABASE        USER            ADDRESS                 METHOD
 
 		# Local connections
@@ -241,7 +241,7 @@ configure_auth() {
 create_deployer_user() {
 	# Check if user already exists
 	local user_exists
-	user_exists=$(run_cmd su - postgres -c "psql -tAc \"SELECT 1 FROM pg_roles WHERE rolname='${DEPLOYER_USER}';\"" 2> /dev/null)
+	user_exists=$(run_cmd su - postgres -c "psql -tAc \"SELECT 1 FROM pg_roles WHERE rolname='${DEPLOY_USER}';\"" 2> /dev/null)
 
 	if [[ $user_exists == "1" ]]; then
 		echo "→ Deployer user already exists, skipping user creation..."
@@ -250,7 +250,7 @@ create_deployer_user() {
 
 	echo "→ Creating deployer user..."
 
-	if ! run_cmd su - postgres -c "psql -c \"CREATE USER ${DEPLOYER_USER} WITH PASSWORD '${DEPLOYER_PASS}';\"" > /dev/null 2>&1; then
+	if ! run_cmd su - postgres -c "psql -c \"CREATE USER ${DEPLOY_USER} WITH PASSWORD '${DEPLOY_PASS}';\"" > /dev/null 2>&1; then
 		echo "Error: Failed to create deployer user" >&2
 		exit 1
 	fi
@@ -266,24 +266,24 @@ create_deployer_user() {
 create_deployer_database() {
 	# Check if database already exists
 	local db_exists
-	db_exists=$(run_cmd su - postgres -c "psql -tAc \"SELECT 1 FROM pg_database WHERE datname='${DEPLOYER_DATABASE}';\"" 2> /dev/null)
+	db_exists=$(run_cmd su - postgres -c "psql -tAc \"SELECT 1 FROM pg_database WHERE datname='${DEPLOY_DATABASE}';\"" 2> /dev/null)
 
 	if [[ $db_exists == "1" ]]; then
 		echo "→ Deployer database already exists, skipping database creation..."
 		# Ensure ownership is correct
-		run_cmd su - postgres -c "psql -c \"ALTER DATABASE ${DEPLOYER_DATABASE} OWNER TO ${DEPLOYER_USER};\"" > /dev/null 2>&1 || true
+		run_cmd su - postgres -c "psql -c \"ALTER DATABASE ${DEPLOY_DATABASE} OWNER TO ${DEPLOY_USER};\"" > /dev/null 2>&1 || true
 		return 0
 	fi
 
 	echo "→ Creating deployer database..."
 
-	if ! run_cmd su - postgres -c "psql -c \"CREATE DATABASE ${DEPLOYER_DATABASE} OWNER ${DEPLOYER_USER} ENCODING 'UTF8' LC_COLLATE 'C.UTF-8' LC_CTYPE 'C.UTF-8' TEMPLATE template0;\"" > /dev/null 2>&1; then
+	if ! run_cmd su - postgres -c "psql -c \"CREATE DATABASE ${DEPLOY_DATABASE} OWNER ${DEPLOY_USER} ENCODING 'UTF8' LC_COLLATE 'C.UTF-8' LC_CTYPE 'C.UTF-8' TEMPLATE template0;\"" > /dev/null 2>&1; then
 		echo "Error: Failed to create deployer database" >&2
 		exit 1
 	fi
 
 	# Grant all privileges
-	if ! run_cmd su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE ${DEPLOYER_DATABASE} TO ${DEPLOYER_USER};\"" > /dev/null 2>&1; then
+	if ! run_cmd su - postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE ${DEPLOY_DATABASE} TO ${DEPLOY_USER};\"" > /dev/null 2>&1; then
 		echo "Error: Failed to grant privileges to deployer user" >&2
 		exit 1
 	fi
@@ -329,7 +329,7 @@ main() {
 		echo "→ PostgreSQL server is already installed and running"
 
 		# Return success with marker indicating already installed
-		if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+		if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 			status: success
 			already_installed: true
 		EOF
@@ -341,7 +341,7 @@ main() {
 
 	# Generate credentials for fresh install
 	POSTGRES_PASS=$(openssl rand -base64 24)
-	DEPLOYER_PASS=$(openssl rand -base64 24)
+	DEPLOY_PASS=$(openssl rand -base64 24)
 
 	# Execute installation tasks
 	install_packages
@@ -372,12 +372,12 @@ main() {
 	done
 
 	# Write output YAML
-	if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+	if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 		status: success
 		postgres_pass: ${POSTGRES_PASS}
-		deployer_user: ${DEPLOYER_USER}
-		deployer_pass: ${DEPLOYER_PASS}
-		deployer_database: ${DEPLOYER_DATABASE}
+		deployer_user: ${DEPLOY_USER}
+		deployer_pass: ${DEPLOY_PASS}
+		deployer_database: ${DEPLOY_DATABASE}
 	EOF
 		echo "Error: Failed to write output file" >&2
 		exit 1

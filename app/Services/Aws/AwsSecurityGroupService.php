@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services\Aws;
+namespace DeployCore\Services\Aws;
 
 /**
  * AWS EC2 security group management service.
  *
- * Handles the shared "deployer" security group for all deployer-provisioned instances.
+ * Handles the shared "deploy-core" security group for all deploy-core-provisioned instances.
  */
 class AwsSecurityGroupService extends BaseAwsService
 {
-    private const SECURITY_GROUP_NAME = 'deployer';
+    private const SECURITY_GROUP_NAME = 'deploy-core';
 
-    private const SECURITY_GROUP_DESCRIPTION = 'Managed by Deployer - allows all traffic (use server:firewall for rules)';
+    private const SECURITY_GROUP_DESCRIPTION = 'Managed by Bigpixelrocket/DeployCore - allows all traffic (use server:firewall for rules)';
 
     /**
-     * Ensure the "deployer" security group exists in the VPC.
+     * Ensure the "deploy-core" security group exists in the VPC.
      *
      * Creates it if it doesn't exist. Returns the security group ID.
      *
@@ -40,7 +40,7 @@ class AwsSecurityGroupService extends BaseAwsService
     }
 
     /**
-     * Find the "deployer" security group in a VPC.
+     * Find the "deploy-core" security group in a VPC.
      *
      * @param string $vpcId VPC ID to search in
      *
@@ -77,7 +77,7 @@ class AwsSecurityGroupService extends BaseAwsService
     }
 
     /**
-     * Create the "deployer" security group with allow-all rules.
+     * Create the "deploy-core" security group with allow-all rules.
      *
      * @param string $vpcId VPC ID where to create the security group
      *
@@ -101,7 +101,7 @@ class AwsSecurityGroupService extends BaseAwsService
                         'ResourceType' => 'security-group',
                         'Tags' => [
                             ['Key' => 'Name', 'Value' => self::SECURITY_GROUP_NAME],
-                            ['Key' => 'ManagedBy', 'Value' => 'deployer'],
+                            ['Key' => 'ManagedBy', 'Value' => 'deploy-core'],
                         ],
                     ],
                 ],

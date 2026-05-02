@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services\Aws;
+namespace DeployCore\Services\Aws;
 
-use DeployerPHP\Services\FilesystemService;
-use DeployerPHP\Services\RetryService;
+use DeployCore\Services\FilesystemService;
+use DeployCore\Services\RetryService;
 
 /**
  * AWS EC2 key pair management service.

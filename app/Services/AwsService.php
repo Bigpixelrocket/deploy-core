@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services;
+namespace DeployCore\Services;
 
 use Aws\Sdk;
-use DeployerPHP\Services\Aws\AwsAccountService;
-use DeployerPHP\Services\Aws\AwsInstanceService;
-use DeployerPHP\Services\Aws\AwsKeyService;
-use DeployerPHP\Services\Aws\AwsRoute53DnsService;
-use DeployerPHP\Services\Aws\AwsRoute53ZoneService;
-use DeployerPHP\Services\Aws\AwsSecurityGroupService;
+use DeployCore\Services\Aws\AwsAccountService;
+use DeployCore\Services\Aws\AwsInstanceService;
+use DeployCore\Services\Aws\AwsKeyService;
+use DeployCore\Services\Aws\AwsRoute53DnsService;
+use DeployCore\Services\Aws\AwsRoute53ZoneService;
+use DeployCore\Services\Aws\AwsSecurityGroupService;
 
 /**
  * AWS API facade service.

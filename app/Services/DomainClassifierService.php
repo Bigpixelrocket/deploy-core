@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services;
+namespace DeployCore\Services;
 
 use Pdp\Domain;
 use Pdp\Rules;
@@ -14,7 +14,7 @@ use RuntimeException;
 final class DomainClassifierService
 {
     private const PSL_URL = 'https://publicsuffix.org/list/public_suffix_list.dat';
-    private const CACHE_DIRECTORY_NAME = 'deployer-php';
+    private const CACHE_DIRECTORY_NAME = 'deploy-core';
     private const CACHE_FILENAME = 'public_suffix_list.dat';
     private const CACHE_TTL_SECONDS = 604800; // 7 days
 

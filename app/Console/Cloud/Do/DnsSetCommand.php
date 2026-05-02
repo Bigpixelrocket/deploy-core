@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Console\Cloud\Do;
+namespace DeployCore\Console\Cloud\Do;
 
-use DeployerPHP\Contracts\BaseCommand;
-use DeployerPHP\Exceptions\ValidationException;
-use DeployerPHP\Services\Do\DoDnsService;
-use DeployerPHP\Traits\DnsCommandTrait;
-use DeployerPHP\Traits\DoDnsTrait;
-use DeployerPHP\Traits\DoTrait;
+use DeployCore\Contracts\BaseCommand;
+use DeployCore\Exceptions\ValidationException;
+use DeployCore\Services\Do\DoDnsService;
+use DeployCore\Traits\DnsCommandTrait;
+use DeployCore\Traits\DoDnsTrait;
+use DeployCore\Traits\DoTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

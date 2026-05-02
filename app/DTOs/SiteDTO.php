@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\DTOs;
+namespace DeployCore\DTOs;
 
-use DeployerPHP\Enums\WwwMode;
+use DeployCore\Enums\WwwMode;
 
 readonly class SiteDTO
 {

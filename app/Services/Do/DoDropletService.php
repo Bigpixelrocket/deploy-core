@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services\Do;
+namespace DeployCore\Services\Do;
 
 use DigitalOceanV2\Entity\Droplet as DropletEntity;
 use DigitalOceanV2\Exception\ResourceNotFoundException;
@@ -18,7 +18,7 @@ class DoDropletService extends BaseDoService
 
     private const BATS_TEST_PROVIDER = 'do';
 
-    private const MANAGED_BY = 'deployer';
+    private const MANAGED_BY = 'deploy-core';
 
     /**
      * Create a new droplet with the specified configuration.
@@ -210,9 +210,9 @@ class DoDropletService extends BaseDoService
             $tags[] = 'testsuite-' . self::BATS_TEST_SUITE;
             $tags[] = 'testprovider-' . self::BATS_TEST_PROVIDER;
             $tags[] = 'testrunsuffix-' . $runSuffix;
-            $tags[] = 'deployer-bats';
-            $tags[] = 'deployer-bats-do';
-            $tags[] = 'deployer-bats-run-' . $runSuffix;
+            $tags[] = 'deploy-core-bats';
+            $tags[] = 'deploy-core-bats-do';
+            $tags[] = 'deploy-core-bats-run-' . $runSuffix;
         }
 
         return $tags;
@@ -220,7 +220,7 @@ class DoDropletService extends BaseDoService
 
     private function extractBatsRunSuffix(string $name): ?string
     {
-        if (1 !== preg_match('/^deployer-bats-do-([a-zA-Z0-9]+)$/', $name, $matches)) {
+        if (1 !== preg_match('/^deploy-core-bats-do-([a-zA-Z0-9]+)$/', $name, $matches)) {
             return null;
         }
 

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Console\Cloud\Aws;
+namespace DeployCore\Console\Cloud\Aws;
 
-use DeployerPHP\Contracts\BaseCommand;
-use DeployerPHP\Exceptions\ValidationException;
-use DeployerPHP\Services\Aws\AwsRoute53DnsService;
-use DeployerPHP\Traits\AwsDnsTrait;
-use DeployerPHP\Traits\AwsTrait;
-use DeployerPHP\Traits\DnsCommandTrait;
+use DeployCore\Contracts\BaseCommand;
+use DeployCore\Exceptions\ValidationException;
+use DeployCore\Services\Aws\AwsRoute53DnsService;
+use DeployCore\Traits\AwsDnsTrait;
+use DeployCore\Traits\AwsTrait;
+use DeployCore\Traits\DnsCommandTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

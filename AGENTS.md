@@ -1,6 +1,6 @@
-# DeployerPHP
+# DeployCore
 
-DeployerPHP is a Symfony Console Composer package (`loadinglucian/deployer-php`)
+DeployCore is a Symfony Console Composer package (`bigpixelrocket/deploy-core`)
 for provisioning, installing, and deploying servers and sites.
 
 > **IMPORTANT**
@@ -21,7 +21,7 @@ Update and maintain this Architecture section when the system changes.
 
 ```mermaid
 flowchart TD
-    bin/deployer --> Container --> SymfonyApp --> Commands
+    bin/deploy --> Container --> SymfonyApp --> Commands
     Commands --> Traits --> Services --> Repositories
     Services --> Builders --> DTOs
     Repositories --> Builders
@@ -79,7 +79,7 @@ tests/bats/            # VM + cloud integration tests
 
 **Playbook/test contracts:**
 
-- Playbooks do not consume `DEPLOYER_DISTRO`; distro validation is centralized
+- Playbooks do not consume `DEPLOY_DISTRO`; distro validation is centralized
   in `ServersTrait::getServerInfo()` and cloud image selection.
 - VM distro/port mapping is centralized in `tests/bats/lib/vm-matrix.bash`.
 - Cloud test naming/cleanup contracts are centralized in
@@ -119,11 +119,11 @@ Use these project-local skills for deep procedural guidance.
 
 | Domain          | Skill                            | Path                                                     |
 | --------------- | -------------------------------- | -------------------------------------------------------- |
-| Commands/Traits | `deployerphp-command-authoring`  | `.agents/skills/deployerphp-command-authoring/SKILL.md`  |
-| Playbooks       | `deployerphp-playbook-authoring` | `.agents/skills/deployerphp-playbook-authoring/SKILL.md` |
-| BATS            | `deployerphp-bats-testing`       | `.agents/skills/deployerphp-bats-testing/SKILL.md`       |
-| GitHub Actions  | `deployerphp-gha-ci`             | `.agents/skills/deployerphp-gha-ci/SKILL.md`             |
-| Documentation   | `deployerphp-docs-policy`        | `.agents/skills/deployerphp-docs-policy/SKILL.md`        |
+| Commands/Traits | `deploy-core-command-authoring`  | `.agents/skills/deploy-core-command-authoring/SKILL.md`  |
+| Playbooks       | `deploy-core-playbook-authoring` | `.agents/skills/deploy-core-playbook-authoring/SKILL.md` |
+| BATS            | `deploy-core-bats-testing`       | `.agents/skills/deploy-core-bats-testing/SKILL.md`       |
+| GitHub Actions  | `deploy-core-gha-ci`             | `.agents/skills/deploy-core-gha-ci/SKILL.md`             |
+| Documentation   | `deploy-core-docs-policy`        | `.agents/skills/deploy-core-docs-policy/SKILL.md`        |
 
 ### Skill Loading Rule
 

@@ -6,9 +6,9 @@
 # Controls Nginx service lifecycle (start/stop/restart/reload) via systemctl.
 #
 # Required Environment Variables:
-#   DEPLOYER_OUTPUT_FILE  - Output file path
-#   DEPLOYER_PERMS        - Permissions: root|sudo|none
-#   DEPLOYER_ACTION       - Action: start|stop|restart|reload
+#   DEPLOY_OUTPUT_FILE  - Output file path
+#   DEPLOY_PERMS        - Permissions: root|sudo|none
+#   DEPLOY_ACTION       - Action: start|stop|restart|reload
 #
 # Output:
 #   status: success
@@ -17,10 +17,10 @@
 set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-[[ -z $DEPLOYER_OUTPUT_FILE ]] && echo "Error: DEPLOYER_OUTPUT_FILE required" && exit 1
-[[ -z $DEPLOYER_PERMS ]] && echo "Error: DEPLOYER_PERMS required" && exit 1
-[[ -z $DEPLOYER_ACTION ]] && echo "Error: DEPLOYER_ACTION required" && exit 1
-export DEPLOYER_PERMS
+[[ -z $DEPLOY_OUTPUT_FILE ]] && echo "Error: DEPLOY_OUTPUT_FILE required" && exit 1
+[[ -z $DEPLOY_PERMS ]] && echo "Error: DEPLOY_PERMS required" && exit 1
+[[ -z $DEPLOY_ACTION ]] && echo "Error: DEPLOY_ACTION required" && exit 1
+export DEPLOY_PERMS
 
 # Shared helpers are automatically inlined when executing playbooks remotely
 # source "$(dirname "$0")/helpers.sh"
@@ -35,7 +35,7 @@ export DEPLOYER_PERMS
 # Validates the action and executes the corresponding systemctl command
 
 execute_action() {
-	case $DEPLOYER_ACTION in
+	case $DEPLOY_ACTION in
 		start)
 			echo "→ Starting Nginx..."
 			if ! run_cmd systemctl start nginx; then
@@ -73,7 +73,7 @@ execute_action() {
 			fi
 			;;
 		*)
-			echo "Error: Invalid action '${DEPLOYER_ACTION}'. Valid: start|stop|restart|reload" >&2
+			echo "Error: Invalid action '${DEPLOY_ACTION}'. Valid: start|stop|restart|reload" >&2
 			exit 1
 			;;
 	esac
@@ -122,7 +122,7 @@ verify_service_stopped() {
 main() {
 	execute_action
 
-	if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+	if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 		status: success
 	EOF
 		echo "Error: Failed to write output file" >&2

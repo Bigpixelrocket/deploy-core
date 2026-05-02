@@ -55,9 +55,9 @@ Alias commands are also supported:
 Use the `do:key:*` commands to keep account SSH keys aligned with your access policy before provisioning. You can list existing keys, upload a local public key, or remove a key you no longer need.
 
 ```shell
-deployer do:key:list
-deployer do:key:add
-deployer do:key:delete
+deploy do:key:list
+deploy do:key:add
+deploy do:key:delete
 ```
 
 <a name="provisioning"></a>
@@ -66,10 +66,10 @@ deployer do:key:delete
 
 `do:provision` creates a Droplet and writes inventory entries so you can continue with `server:install` and site workflows immediately. You can also configure optional settings during provisioning, including VPC selection, monitoring (enabled by default, free), IPv6 (enabled by default, free), and automatic backups.
 
-If provisioning fails after the Droplet is created, DeployerPHP automatically rolls back the Droplet so you don't accumulate orphaned resources.
+If provisioning fails after the Droplet is created, DeployCore automatically rolls back the Droplet so you don't accumulate orphaned resources.
 
 ```shell
-deployer do:provision
+deploy do:provision
 ```
 
 After provisioning, run the `server:install` command to prepare runtime services.
@@ -83,7 +83,7 @@ Use `do:dns:list` to inspect current records for a domain, then use `do:dns:set`
 `do:dns:delete` uses a two-tier confirmation: you type the record name first, then confirm with a yes/no prompt.
 
 ```shell
-deployer do:dns:list
-deployer do:dns:set
-deployer do:dns:delete
+deploy do:dns:list
+deploy do:dns:set
+deploy do:dns:delete
 ```

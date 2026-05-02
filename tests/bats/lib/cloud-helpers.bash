@@ -54,8 +54,8 @@ export BATS_RUN_SUFFIX="$(normalize_bats_run_suffix "${BATS_RUN_SUFFIX:-}")"
 # ----
 # Instance sizing and disk configuration
 
-export AWS_TEST_KEY_NAME="deployer-bats-aws-${BATS_RUN_SUFFIX}"
-export AWS_TEST_SERVER_NAME="deployer-bats-aws-${BATS_RUN_SUFFIX}"
+export AWS_TEST_KEY_NAME="deploy-core-bats-aws-${BATS_RUN_SUFFIX}"
+export AWS_TEST_SERVER_NAME="deploy-core-bats-aws-${BATS_RUN_SUFFIX}"
 export AWS_TEST_INSTANCE_TYPE="${AWS_TEST_INSTANCE_TYPE:-}"
 export AWS_TEST_IMAGE="${AWS_TEST_IMAGE:-}"
 export AWS_TEST_KEY_PAIR="${AWS_TEST_KEY_PAIR:-}"
@@ -65,7 +65,7 @@ export AWS_TEST_PRIVATE_KEY_PATH="${AWS_TEST_PRIVATE_KEY_PATH:-$HOME/.ssh/id_ed2
 export AWS_TEST_DISK_SIZE="${AWS_TEST_DISK_SIZE:-}"
 
 # AWS DNS/Site Test Configuration
-export AWS_TEST_DOMAIN="${AWS_TEST_DOMAIN:-deployeraws.eu}"
+export AWS_TEST_DOMAIN="${AWS_TEST_DOMAIN:-deploycoreaws.eu}"
 export AWS_TEST_HOSTED_ZONE="${AWS_TEST_HOSTED_ZONE:-$AWS_TEST_DOMAIN}"
 export AWS_TEST_DNS_ROOT_PRIMARY="r${BATS_RUN_SUFFIX}"
 export AWS_TEST_DNS_ROOT_SECONDARY="${AWS_TEST_DNS_ROOT_PRIMARY}.v2"
@@ -80,8 +80,8 @@ export AWS_TEST_SITE_DOMAIN_SECONDARY="${AWS_TEST_DNS_ROOT_SECONDARY_FQDN}"
 # ----
 # Droplet sizing and VPC configuration
 
-export DO_TEST_KEY_NAME="deployer-bats-do-${BATS_RUN_SUFFIX}"
-export DO_TEST_SERVER_NAME="deployer-bats-do-${BATS_RUN_SUFFIX}"
+export DO_TEST_KEY_NAME="deploy-core-bats-do-${BATS_RUN_SUFFIX}"
+export DO_TEST_SERVER_NAME="deploy-core-bats-do-${BATS_RUN_SUFFIX}"
 export DO_TEST_SSH_KEY_ID="${DO_TEST_SSH_KEY_ID:-}"
 export DO_TEST_PRIVATE_KEY_PATH="${DO_TEST_PRIVATE_KEY_PATH:-$HOME/.ssh/id_ed25519}"
 export DO_TEST_REGION="${DO_TEST_REGION:-}"
@@ -90,7 +90,7 @@ export DO_TEST_IMAGE="${DO_TEST_IMAGE:-}"
 export DO_TEST_VPC_UUID="${DO_TEST_VPC_UUID:-}"
 
 # DigitalOcean DNS/Site Test Configuration
-export DO_TEST_DOMAIN="${DO_TEST_DOMAIN:-deployerdo.eu}"
+export DO_TEST_DOMAIN="${DO_TEST_DOMAIN:-deploycoredo.eu}"
 export DO_TEST_DNS_ROOT_PRIMARY="r${BATS_RUN_SUFFIX}"
 export DO_TEST_DNS_ROOT_SECONDARY="${DO_TEST_DNS_ROOT_PRIMARY}.v2"
 export DO_TEST_DNS_ROOT="${DO_TEST_DNS_ROOT_PRIMARY}"
@@ -104,7 +104,7 @@ export DO_TEST_SITE_DOMAIN_SECONDARY="${DO_TEST_DNS_ROOT_SECONDARY_FQDN}"
 # ----
 # DNS-only provider - uses AWS-provisioned server IP for record values
 
-export CF_TEST_DOMAIN="${CF_TEST_DOMAIN:-deployercf.eu}"
+export CF_TEST_DOMAIN="${CF_TEST_DOMAIN:-deploycorecf.eu}"
 export CF_TEST_DNS_ROOT="r${BATS_RUN_SUFFIX}"
 export CF_TEST_DNS_ROOT_FQDN="${CF_TEST_DNS_ROOT}.${CF_TEST_DOMAIN}"
 export CF_TEST_SITE_DOMAIN="${CF_TEST_DNS_ROOT_FQDN}"
@@ -118,7 +118,7 @@ export CLOUD_TEST_PHP_PRIMARY_VERSION="${CLOUD_TEST_PHP_PRIMARY_VERSION:-8.5}"
 export CLOUD_TEST_PHP_SECONDARY_VERSION="${CLOUD_TEST_PHP_SECONDARY_VERSION:-8.4}"
 export CLOUD_TEST_DEPLOY_REPO="${CLOUD_TEST_DEPLOY_REPO:-https://github.com/loadinglucian/deploy-me.git}"
 export CLOUD_TEST_DEPLOY_BRANCH="${CLOUD_TEST_DEPLOY_BRANCH:-main}"
-export CLOUD_TEST_APP_MESSAGE="${CLOUD_TEST_APP_MESSAGE:-DeployerPHP-BATS-Test-Success}"
+export CLOUD_TEST_APP_MESSAGE="${CLOUD_TEST_APP_MESSAGE:-DeployCore-BATS-Test-Success}"
 export CLOUD_TEST_CRON_SUPERVISOR_SCRIPT="${CLOUD_TEST_CRON_SUPERVISOR_SCRIPT:-hello.sh}"
 export CLOUD_TEST_SUPERVISOR_PROGRAM="${CLOUD_TEST_SUPERVISOR_PROGRAM:-hello-${BATS_RUN_SUFFIX}}"
 
@@ -301,7 +301,7 @@ require_do_provision_config() {
 
 # Cleanup AWS test key (idempotent - ignores "not found")
 aws_cleanup_test_key() {
-	"$DEPLOYER_BIN" aws:key:delete \
+	"$DEPLOY_BIN" aws:key:delete \
 		--key="$AWS_TEST_KEY_NAME" \
 		--force \
 		--yes 2> /dev/null || true
@@ -309,7 +309,7 @@ aws_cleanup_test_key() {
 
 # Cleanup AWS provisioned test server (idempotent - ignores "not found")
 aws_cleanup_test_server() {
-	"$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" server:delete \
+	"$DEPLOY_BIN" --inventory="$TEST_INVENTORY" server:delete \
 		--server="$AWS_TEST_SERVER_NAME" \
 		--force \
 		--yes \
@@ -320,7 +320,7 @@ aws_cleanup_test_server() {
 aws_cleanup_test_dns() {
 	local name
 	for name in "$AWS_TEST_DNS_ROOT" "$AWS_TEST_DNS_ROOT_SECONDARY"; do
-		"$DEPLOYER_BIN" aws:dns:delete \
+		"$DEPLOY_BIN" aws:dns:delete \
 			--zone="$AWS_TEST_HOSTED_ZONE" \
 			--type="A" \
 			--name="$name" \
@@ -383,13 +383,13 @@ do_extract_key_id_from_output() {
 }
 
 # Find DO key ID by name from key:list output
-# Usage: do_find_key_id_by_name "deployer-bats-test"
+# Usage: do_find_key_id_by_name "deploy-core-bats-test"
 # Returns: Key ID or empty string if not found
-# Output format: "▒ 52905304: deployer-bats-test (fc:e9:cc:0a:00:7...)"
+# Output format: "▒ 52905304: deploy-core-bats-test (fc:e9:cc:0a:00:7...)"
 # Note: Must strip ANSI/control codes and match 8-digit IDs (not short numbers in escapes)
 do_find_key_id_by_name() {
 	local key_name="$1"
-	"$DEPLOYER_BIN" --no-ansi do:key:list 2> /dev/null \
+	"$DEPLOY_BIN" --no-ansi do:key:list 2> /dev/null \
 		| LC_ALL=C tr -cd '[:print:]\n' \
 		| grep "$key_name" \
 		| grep -oE '[0-9]{7,8}' \
@@ -402,7 +402,7 @@ do_cleanup_test_key() {
 	key_id=$(do_find_key_id_by_name "$DO_TEST_KEY_NAME")
 
 	if [[ -n "$key_id" ]]; then
-		"$DEPLOYER_BIN" do:key:delete \
+		"$DEPLOY_BIN" do:key:delete \
 			--key="$key_id" \
 			--force \
 			--yes 2> /dev/null || true
@@ -411,7 +411,7 @@ do_cleanup_test_key() {
 
 # Cleanup DO provisioned test server (idempotent - ignores "not found")
 do_cleanup_test_server() {
-	"$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" server:delete \
+	"$DEPLOY_BIN" --inventory="$TEST_INVENTORY" server:delete \
 		--server="$DO_TEST_SERVER_NAME" \
 		--force \
 		--yes \
@@ -422,7 +422,7 @@ do_cleanup_test_server() {
 do_cleanup_test_dns() {
 	local name
 	for name in "$DO_TEST_DNS_ROOT" "$DO_TEST_DNS_ROOT_SECONDARY"; do
-		"$DEPLOYER_BIN" do:dns:delete \
+		"$DEPLOY_BIN" do:dns:delete \
 			--zone="$DO_TEST_DOMAIN" \
 			--type="A" \
 			--name="$name" \
@@ -462,7 +462,7 @@ cf_credentials_available() {
 
 # Cleanup Cloudflare test DNS records (idempotent - ignores "not found")
 cf_cleanup_test_dns() {
-	"$DEPLOYER_BIN" cf:dns:delete \
+	"$DEPLOY_BIN" cf:dns:delete \
 		--zone="$CF_TEST_DOMAIN" \
 		--type="A" \
 		--name="$CF_TEST_DNS_ROOT" \
@@ -505,7 +505,7 @@ cf_cleanup_test_dns_raw() {
 get_server_command_output() {
 	local server_name="$1"
 	local command="$2"
-	"$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:run \
+	"$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:run \
 		--server="$server_name" \
 		--command="$command" 2> /dev/null
 }
@@ -734,7 +734,7 @@ do_assert_droplet_tag_contract() {
 # Note: Parses text output since --format=json still includes banner
 get_server_ip() {
 	local server_name="$1"
-	"$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:info \
+	"$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:info \
 		--server="$server_name" 2> /dev/null \
 		| grep -E '^▒ Host:' \
 		| sed 's/.*Host:[[:space:]]*//'
@@ -744,7 +744,7 @@ get_server_ip() {
 # Usage: cleanup_test_site "example.com"
 cleanup_test_site() {
 	local domain="$1"
-	"$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" site:delete \
+	"$DEPLOY_BIN" --inventory="$TEST_INVENTORY" site:delete \
 		--domain="$domain" \
 		--force \
 		--yes 2> /dev/null || true

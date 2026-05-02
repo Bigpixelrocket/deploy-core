@@ -8,7 +8,7 @@
 
 <!-- /toc -->
 
-DeployerPHP documentation is split into guides and references. Use guides for workflows and operational decisions, and use references for fast command lookup.
+DeployCore documentation is split into guides and references. Use guides for workflows and operational decisions, and use references for fast command lookup.
 
 <a name="guides"></a>
 

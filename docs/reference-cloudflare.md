@@ -49,9 +49,9 @@ When creating or updating records, `cf:dns:set` prompts for Cloudflare proxy sta
 `cf:dns:delete` uses a two-tier confirmation: you type the record name first, then confirm with a yes/no prompt.
 
 ```shell
-deployer cf:dns:list
-deployer cf:dns:set
-deployer cf:dns:delete
+deploy cf:dns:list
+deploy cf:dns:set
+deploy cf:dns:delete
 ```
 
 Use Cloudflare DNS updates together with `site:dns:check` when preparing HTTPS enablement.

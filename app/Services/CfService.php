@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services;
+namespace DeployCore\Services;
 
-use DeployerPHP\Services\Cf\CfDnsService;
-use DeployerPHP\Services\Cf\CfZoneService;
+use DeployCore\Services\Cf\CfDnsService;
+use DeployCore\Services\Cf\CfZoneService;
 
 /**
  * Cloudflare API facade service.

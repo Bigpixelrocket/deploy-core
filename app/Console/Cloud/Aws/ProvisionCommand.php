@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Console\Cloud\Aws;
+namespace DeployCore\Console\Cloud\Aws;
 
-use DeployerPHP\Builders\ServerBuilder;
-use DeployerPHP\Contracts\BaseCommand;
-use DeployerPHP\Enums\Distribution;
-use DeployerPHP\Exceptions\ValidationException;
-use DeployerPHP\Traits\AwsTrait;
-use DeployerPHP\Traits\KeysTrait;
-use DeployerPHP\Traits\PlaybooksTrait;
-use DeployerPHP\Traits\ServersTrait;
+use DeployCore\Builders\ServerBuilder;
+use DeployCore\Contracts\BaseCommand;
+use DeployCore\Enums\Distribution;
+use DeployCore\Exceptions\ValidationException;
+use DeployCore\Traits\AwsTrait;
+use DeployCore\Traits\KeysTrait;
+use DeployCore\Traits\PlaybooksTrait;
+use DeployCore\Traits\ServersTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -153,7 +153,7 @@ class ProvisionCommand extends BaseCommand
     }
 
     /**
-     * Ensure deployer security group exists.
+     * Ensure deploy-core security group exists.
      */
     protected function ensureSecurityGroup(string $vpcId): string|int
     {

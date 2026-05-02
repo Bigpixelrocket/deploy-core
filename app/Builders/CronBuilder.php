@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Builders;
+namespace DeployCore\Builders;
 
-use DeployerPHP\DTOs\CronDTO;
+use DeployCore\DTOs\CronDTO;
 
 /**
  * Builder for CronDTO - centralizes all CronDTO instantiation.

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Traits;
+namespace DeployCore\Traits;
 
-use DeployerPHP\Container;
-use DeployerPHP\Enums\WwwMode;
-use DeployerPHP\Exceptions\ValidationException;
-use DeployerPHP\Services\DomainClassifierService;
+use DeployCore\Container;
+use DeployCore\Enums\WwwMode;
+use DeployCore\Exceptions\ValidationException;
+use DeployCore\Services\DomainClassifierService;
 
 /**
  * Centralized domain operations and validation.

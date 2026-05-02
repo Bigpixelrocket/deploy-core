@@ -59,7 +59,7 @@ RUNNER_DISTROS=()
 print_header() {
 	echo ""
 	echo "=================================="
-	echo " Deployer BATS Integration Tests"
+	echo " DeployCore BATS Integration Tests"
 	echo "=================================="
 	echo ""
 }
@@ -109,7 +109,7 @@ setup_keys() {
 	if [[ ! -f "$private_key" ]]; then
 		echo -e "${YELLOW}Generating test SSH keys...${NC}"
 		mkdir -p "$keys_dir"
-		ssh-keygen -t ed25519 -f "$private_key" -N "" -C "deployer-bats-test"
+		ssh-keygen -t ed25519 -f "$private_key" -N "" -C "deploy-core-bats-test"
 		chmod 600 "$private_key"
 		chmod 644 "${private_key}.pub"
 		echo -e "${GREEN}SSH keys generated${NC}"

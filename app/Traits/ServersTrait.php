@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Traits;
+namespace DeployCore\Traits;
 
-use DeployerPHP\Builders\ServerBuilder;
-use DeployerPHP\DTOs\ServerDTO;
-use DeployerPHP\DTOs\SiteDTO;
-use DeployerPHP\Enums\Distribution;
-use DeployerPHP\Exceptions\ValidationException;
-use DeployerPHP\Repositories\ServerRepository;
-use DeployerPHP\Repositories\SiteRepository;
-use DeployerPHP\Services\IoService;
-use DeployerPHP\Services\SshService;
+use DeployCore\Builders\ServerBuilder;
+use DeployCore\DTOs\ServerDTO;
+use DeployCore\DTOs\SiteDTO;
+use DeployCore\Enums\Distribution;
+use DeployCore\Exceptions\ValidationException;
+use DeployCore\Repositories\ServerRepository;
+use DeployCore\Repositories\SiteRepository;
+use DeployCore\Services\IoService;
+use DeployCore\Services\SshService;
 use Symfony\Component\Console\Command\Command;
 
 /**
@@ -256,7 +256,7 @@ trait ServersTrait
         $distro = $info['distro'] ?? 'unknown';
 
         if ('ubuntu' !== $distro) {
-            $this->info('DeployerPHP only supports Ubuntu LTS.');
+            $this->info('DeployCore only supports Ubuntu LTS.');
 
             return Command::FAILURE;
         }
@@ -270,7 +270,7 @@ trait ServersTrait
         $version = $info['version'] ?? 'unknown';
 
         if (! $distribution->isValidVersion($version)) {
-            $this->info("DeployerPHP supports {$distribution->displayName()} {$distribution->supportedVersions()}.");
+            $this->info("DeployCore supports {$distribution->displayName()} {$distribution->supportedVersions()}.");
 
             if ('unknown' === $version) {
                 $this->out("Could not detect the {$distribution->displayName()} version.");
@@ -287,7 +287,7 @@ trait ServersTrait
         $permissions = $info['permissions'] ?? null;
 
         if (! is_string($permissions) || ! in_array($permissions, ['root', 'sudo'])) {
-            $this->info('DeployerPHP requires root or passwordless sudo permissions:');
+            $this->info('DeployCore requires root or passwordless sudo permissions:');
             $this->ol([
                 "SSH into your server as {$server->username}",
                 "Run <|cyan>echo \"{$server->username} ALL=(ALL) NOPASSWD:ALL\" | sudo tee /etc/sudoers.d/{$server->username}</>",

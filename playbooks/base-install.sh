@@ -7,9 +7,9 @@
 # Configures UFW firewall with secure defaults (SSH, 80, 443 only).
 #
 # Required Environment Variables:
-#   DEPLOYER_OUTPUT_FILE  - Output file path
-#   DEPLOYER_PERMS        - Permissions: root|sudo|none
-#   DEPLOYER_SSH_PORT     - SSH port to allow through firewall
+#   DEPLOY_OUTPUT_FILE  - Output file path
+#   DEPLOY_PERMS        - Permissions: root|sudo|none
+#   DEPLOY_SSH_PORT     - SSH port to allow through firewall
 #
 # Output:
 #   status: success
@@ -18,10 +18,10 @@
 set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-[[ -z $DEPLOYER_OUTPUT_FILE ]] && echo "Error: DEPLOYER_OUTPUT_FILE required" && exit 1
-[[ -z $DEPLOYER_PERMS ]] && echo "Error: DEPLOYER_PERMS required" && exit 1
-[[ -z $DEPLOYER_SSH_PORT ]] && echo "Error: DEPLOYER_SSH_PORT required" && exit 1
-export DEPLOYER_PERMS
+[[ -z $DEPLOY_OUTPUT_FILE ]] && echo "Error: DEPLOY_OUTPUT_FILE required" && exit 1
+[[ -z $DEPLOY_PERMS ]] && echo "Error: DEPLOY_PERMS required" && exit 1
+[[ -z $DEPLOY_SSH_PORT ]] && echo "Error: DEPLOY_SSH_PORT required" && exit 1
+export DEPLOY_PERMS
 
 # Shared helpers are automatically inlined when executing playbooks remotely
 # source "$(dirname "$0")/helpers.sh"
@@ -174,7 +174,7 @@ config_nginx() {
 			        deny all;
 			    }
 
-			    #### DEPLOYER-PHP CONFIG ####
+			    #### DEPLOY-PHP CONFIG ####
 			}
 		EOF
 			echo "Error: Failed to create stub_status config" >&2
@@ -237,8 +237,8 @@ config_ufw() {
 
 	# SSH Safety: Allow SSH before any changes (prevents lockout if UFW is active)
 	run_cmd ufw allow "${detected_port}/tcp" > /dev/null 2>&1 || true
-	if [[ $DEPLOYER_SSH_PORT -ne $detected_port ]]; then
-		run_cmd ufw allow "$DEPLOYER_SSH_PORT/tcp" > /dev/null 2>&1 || true
+	if [[ $DEPLOY_SSH_PORT -ne $detected_port ]]; then
+		run_cmd ufw allow "$DEPLOY_SSH_PORT/tcp" > /dev/null 2>&1 || true
 	fi
 
 	# Reset UFW to clear any existing rules
@@ -246,8 +246,8 @@ config_ufw() {
 
 	# Re-allow SSH immediately after reset
 	run_cmd ufw allow "${detected_port}/tcp" > /dev/null 2>&1 || fail "Failed to allow SSH port ${detected_port}"
-	if [[ $DEPLOYER_SSH_PORT -ne $detected_port ]]; then
-		run_cmd ufw allow "$DEPLOYER_SSH_PORT/tcp" > /dev/null 2>&1 || fail "Failed to allow SSH port ${DEPLOYER_SSH_PORT}"
+	if [[ $DEPLOY_SSH_PORT -ne $detected_port ]]; then
+		run_cmd ufw allow "$DEPLOY_SSH_PORT/tcp" > /dev/null 2>&1 || fail "Failed to allow SSH port ${DEPLOY_SSH_PORT}"
 	fi
 
 	# Set default policies
@@ -273,7 +273,7 @@ main() {
 	config_ufw
 
 	# Write output YAML
-	if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+	if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 		status: success
 	EOF
 		echo "Error: Failed to write output file" >&2

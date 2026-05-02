@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\DTOs;
+namespace DeployCore\DTOs;
 
 readonly class ServerDTO
 {

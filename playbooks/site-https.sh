@@ -7,13 +7,13 @@
 # Certbot automatically modifies the Nginx configuration to add SSL and redirects.
 #
 # Required Environment Variables:
-#   DEPLOYER_OUTPUT_FILE  - Output file path
-#   DEPLOYER_PERMS        - Permissions: root|sudo|none
-#   DEPLOYER_SITE_DOMAIN  - Domain name
-#   DEPLOYER_WWW_MODE     - WWW mode: redirect-to-root|redirect-to-www|none
+#   DEPLOY_OUTPUT_FILE  - Output file path
+#   DEPLOY_PERMS        - Permissions: root|sudo|none
+#   DEPLOY_SITE_DOMAIN  - Domain name
+#   DEPLOY_WWW_MODE     - WWW mode: redirect-to-root|redirect-to-www|none
 #
 # Optional Environment Variables:
-#   DEPLOYER_SSL_EMAIL    - Email for SSL certificate renewal notices (default: ssl@{domain})
+#   DEPLOY_SSL_EMAIL    - Email for SSL certificate renewal notices (default: ssl@{domain})
 #
 # Output:
 #   status: success
@@ -23,11 +23,11 @@
 set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-[[ -z $DEPLOYER_OUTPUT_FILE ]] && echo "Error: DEPLOYER_OUTPUT_FILE required" && exit 1
-[[ -z $DEPLOYER_PERMS ]] && echo "Error: DEPLOYER_PERMS required" && exit 1
-[[ -z $DEPLOYER_SITE_DOMAIN ]] && echo "Error: DEPLOYER_SITE_DOMAIN required" && exit 1
-[[ -z $DEPLOYER_WWW_MODE ]] && echo "Error: DEPLOYER_WWW_MODE required (redirect-to-root|redirect-to-www|none)" && exit 1
-export DEPLOYER_PERMS
+[[ -z $DEPLOY_OUTPUT_FILE ]] && echo "Error: DEPLOY_OUTPUT_FILE required" && exit 1
+[[ -z $DEPLOY_PERMS ]] && echo "Error: DEPLOY_PERMS required" && exit 1
+[[ -z $DEPLOY_SITE_DOMAIN ]] && echo "Error: DEPLOY_SITE_DOMAIN required" && exit 1
+[[ -z $DEPLOY_WWW_MODE ]] && echo "Error: DEPLOY_WWW_MODE required (redirect-to-root|redirect-to-www|none)" && exit 1
+export DEPLOY_PERMS
 
 # Shared helpers are automatically inlined when executing playbooks remotely
 # source "$(dirname "$0")/helpers.sh"
@@ -41,7 +41,7 @@ export DEPLOYER_PERMS
 
 request_certificate() {
 	local domain=$1
-	local www_mode=$DEPLOYER_WWW_MODE
+	local www_mode=$DEPLOY_WWW_MODE
 
 	echo "→ Requesting SSL certificate from Let's Encrypt..."
 	echo "→ Domain: ${domain}"
@@ -76,7 +76,7 @@ request_certificate() {
 	# --redirect: Configure HTTP to HTTPS redirect
 	# --email: Email for urgent notices and recovery
 	# --no-eff-email: Don't share email with EFF
-	local ssl_email="${DEPLOYER_SSL_EMAIL:-ssl@${domain}}"
+	local ssl_email="${DEPLOY_SSL_EMAIL:-ssl@${domain}}"
 
 	if ! run_cmd certbot --nginx \
 		--non-interactive \
@@ -172,7 +172,7 @@ reload_nginx() {
 # ----
 
 main() {
-	local domain=$DEPLOYER_SITE_DOMAIN
+	local domain=$DEPLOY_SITE_DOMAIN
 	local vhost_file="/etc/nginx/sites-available/${domain}"
 
 	# Verify Nginx vhost exists
@@ -189,7 +189,7 @@ main() {
 	reload_nginx
 
 	# Write output YAML
-	if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+	if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 		status: success
 		https_enabled: true
 	EOF

@@ -13,10 +13,10 @@
 set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-[[ -z $DEPLOYER_OUTPUT_FILE ]] && echo "Error: DEPLOYER_OUTPUT_FILE required" && exit 1
-[[ -z $DEPLOYER_PERMS ]] && echo "Error: DEPLOYER_PERMS required" && exit 1
-[[ -z $DEPLOYER_SERVER_NAME ]] && echo "Error: DEPLOYER_SERVER_NAME required" && exit 1
-export DEPLOYER_PERMS
+[[ -z $DEPLOY_OUTPUT_FILE ]] && echo "Error: DEPLOY_OUTPUT_FILE required" && exit 1
+[[ -z $DEPLOY_PERMS ]] && echo "Error: DEPLOY_PERMS required" && exit 1
+[[ -z $DEPLOY_SERVER_NAME ]] && echo "Error: DEPLOY_SERVER_NAME required" && exit 1
+export DEPLOY_PERMS
 
 # Shared helpers are automatically inlined when executing playbooks remotely
 # source "$(dirname "$0")/helpers.sh"
@@ -88,22 +88,22 @@ setup_deployer() {
 		fi
 	fi
 
-	if [[ -n ${DEPLOYER_KEY_PRIVATE:-} && -n ${DEPLOYER_KEY_PUBLIC:-} ]]; then
+	if [[ -n ${DEPLOY_KEY_PRIVATE:-} && -n ${DEPLOY_KEY_PUBLIC:-} ]]; then
 		echo "→ Installing custom SSH key pair..."
 
-		if ! echo "$DEPLOYER_KEY_PRIVATE" | base64 -d | run_cmd tee "$private_key" > /dev/null; then
+		if ! echo "$DEPLOY_KEY_PRIVATE" | base64 -d | run_cmd tee "$private_key" > /dev/null; then
 			echo "Error: Failed to write private key" >&2
 			exit 1
 		fi
 
-		if ! echo "$DEPLOYER_KEY_PUBLIC" | base64 -d | run_cmd tee "$public_key" > /dev/null; then
+		if ! echo "$DEPLOY_KEY_PUBLIC" | base64 -d | run_cmd tee "$public_key" > /dev/null; then
 			echo "Error: Failed to write public key" >&2
 			exit 1
 		fi
 	else
 		if ! run_cmd test -f "$private_key"; then
 			echo "→ Generating SSH key pair..."
-			if ! run_cmd ssh-keygen -t ed25519 -C "deployer@${DEPLOYER_SERVER_NAME}" -f "$private_key" -N ""; then
+			if ! run_cmd ssh-keygen -t ed25519 -C "deployer@${DEPLOY_SERVER_NAME}" -f "$private_key" -N ""; then
 				echo "Error: Failed to generate SSH key pair" >&2
 				exit 1
 			fi
@@ -162,7 +162,7 @@ main() {
 		exit 1
 	fi
 
-	if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+	if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 		status: success
 		deploy_public_key: $deploy_public_key
 	EOF

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services;
+namespace DeployCore\Services;
 
-use DeployerPHP\Services\Do\DoAccountService;
-use DeployerPHP\Services\Do\DoDnsService;
-use DeployerPHP\Services\Do\DoDomainService;
-use DeployerPHP\Services\Do\DoDropletService;
-use DeployerPHP\Services\Do\DoKeyService;
+use DeployCore\Services\Do\DoAccountService;
+use DeployCore\Services\Do\DoDnsService;
+use DeployCore\Services\Do\DoDomainService;
+use DeployCore\Services\Do\DoDropletService;
+use DeployCore\Services\Do\DoKeyService;
 use DigitalOceanV2\Client;
 
 /**

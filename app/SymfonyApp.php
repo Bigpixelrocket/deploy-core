@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP;
+namespace DeployCore;
 
-use DeployerPHP\Services\CommandDiscoveryService;
-use DeployerPHP\Services\VersionService;
+use DeployCore\Services\CommandDiscoveryService;
+use DeployCore\Services\VersionService;
 use Symfony\Component\Console\Application as SymfonyApplication;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -27,7 +27,7 @@ final class SymfonyApp extends SymfonyApplication
         private readonly VersionService $versionService,
         private readonly CommandDiscoveryService $commandDiscovery,
     ) {
-        $name = 'DeployerPHP';
+        $name = 'DeployCore';
         $version = $this->versionService->getVersion();
         parent::__construct($name, $version);
 
@@ -97,7 +97,7 @@ final class SymfonyApp extends SymfonyApplication
 
         $this->io->writeln([
             '',
-            '<fg=cyan>▒ ≡</> <fg=cyan;options=bold>DeployerPHP</> <fg=cyan>━━━━━━━━━━━━━━━━</><fg=bright-blue>━━━━━━━━━━━━━━━</><fg=magenta>━━━━━━━━━━━━━━━</><fg=gray>━━━━━━━━━━━━━━━━</>',
+            '<fg=cyan>▒ ≡</> <fg=cyan;options=bold>DeployCore</> <fg=cyan>━━━━━━━━━━━━━━━━</><fg=bright-blue>━━━━━━━━━━━━━━━</><fg=magenta>━━━━━━━━━━━━━━━</><fg=gray>━━━━━━━━━━━━━━━━</>',
             '<fg=gray>▒ </>',
             '<fg=gray>▒ Ver: '.$version.'</>',
         ]);

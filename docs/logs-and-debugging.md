@@ -13,7 +13,7 @@
 
 As a seasoned developer, you already know that deployments are really straightforward and usually go off without a hitch. Nothing can really go wrong when orchestrating many different layers of complex software that need to interact seamlessly with each other.
 
-However, in the very rare cases when something does occur, this guide will walk you through debugging using DeployerPHP.
+However, in the very rare cases when something does occur, this guide will walk you through debugging using DeployCore.
 
 <a name="the-triage-pyramid"></a>
 
@@ -32,7 +32,7 @@ Start at the top and work your way down:
 Run the `server:info` command as your first diagnostic checkpoint:
 
 ```shell
-deployer server:info
+deploy server:info
 ```
 
 This gives you a single-screen overview of your server's health. Here's what to look for when debugging:
@@ -61,7 +61,7 @@ When reading the trend, compare the 1m and 15m values. A 1m value rising above 1
 Run the `server:logs` command to pull relevant logs:
 
 ```shell
-deployer server:logs
+deploy server:logs
 ```
 
 The command presents a multiselect menu of every log source available on your server. You can pick one or several sources in a single session, which is especially useful for cross-correlating events across services.
@@ -86,14 +86,14 @@ Log output isn't a wall of undifferentiated text. Lines containing error keyword
 
 ## Shell Access
 
-When you need a full shell, DeployerPHP provides two commands. Both connect as the same SSH user with full server access:
+When you need a full shell, DeployCore provides two commands. Both connect as the same SSH user with full server access:
 
 ```shell
-deployer server:ssh
+deploy server:ssh
 ```
 
 ```shell
-deployer site:ssh
+deploy site:ssh
 ```
 
 The only difference is that `server:ssh` lands you in the configured SSH user's default login directory, while `site:ssh` drops you directly into the site's directory at `/home/deployer/sites/{domain}`, saving you the navigation step when you already know which site you're investigating.
@@ -108,7 +108,7 @@ The only difference is that `server:ssh` lands you in the configured SSH user's 
 When you need a single remote check without opening an interactive shell, use the `server:run` command:
 
 ```shell
-deployer server:run
+deploy server:run
 ```
 
 This is useful for quick diagnostics such as disk pressure (`df -h`), memory state (`free -m`), service status (`systemctl status nginx`), or network checks (`ss -tulpn`), while keeping your investigation repeatable.

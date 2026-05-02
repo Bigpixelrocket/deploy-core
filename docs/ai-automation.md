@@ -11,7 +11,7 @@
 
 <!-- /toc -->
 
-You can automate and significantly speed up the debugging process by letting an AI agent use the triage tools instead of using them manually. DeployerPHP can generate a SKILL file that gives your AI agent structured, permission-controlled access to your infrastructure, so it can read logs, inspect server state, and diagnose issues the same way you would.
+You can automate and significantly speed up the debugging process by letting an AI agent use the triage tools instead of using them manually. DeployCore can generate a SKILL file that gives your AI agent structured, permission-controlled access to your infrastructure, so it can read logs, inspect server state, and diagnose issues the same way you would.
 
 This guide covers generating that agent SKILL and choosing the right permission tier for your workflow.
 
@@ -25,7 +25,7 @@ This guide covers generating that agent SKILL and choosing the right permission 
 Run the `scaffold:ai` command from your project directory:
 
 ```shell
-deployer scaffold:ai
+deploy scaffold:ai
 ```
 
 The command detects which AI agent directories already exist in your project. If one or more are found, it scaffolds into all of them automatically. If none exist, it prompts you with a multi-select so you can choose one or both. The supported directories are:
@@ -33,9 +33,9 @@ The command detects which AI agent directories already exist in your project. If
 - **`.agents/`** - For Codex, Cursor, and OpenCode
 - **`.claude/`** - For Claude Code
 
-DeployerPHP will then prompt you for a permission tier and generate the SKILL inside a `skills/` subdirectory. Existing files are skipped by default, so you'll need to explicitly request an overwrite to regenerate. You can always rerun the command and use the non-interactive command replay to target specific directories.
+DeployCore will then prompt you for a permission tier and generate the SKILL inside a `skills/` subdirectory. Existing files are skipped by default, so you'll need to explicitly request an overwrite to regenerate. You can always rerun the command and use the non-interactive command replay to target specific directories.
 
-This SKILL gives your AI agent all the context it needs to work with your DeployerPHP setup: knowledge of your inventory structure, your deployment layout, and a scoped set of commands matched to the permission tier you choose.
+This SKILL gives your AI agent all the context it needs to work with your DeployCore setup: knowledge of your inventory structure, your deployment layout, and a scoped set of commands matched to the permission tier you choose.
 
 <a name="permission-tiers"></a>
 
@@ -69,7 +69,7 @@ Two categories are off-limits: state-changing commands (deploy, install, restart
 
 ### Admin
 
-The Admin tier covers the full range of DeployerPHP command domains: server management, site lifecycle, cron, and supervisor. It also includes service installs and lifecycle management plus cloud provider integrations for provisioning, DNS, and SSH key management.
+The Admin tier covers the full range of deploy command domains: server management, site lifecycle, cron, and supervisor. It also includes service installs and lifecycle management plus cloud provider integrations for provisioning, DNS, and SSH key management.
 
 > [!IMPORTANT]
 > While guardrails to prevent potentially unwanted side effects are provided, this tier is regarded as the most risky to operate within. Make sure you understand the risks of allowing an LLM this much access to your servers.

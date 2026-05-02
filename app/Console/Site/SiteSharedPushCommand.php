@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Console\Site;
+namespace DeployCore\Console\Site;
 
-use DeployerPHP\Contracts\BaseCommand;
-use DeployerPHP\DTOs\ServerDTO;
-use DeployerPHP\Exceptions\ValidationException;
-use DeployerPHP\Traits\PathOperationsTrait;
-use DeployerPHP\Traits\PlaybooksTrait;
-use DeployerPHP\Traits\ServersTrait;
-use DeployerPHP\Traits\SitesTrait;
+use DeployCore\Contracts\BaseCommand;
+use DeployCore\DTOs\ServerDTO;
+use DeployCore\Exceptions\ValidationException;
+use DeployCore\Traits\PathOperationsTrait;
+use DeployCore\Traits\PlaybooksTrait;
+use DeployCore\Traits\ServersTrait;
+use DeployCore\Traits\SitesTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -131,7 +131,7 @@ class SiteSharedPushCommand extends BaseCommand
         // Upload file
         // ----
 
-        $tempPath = '/tmp/deployer-upload-' . bin2hex(random_bytes(8));
+        $tempPath = '/tmp/deploy-core-upload-' . bin2hex(random_bytes(8));
 
         try {
             $this->io->promptSpin(

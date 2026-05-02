@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services;
+namespace DeployCore\Services;
 
 /**
  * Shared retry/backoff service for transient operations.

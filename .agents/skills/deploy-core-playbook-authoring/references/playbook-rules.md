@@ -7,7 +7,7 @@ Playbooks are idempotent, non-interactive bash scripts that execute server tasks
 > - Shebang `#!/usr/bin/env bash` always first line
 > - `set -o pipefail` (NEVER use `set -e`)
 > - `export DEBIAN_FRONTEND=noninteractive`
-> - Validate ALL `DEPLOYER_*` variables before any work
+> - Validate ALL `DEPLOY_*` variables before any work
 > - NEVER use `eval`
 > - Prefer OS-native packages; use third-party repos only when the package is unavailable
 
@@ -15,10 +15,10 @@ Playbooks are idempotent, non-interactive bash scripts that execute server tasks
 
 ### Environment Variables
 
-All variables use `DEPLOYER_` prefix:
+All variables use `DEPLOY_` prefix:
 
-- `DEPLOYER_OUTPUT_FILE` - YAML output path (always required)
-- `DEPLOYER_PERMS` - Permissions: `root|sudo|none`
+- `DEPLOY_OUTPUT_FILE` - YAML output path (always required)
+- `DEPLOY_PERMS` - Permissions: `root|sudo|none`
 
 ### Available Helpers
 
@@ -146,11 +146,11 @@ Default to built-in rotation. Only create custom configs when:
 
 # Required Environment Variables:
 
-# DEPLOYER_OUTPUT_FILE - Output file path
+# DEPLOY_OUTPUT_FILE - Output file path
 
-# DEPLOYER_PERMS - Permissions: root|sudo|none
+# DEPLOY_PERMS - Permissions: root|sudo|none
 
-# {DEPLOYER_CUSTOM_VAR} - {Description}
+# {DEPLOY_CUSTOM_VAR} - {Description}
 
 #
 
@@ -165,12 +165,12 @@ Default to built-in rotation. Only create custom configs when:
 set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-[[ -z $DEPLOYER_OUTPUT_FILE ]] && echo "Error: DEPLOYER_OUTPUT_FILE required" && exit 1
-[[ -z $DEPLOYER_PERMS ]] && echo "Error: DEPLOYER_PERMS required" && exit 1
+[[ -z $DEPLOY_OUTPUT_FILE ]] && echo "Error: DEPLOY_OUTPUT_FILE required" && exit 1
+[[ -z $DEPLOY_PERMS ]] && echo "Error: DEPLOY_PERMS required" && exit 1
 
 # Add validation for custom variables here
 
-export DEPLOYER_PERMS
+export DEPLOY_PERMS
 
 # Shared helpers are automatically inlined when executing playbooks remotely
 
@@ -199,7 +199,7 @@ main() { # Execute tasks
 function_name
 
     # Write output YAML
-    if ! cat > "$DEPLOYER_OUTPUT_FILE" <<EOF; then
+    if ! cat > "$DEPLOY_OUTPUT_FILE" <<EOF; then
 status: success
 EOF
         echo "Error: Failed to write output file" >&2
@@ -247,7 +247,7 @@ fi
 
 ```bash
 # Config content marker
-if ! grep -q "DEPLOYER-MARKER" /etc/config 2>/dev/null; then
+if ! grep -q "DEPLOY-MARKER" /etc/config 2>/dev/null; then
     echo "→ Updating configuration..."
     # modify config
 fi
@@ -266,7 +266,7 @@ fi
 
 ```bash
 # Validation errors → stdout, then exit
-[[ -z $DEPLOYER_VAR ]] && echo "Error: DEPLOYER_VAR required" && exit 1
+[[ -z $DEPLOY_VAR ]] && echo "Error: DEPLOY_VAR required" && exit 1
 ```
 
 ### Example: Error Runtime
@@ -366,7 +366,7 @@ run_user_script "${RELEASE_PATH}/.deployer/hooks/1-building.sh" "1-building.sh h
 
 ```bash
 # Simple success
-if ! cat > "$DEPLOYER_OUTPUT_FILE" <<EOF; then
+if ! cat > "$DEPLOY_OUTPUT_FILE" <<EOF; then
 status: success
 EOF
     echo "Error: Failed to write output file" >&2
@@ -378,7 +378,7 @@ fi
 
 ```bash
 # With additional data
-if ! cat > "$DEPLOYER_OUTPUT_FILE" <<EOF; then
+if ! cat > "$DEPLOY_OUTPUT_FILE" <<EOF; then
 status: success
 site_path: ${site_path}
 php_version: ${php_version}
@@ -398,7 +398,7 @@ main() {
 
     # ... service installation ...
 
-    if ! cat > "$DEPLOYER_OUTPUT_FILE" <<EOF; then
+    if ! cat > "$DEPLOY_OUTPUT_FILE" <<EOF; then
 status: success
 mysql_user: ${db_user}
 mysql_pass: ${db_pass}

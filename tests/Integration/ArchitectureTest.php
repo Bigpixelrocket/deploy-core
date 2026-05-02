@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use DeployerPHP\Contracts\BaseCommand;
+use DeployCore\Contracts\BaseCommand;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 
@@ -11,7 +11,7 @@ use Symfony\Component\Console\Command\Command;
 // ----
 
 arch('commands extend BaseCommand', function () {
-    expect('DeployerPHP\\Console\\')
+    expect('DeployCore\\Console\\')
         ->classes()
         ->toHaveSuffix('Command')
         ->toExtend(BaseCommand::class);
@@ -25,7 +25,7 @@ arch('base command contract', function () {
 });
 
 arch('commands expose Symfony metadata', function () {
-    expect('DeployerPHP\\Console\\')
+    expect('DeployCore\\Console\\')
         ->classes()
         ->toHaveAttribute(AsCommand::class);
 });

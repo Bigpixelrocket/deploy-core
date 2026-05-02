@@ -133,9 +133,9 @@ You can create an IAM policy in the [AWS IAM Console](https://console.aws.amazon
 Use the `aws:key:*` commands to keep key inventory aligned with your access policy before provisioning. You can list existing key pairs, import a local public key, or remove a key pair you no longer need.
 
 ```shell
-deployer aws:key:list
-deployer aws:key:add
-deployer aws:key:delete
+deploy aws:key:list
+deploy aws:key:add
+deploy aws:key:delete
 ```
 
 <a name="provisioning"></a>
@@ -144,12 +144,12 @@ deployer aws:key:delete
 
 `aws:provision` creates an EC2 instance, allocates an Elastic IP, configures a security group, and writes inventory entries so you can continue with `server:install` and site workflows immediately.
 
-A shared "deployer" security group is created once per VPC and reused across provisions, so subsequent servers in the same VPC share the same firewall baseline.
+A shared "deploy-core" security group is created once per VPC and reused across provisions, so subsequent servers in the same VPC share the same firewall baseline.
 
-If provisioning fails after the instance is created, DeployerPHP automatically rolls back the instance and Elastic IP so you don't accumulate orphaned resources.
+If provisioning fails after the instance is created, DeployCore automatically rolls back the instance and Elastic IP so you don't accumulate orphaned resources.
 
 ```shell
-deployer aws:provision
+deploy aws:provision
 ```
 
 After provisioning, run the `server:install` command to prepare runtime services.
@@ -163,7 +163,7 @@ Use `aws:dns:list` to inspect current records in a Route53 hosted zone, then use
 Note that `aws:dns:delete` cannot remove Route53 alias records. You'll need to manage alias records through the AWS Console.
 
 ```shell
-deployer aws:dns:list
-deployer aws:dns:set
-deployer aws:dns:delete
+deploy aws:dns:list
+deploy aws:dns:set
+deploy aws:dns:delete
 ```

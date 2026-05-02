@@ -20,18 +20,18 @@
 set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-[[ -z $DEPLOYER_OUTPUT_FILE ]] && echo "Error: DEPLOYER_OUTPUT_FILE required" && exit 1
-[[ -z $DEPLOYER_PERMS ]] && echo "Error: DEPLOYER_PERMS required" && exit 1
-export DEPLOYER_PERMS
+[[ -z $DEPLOY_OUTPUT_FILE ]] && echo "Error: DEPLOY_OUTPUT_FILE required" && exit 1
+[[ -z $DEPLOY_PERMS ]] && echo "Error: DEPLOY_PERMS required" && exit 1
+export DEPLOY_PERMS
 
 # Shared helpers are automatically inlined when executing playbooks remotely
 # source "$(dirname "$0")/helpers.sh"
 
 # Credentials (generated in main, used across functions)
 ROOT_PASS=""
-DEPLOYER_USER="deployer"
-DEPLOYER_PASS=""
-DEPLOYER_DATABASE="deployer"
+DEPLOY_USER="deployer"
+DEPLOY_PASS=""
+DEPLOY_DATABASE="deployer"
 
 # ----
 # Installation Functions
@@ -131,7 +131,7 @@ secure_installation() {
 create_deployer_user() {
 	# Check if user already exists (MYSQL_PWD already exported in secure_installation)
 	local user_exists
-	user_exists=$(run_cmd mariadb -u root -N -e "SELECT COUNT(*) FROM mysql.user WHERE User='${DEPLOYER_USER}' AND Host='localhost';" 2> /dev/null)
+	user_exists=$(run_cmd mariadb -u root -N -e "SELECT COUNT(*) FROM mysql.user WHERE User='${DEPLOY_USER}' AND Host='localhost';" 2> /dev/null)
 
 	if [[ $user_exists == "1" ]]; then
 		echo "→ Deployer user already exists, skipping user creation..."
@@ -142,7 +142,7 @@ create_deployer_user() {
 
 	# Use heredoc to pass SQL via stdin (avoids exposing password in process listings)
 	if ! run_cmd mariadb -u root <<- EOSQL 2> /dev/null; then
-		CREATE USER '${DEPLOYER_USER}'@'localhost' IDENTIFIED BY '${DEPLOYER_PASS}';
+		CREATE USER '${DEPLOY_USER}'@'localhost' IDENTIFIED BY '${DEPLOY_PASS}';
 	EOSQL
 		echo "Error: Failed to create deployer user" >&2
 		exit 1
@@ -159,24 +159,24 @@ create_deployer_user() {
 create_deployer_database() {
 	# Check if database already exists (MYSQL_PWD already exported in secure_installation)
 	local db_exists
-	db_exists=$(run_cmd mariadb -u root -N -e "SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name='${DEPLOYER_DATABASE}';" 2> /dev/null)
+	db_exists=$(run_cmd mariadb -u root -N -e "SELECT COUNT(*) FROM information_schema.schemata WHERE schema_name='${DEPLOY_DATABASE}';" 2> /dev/null)
 
 	if [[ $db_exists == "1" ]]; then
 		echo "→ Deployer database already exists, skipping database creation..."
 		# Still ensure grants are in place
-		run_cmd mariadb -u root -e "GRANT ALL PRIVILEGES ON ${DEPLOYER_DATABASE}.* TO '${DEPLOYER_USER}'@'localhost'; FLUSH PRIVILEGES;" 2> /dev/null || true
+		run_cmd mariadb -u root -e "GRANT ALL PRIVILEGES ON ${DEPLOY_DATABASE}.* TO '${DEPLOY_USER}'@'localhost'; FLUSH PRIVILEGES;" 2> /dev/null || true
 		return 0
 	fi
 
 	echo "→ Creating deployer database..."
 
-	if ! run_cmd mariadb -u root -e "CREATE DATABASE ${DEPLOYER_DATABASE} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2> /dev/null; then
+	if ! run_cmd mariadb -u root -e "CREATE DATABASE ${DEPLOY_DATABASE} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2> /dev/null; then
 		echo "Error: Failed to create deployer database" >&2
 		exit 1
 	fi
 
 	# Grant privileges
-	if ! run_cmd mariadb -u root -e "GRANT ALL PRIVILEGES ON ${DEPLOYER_DATABASE}.* TO '${DEPLOYER_USER}'@'localhost'; FLUSH PRIVILEGES;" 2> /dev/null; then
+	if ! run_cmd mariadb -u root -e "GRANT ALL PRIVILEGES ON ${DEPLOY_DATABASE}.* TO '${DEPLOY_USER}'@'localhost'; FLUSH PRIVILEGES;" 2> /dev/null; then
 		echo "Error: Failed to grant privileges to deployer user" >&2
 		exit 1
 	fi
@@ -221,7 +221,7 @@ main() {
 		echo "→ MariaDB server is already installed and running"
 
 		# Return success with marker indicating already installed
-		if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+		if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 			status: success
 			already_installed: true
 		EOF
@@ -233,7 +233,7 @@ main() {
 
 	# Generate credentials for fresh install
 	ROOT_PASS=$(openssl rand -base64 24)
-	DEPLOYER_PASS=$(openssl rand -base64 24)
+	DEPLOY_PASS=$(openssl rand -base64 24)
 
 	# Execute installation tasks
 	install_packages
@@ -243,12 +243,12 @@ main() {
 	config_logrotate
 
 	# Write output YAML
-	if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+	if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 		status: success
 		root_pass: ${ROOT_PASS}
-		deployer_user: ${DEPLOYER_USER}
-		deployer_pass: ${DEPLOYER_PASS}
-		deployer_database: ${DEPLOYER_DATABASE}
+		deployer_user: ${DEPLOY_USER}
+		deployer_pass: ${DEPLOY_PASS}
+		deployer_database: ${DEPLOY_DATABASE}
 	EOF
 		echo "Error: Failed to write output file" >&2
 		exit 1

@@ -9,7 +9,7 @@
 
 <!-- /toc -->
 
-Most applications need more than request-response cycles. You probably have scheduled tasks that should run periodically (clearing caches, sending digest emails, processing queued jobs) and long-running workers that need to stay alive around the clock (queue consumers, WebSocket servers). This guide is going to walk you through setting up both using DeployerPHP.
+Most applications need more than request-response cycles. You probably have scheduled tasks that should run periodically (clearing caches, sending digest emails, processing queued jobs) and long-running workers that need to stay alive around the clock (queue consumers, WebSocket servers). This guide is going to walk you through setting up both using DeployCore.
 
 Both follow the same inventory-driven pattern you've already seen with servers and sites: you define what you want locally, then sync those definitions to the server when you're ready. Nothing changes remotely until you explicitly tell it to.
 
@@ -34,17 +34,17 @@ This separation is intentional. It lets you stage multiple changes (add a job, r
 Let's walk through adding a scheduled task to your site. Before you can create a cron job, you'll need a script for it to run. If you haven't already, run the `scaffold:scripts` command in your project directory to generate starter scripts:
 
 ```shell
-deployer scaffold:scripts
+deploy scaffold:scripts
 ```
 
-This creates a `cron.sh` script (along with `deploy.sh` and `supervisor.sh`) in your project's `.deployer/scripts` directory. The scaffolded `cron.sh` includes framework detection for Laravel, Symfony, and CodeIgniter, so it works out of the box for most PHP applications. You're free to customize it for your needs.
+This creates a `cron.sh` script (along with `deploy.sh` and `supervisor.sh`) in your project's `.deploy-core/scripts` directory. The scaffolded `cron.sh` includes framework detection for Laravel, Symfony, and CodeIgniter, so it works out of the box for most PHP applications. You're free to customize it for your needs.
 
 ### Creating a Cron
 
 Run the `cron:create` command to add a new cron job to your inventory:
 
 ```shell
-deployer cron:create
+deploy cron:create
 ```
 
 The command will ask for the server and site this job belongs to, the path to the script that should run, and a cron expression defining the schedule. Once you've answered the prompts, the job is saved to your local inventory. Your server hasn't changed yet.
@@ -54,7 +54,7 @@ The command will ask for the server and site this job belongs to, the path to th
 To apply your cron definitions to the server, run:
 
 ```shell
-deployer cron:sync
+deploy cron:sync
 ```
 
 This writes the crontab entries for the target site's `deployer` user on the server. From this point on, your scheduled task will run on the schedule you defined.
@@ -64,7 +64,7 @@ This writes the crontab entries for the target site's `deployer` user on the ser
 When you no longer need a scheduled task, remove it with `cron:delete`:
 
 ```shell
-deployer cron:delete
+deploy cron:delete
 ```
 
 The command will prompt you to select which cron job to remove from your inventory. After deleting, run the `cron:sync` command again to update the server's crontab.
@@ -78,10 +78,10 @@ The command will prompt you to select which cron job to remove from your invento
 
 Supervisor processes are long-running workers that need to stay alive continuously, things like queue workers, WebSocket servers, or any daemon your application relies on. Supervisord monitors these processes and automatically restarts them if they crash.
 
-Like cron jobs, you'll need a script for your worker. If you ran `scaffold:scripts` earlier, you already have a `supervisor.sh` in your project's `.deployer/scripts` directory. If not, run it now:
+Like cron jobs, you'll need a script for your worker. If you ran `scaffold:scripts` earlier, you already have a `supervisor.sh` in your project's `.deploy-core/scripts` directory. If not, run it now:
 
 ```shell
-deployer scaffold:scripts
+deploy scaffold:scripts
 ```
 
 The scaffolded `supervisor.sh` includes framework detection for Laravel, Symfony, and CodeIgniter, and uses `exec` to replace the shell process with your worker. This ensures supervisord can send signals directly to your application for graceful shutdowns.
@@ -91,7 +91,7 @@ The scaffolded `supervisor.sh` includes framework detection for Laravel, Symfony
 Run the `supervisor:create` command to add a new process definition:
 
 ```shell
-deployer supervisor:create
+deploy supervisor:create
 ```
 
 The command will ask for the server and site this process belongs to and the path to the worker script. Like cron, this saves the definition to your local inventory without touching the server.
@@ -101,7 +101,7 @@ The command will ask for the server and site this process belongs to and the pat
 Apply your supervisor definitions with:
 
 ```shell
-deployer supervisor:sync
+deploy supervisor:sync
 ```
 
 This writes the supervisord configuration file on the server for your site's processes. After syncing, supervisord picks up the new configuration and starts managing your workers.
@@ -111,7 +111,7 @@ This writes the supervisord configuration file on the server for your site's pro
 Remove a process definition with `supervisor:delete`:
 
 ```shell
-deployer supervisor:delete
+deploy supervisor:delete
 ```
 
 Select the process to remove, then run the `supervisor:sync` command to update the server.

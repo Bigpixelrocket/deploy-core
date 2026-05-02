@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services\Aws;
+namespace DeployCore\Services\Aws;
 
 use Aws\Sdk;
-use DeployerPHP\Services\RetryService;
+use DeployCore\Services\RetryService;
 
 /**
  * Base class for AWS API services.

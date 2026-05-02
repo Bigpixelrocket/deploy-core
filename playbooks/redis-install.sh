@@ -17,9 +17,9 @@
 set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-[[ -z $DEPLOYER_OUTPUT_FILE ]] && echo "Error: DEPLOYER_OUTPUT_FILE required" && exit 1
-[[ -z $DEPLOYER_PERMS ]] && echo "Error: DEPLOYER_PERMS required" && exit 1
-export DEPLOYER_PERMS
+[[ -z $DEPLOY_OUTPUT_FILE ]] && echo "Error: DEPLOY_OUTPUT_FILE required" && exit 1
+[[ -z $DEPLOY_PERMS ]] && echo "Error: DEPLOY_PERMS required" && exit 1
+export DEPLOY_PERMS
 
 # Shared helpers are automatically inlined when executing playbooks remotely
 # source "$(dirname "$0")/helpers.sh"
@@ -163,7 +163,7 @@ main() {
 		echo "-> Redis server is already installed and running"
 
 		# Return success with marker indicating already installed
-		if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+		if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 			status: success
 			already_installed: true
 		EOF
@@ -182,7 +182,7 @@ main() {
 	config_logrotate
 
 	# Write output YAML
-	if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+	if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 		status: success
 		redis_pass: ${REDIS_PASS}
 	EOF

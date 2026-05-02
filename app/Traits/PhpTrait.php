@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Traits;
+namespace DeployCore\Traits;
 
 /**
  * Shared PHP version helpers for PHP-FPM commands.

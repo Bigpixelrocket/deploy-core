@@ -49,8 +49,8 @@ set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
 # Validation
-if [[ -z $DEPLOYER_OUTPUT_FILE ]]; then
-	echo "Error: DEPLOYER_OUTPUT_FILE required"
+if [[ -z $DEPLOY_OUTPUT_FILE ]]; then
+	echo "Error: DEPLOY_OUTPUT_FILE required"
 	exit 1
 fi
 
@@ -629,7 +629,7 @@ main() {
 	#
 	# Output YAML to file
 
-	if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+	if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 		distro: $distro
 		version: "$version"
 		permissions: $permissions
@@ -651,7 +651,7 @@ main() {
 		  default: ${php_default:-}
 		  versions:
 	EOF
-		echo "Error: Failed to write output file header to $DEPLOYER_OUTPUT_FILE" >&2
+		echo "Error: Failed to write output file header to $DEPLOY_OUTPUT_FILE" >&2
 		exit 1
 	fi
 
@@ -662,24 +662,24 @@ main() {
 			local extensions
 			extensions=$(detect_php_extensions "$php_ver")
 
-			if ! cat >> "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+			if ! cat >> "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 				    - version: "${php_ver}"
 				      extensions: [${extensions}]
 			EOF
-				echo "Error: Failed to write PHP version $php_ver to $DEPLOYER_OUTPUT_FILE" >&2
+				echo "Error: Failed to write PHP version $php_ver to $DEPLOY_OUTPUT_FILE" >&2
 				exit 1
 			fi
 		done
 	else
 		# No PHP versions found, write empty array
-		if ! echo "    []" >> "$DEPLOYER_OUTPUT_FILE"; then
-			echo "Error: Failed to write empty PHP versions to $DEPLOYER_OUTPUT_FILE" >&2
+		if ! echo "    []" >> "$DEPLOY_OUTPUT_FILE"; then
+			echo "Error: Failed to write empty PHP versions to $DEPLOY_OUTPUT_FILE" >&2
 			exit 1
 		fi
 	fi
 
 	# Continue with Nginx and PHP-FPM sections
-	if ! cat >> "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+	if ! cat >> "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 		nginx:
 		  available: ${nginx_available:-false}
 		  version: ${nginx_version:-unknown}
@@ -689,52 +689,52 @@ main() {
 		  requests: ${nginx_requests:-0}
 		php_fpm:
 	EOF
-		echo "Error: Failed to write Nginx metrics to $DEPLOYER_OUTPUT_FILE" >&2
+		echo "Error: Failed to write Nginx metrics to $DEPLOY_OUTPUT_FILE" >&2
 		exit 1
 	fi
 
 	# Write PHP-FPM metrics (gathered earlier)
 	if [[ $has_fpm_metrics == true ]]; then
-		if ! echo "$php_fpm_yaml" >> "$DEPLOYER_OUTPUT_FILE"; then
-			echo "Error: Failed to write PHP-FPM metrics to $DEPLOYER_OUTPUT_FILE" >&2
+		if ! echo "$php_fpm_yaml" >> "$DEPLOY_OUTPUT_FILE"; then
+			echo "Error: Failed to write PHP-FPM metrics to $DEPLOY_OUTPUT_FILE" >&2
 			exit 1
 		fi
 	else
-		if ! echo "  {}" >> "$DEPLOYER_OUTPUT_FILE"; then
-			echo "Error: Failed to write empty PHP-FPM section to $DEPLOYER_OUTPUT_FILE" >&2
+		if ! echo "  {}" >> "$DEPLOY_OUTPUT_FILE"; then
+			echo "Error: Failed to write empty PHP-FPM section to $DEPLOY_OUTPUT_FILE" >&2
 			exit 1
 		fi
 	fi
 
 	# Add ports section
-	if ! echo "ports:" >> "$DEPLOYER_OUTPUT_FILE"; then
-		echo "Error: Failed to write ports section header to $DEPLOYER_OUTPUT_FILE" >&2
+	if ! echo "ports:" >> "$DEPLOY_OUTPUT_FILE"; then
+		echo "Error: Failed to write ports section header to $DEPLOY_OUTPUT_FILE" >&2
 		exit 1
 	fi
 
 	local port process has_ports=false
 	while IFS=: read -r port process; do
-		if ! echo "  ${port}: ${process}" >> "$DEPLOYER_OUTPUT_FILE"; then
-			echo "Error: Failed to write port $port to $DEPLOYER_OUTPUT_FILE" >&2
+		if ! echo "  ${port}: ${process}" >> "$DEPLOY_OUTPUT_FILE"; then
+			echo "Error: Failed to write port $port to $DEPLOY_OUTPUT_FILE" >&2
 			exit 1
 		fi
 		has_ports=true
 	done < <(get_listening_services)
 
 	if [[ $has_ports == false ]]; then
-		if ! echo "  {}" >> "$DEPLOYER_OUTPUT_FILE"; then
-			echo "Error: Failed to write empty ports section to $DEPLOYER_OUTPUT_FILE" >&2
+		if ! echo "  {}" >> "$DEPLOY_OUTPUT_FILE"; then
+			echo "Error: Failed to write empty ports section to $DEPLOY_OUTPUT_FILE" >&2
 			exit 1
 		fi
 	fi
 
 	# Add UFW firewall section
-	if ! cat >> "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+	if ! cat >> "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 		ufw_installed: $ufw_installed
 		ufw_active: $ufw_active
 		ufw_rules:
 	EOF
-		echo "Error: Failed to write UFW section to $DEPLOYER_OUTPUT_FILE" >&2
+		echo "Error: Failed to write UFW section to $DEPLOY_OUTPUT_FILE" >&2
 		exit 1
 	fi
 
@@ -743,22 +743,22 @@ main() {
 		local rule has_rules=false
 		while read -r rule; do
 			[[ -z $rule ]] && continue
-			if ! echo "  - ${rule}" >> "$DEPLOYER_OUTPUT_FILE"; then
-				echo "Error: Failed to write UFW rule to $DEPLOYER_OUTPUT_FILE" >&2
+			if ! echo "  - ${rule}" >> "$DEPLOY_OUTPUT_FILE"; then
+				echo "Error: Failed to write UFW rule to $DEPLOY_OUTPUT_FILE" >&2
 				exit 1
 			fi
 			has_rules=true
 		done < <(get_ufw_rules)
 
 		if [[ $has_rules == false ]]; then
-			if ! echo "  []" >> "$DEPLOYER_OUTPUT_FILE"; then
-				echo "Error: Failed to write empty UFW rules to $DEPLOYER_OUTPUT_FILE" >&2
+			if ! echo "  []" >> "$DEPLOY_OUTPUT_FILE"; then
+				echo "Error: Failed to write empty UFW rules to $DEPLOY_OUTPUT_FILE" >&2
 				exit 1
 			fi
 		fi
 	else
-		if ! echo "  []" >> "$DEPLOYER_OUTPUT_FILE"; then
-			echo "Error: Failed to write empty UFW rules to $DEPLOYER_OUTPUT_FILE" >&2
+		if ! echo "  []" >> "$DEPLOY_OUTPUT_FILE"; then
+			echo "Error: Failed to write empty UFW rules to $DEPLOY_OUTPUT_FILE" >&2
 			exit 1
 		fi
 	fi
@@ -776,16 +776,16 @@ main() {
 	done < <(get_sites_config)
 
 	if [[ $has_sites_config == true ]]; then
-		if ! echo "sites_config:" >> "$DEPLOYER_OUTPUT_FILE"; then
+		if ! echo "sites_config:" >> "$DEPLOY_OUTPUT_FILE"; then
 			echo "Error: Failed to write sites_config header" >&2
 			exit 1
 		fi
-		if ! echo "$sites_config_yaml" >> "$DEPLOYER_OUTPUT_FILE"; then
+		if ! echo "$sites_config_yaml" >> "$DEPLOY_OUTPUT_FILE"; then
 			echo "Error: Failed to write sites_config body" >&2
 			exit 1
 		fi
 	else
-		if ! echo "sites_config: {}" >> "$DEPLOYER_OUTPUT_FILE"; then
+		if ! echo "sites_config: {}" >> "$DEPLOY_OUTPUT_FILE"; then
 			echo "Error: Failed to write empty sites_config" >&2
 			exit 1
 		fi

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Traits;
+namespace DeployCore\Traits;
 
-use DeployerPHP\Exceptions\ValidationException;
-use DeployerPHP\Services\FilesystemService;
-use DeployerPHP\Services\IoService;
+use DeployCore\Exceptions\ValidationException;
+use DeployCore\Services\FilesystemService;
+use DeployCore\Services\IoService;
 
 /**
  * Reusable SSH key things.

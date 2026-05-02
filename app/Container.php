@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP;
+namespace DeployCore;
 
 use ReflectionClass;
 use ReflectionIntersectionType;

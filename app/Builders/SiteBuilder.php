@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Builders;
+namespace DeployCore\Builders;
 
-use DeployerPHP\DTOs\CronDTO;
-use DeployerPHP\DTOs\SiteDTO;
-use DeployerPHP\DTOs\SupervisorDTO;
-use DeployerPHP\Enums\WwwMode;
+use DeployCore\DTOs\CronDTO;
+use DeployCore\DTOs\SiteDTO;
+use DeployCore\DTOs\SupervisorDTO;
+use DeployCore\Enums\WwwMode;
 
 /**
  * Builder for SiteDTO - centralizes all SiteDTO instantiation.

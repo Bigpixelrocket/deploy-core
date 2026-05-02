@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services;
+namespace DeployCore\Services;
 
-use DeployerPHP\Contracts\BaseCommand;
+use DeployCore\Contracts\BaseCommand;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
@@ -17,7 +17,7 @@ class CommandDiscoveryService
 {
     private const CONSOLE_PATH = 'app/Console';
 
-    private const NAMESPACE_PREFIX = 'DeployerPHP\\Console\\';
+    private const NAMESPACE_PREFIX = 'DeployCore\\Console\\';
 
     private readonly string $resolvedBasePath;
 

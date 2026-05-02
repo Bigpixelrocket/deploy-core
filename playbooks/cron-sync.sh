@@ -14,16 +14,16 @@
 set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-[[ -z $DEPLOYER_OUTPUT_FILE ]] && echo "Error: DEPLOYER_OUTPUT_FILE required" && exit 1
-[[ -z $DEPLOYER_PERMS ]] && echo "Error: DEPLOYER_PERMS required" && exit 1
-[[ -z $DEPLOYER_SITE_DOMAIN ]] && echo "Error: DEPLOYER_SITE_DOMAIN required" && exit 1
-[[ -z $DEPLOYER_CRONS ]] && echo "Error: DEPLOYER_CRONS required" && exit 1
-export DEPLOYER_PERMS
+[[ -z $DEPLOY_OUTPUT_FILE ]] && echo "Error: DEPLOY_OUTPUT_FILE required" && exit 1
+[[ -z $DEPLOY_PERMS ]] && echo "Error: DEPLOY_PERMS required" && exit 1
+[[ -z $DEPLOY_SITE_DOMAIN ]] && echo "Error: DEPLOY_SITE_DOMAIN required" && exit 1
+[[ -z $DEPLOY_CRONS ]] && echo "Error: DEPLOY_CRONS required" && exit 1
+export DEPLOY_PERMS
 
 # Shared helpers are automatically inlined when executing playbooks remotely
 # source "$(dirname "$0")/helpers.sh"
 
-SITE_ROOT="/home/deployer/sites/${DEPLOYER_SITE_DOMAIN}"
+SITE_ROOT="/home/deployer/sites/${DEPLOY_SITE_DOMAIN}"
 SHARED_PATH="${SITE_ROOT}/shared"
 CRON_LOG_DIR="/var/log/cron"
 LOGROTATE_DIR="/etc/logrotate.d"
@@ -32,8 +32,8 @@ LOGROTATE_DIR="/etc/logrotate.d"
 declare -a SCRIPT_PATHS=()
 declare -a SCRIPT_SLUGS=()
 
-START_MARKER="# DEPLOYER-CRON-START ${DEPLOYER_SITE_DOMAIN}"
-END_MARKER="# DEPLOYER-CRON-END ${DEPLOYER_SITE_DOMAIN}"
+START_MARKER="# DEPLOY-CRON-START ${DEPLOY_SITE_DOMAIN}"
+END_MARKER="# DEPLOY-CRON-END ${DEPLOY_SITE_DOMAIN}"
 
 # ----
 # JSON Parsing
@@ -45,18 +45,18 @@ END_MARKER="# DEPLOYER-CRON-END ${DEPLOYER_SITE_DOMAIN}"
 # Sets: CRON_COUNT, SCRIPT_PATHS[], SCRIPT_SLUGS[]
 
 parse_crons_json() {
-	if ! echo "$DEPLOYER_CRONS" | jq empty 2> /dev/null; then
-		echo "Error: Invalid DEPLOYER_CRONS" >&2
+	if ! echo "$DEPLOY_CRONS" | jq empty 2> /dev/null; then
+		echo "Error: Invalid DEPLOY_CRONS" >&2
 		exit 1
 	fi
 
-	CRON_COUNT=$(echo "$DEPLOYER_CRONS" | jq 'length')
+	CRON_COUNT=$(echo "$DEPLOY_CRONS" | jq 'length')
 
 	# Build arrays of script paths and log-safe script slugs
 	local i=0
 	while ((i < CRON_COUNT)); do
 		local script slug
-		script=$(echo "$DEPLOYER_CRONS" | jq -r ".[$i].script")
+		script=$(echo "$DEPLOY_CRONS" | jq -r ".[$i].script")
 		slug="$script"
 		slug="${slug//\//-}"
 		SCRIPT_PATHS+=("$script")
@@ -86,10 +86,10 @@ generate_cron_block() {
 	local i=0
 	while ((i < CRON_COUNT)); do
 		local schedule script_path script_slug script_log
-		schedule=$(echo "$DEPLOYER_CRONS" | jq -r ".[$i].schedule")
+		schedule=$(echo "$DEPLOY_CRONS" | jq -r ".[$i].schedule")
 		script_path="${SCRIPT_PATHS[$i]}"
 		script_slug="${SCRIPT_SLUGS[$i]}"
-		script_log="${CRON_LOG_DIR}/${DEPLOYER_SITE_DOMAIN}-${script_slug}.log"
+		script_log="${CRON_LOG_DIR}/${DEPLOY_SITE_DOMAIN}-${script_slug}.log"
 
 		cron_block+="${schedule} ${runner_path} ${script_path} >> ${script_log} 2>&1"$'\n'
 
@@ -116,7 +116,7 @@ update_crontab() {
 	local current_crontab=""
 	local updated_crontab=""
 
-	echo "→ Updating crontab for ${DEPLOYER_SITE_DOMAIN}..."
+	echo "→ Updating crontab for ${DEPLOY_SITE_DOMAIN}..."
 
 	# Ensure logs directory exists
 	if ! run_cmd test -d "${SHARED_PATH}/logs"; then
@@ -178,7 +178,7 @@ setup_cron_logging() {
 
 	# Create per-script log files
 	for script_slug in "${SCRIPT_SLUGS[@]}"; do
-		local log_file="${CRON_LOG_DIR}/${DEPLOYER_SITE_DOMAIN}-${script_slug}.log"
+		local log_file="${CRON_LOG_DIR}/${DEPLOY_SITE_DOMAIN}-${script_slug}.log"
 
 		if ! run_cmd test -f "$log_file"; then
 			run_cmd touch "$log_file" || fail "Failed to create ${log_file}"
@@ -200,10 +200,10 @@ write_logrotate_configs() {
 	echo "→ Writing ${CRON_COUNT} logrotate config(s)..."
 
 	for script_slug in "${SCRIPT_SLUGS[@]}"; do
-		local log_file="${CRON_LOG_DIR}/${DEPLOYER_SITE_DOMAIN}-${script_slug}.log"
-		local logrotate_file="${LOGROTATE_DIR}/cron-${DEPLOYER_SITE_DOMAIN}-${script_slug}.conf"
+		local log_file="${CRON_LOG_DIR}/${DEPLOY_SITE_DOMAIN}-${script_slug}.log"
+		local logrotate_file="${LOGROTATE_DIR}/cron-${DEPLOY_SITE_DOMAIN}-${script_slug}.conf"
 
-		echo "→ Writing logrotate for ${DEPLOYER_SITE_DOMAIN}-${script_slug}..."
+		echo "→ Writing logrotate for ${DEPLOY_SITE_DOMAIN}-${script_slug}..."
 
 		if ! run_cmd tee "$logrotate_file" > /dev/null <<- EOF; then
 			${log_file} {
@@ -232,8 +232,8 @@ write_logrotate_configs() {
 cleanup_orphaned_logrotate_configs() {
 	echo "→ Checking for orphaned cron logrotate configs..."
 
-	local pattern="cron-${DEPLOYER_SITE_DOMAIN}-*.conf"
-	local prefix="cron-${DEPLOYER_SITE_DOMAIN}-"
+	local pattern="cron-${DEPLOY_SITE_DOMAIN}-*.conf"
+	local prefix="cron-${DEPLOY_SITE_DOMAIN}-"
 	local existing_files
 	existing_files=$(run_cmd find "$LOGROTATE_DIR" -maxdepth 1 -name "$pattern" -type f 2> /dev/null) || existing_files=""
 
@@ -272,7 +272,7 @@ cleanup_orphaned_logrotate_configs() {
 # Write YAML output file with sync results
 
 write_output() {
-	if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+	if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 		status: success
 		crons_synced: ${CRON_COUNT}
 	EOF

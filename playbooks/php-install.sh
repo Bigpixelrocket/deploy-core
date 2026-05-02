@@ -12,12 +12,12 @@
 set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-[[ -z $DEPLOYER_OUTPUT_FILE ]] && echo "Error: DEPLOYER_OUTPUT_FILE required" && exit 1
-[[ -z $DEPLOYER_PERMS ]] && echo "Error: DEPLOYER_PERMS required" && exit 1
-[[ -z $DEPLOYER_PHP_VERSION ]] && echo "Error: DEPLOYER_PHP_VERSION required" && exit 1
-[[ -z $DEPLOYER_PHP_SET_DEFAULT ]] && echo "Error: DEPLOYER_PHP_SET_DEFAULT required" && exit 1
-[[ -z $DEPLOYER_PHP_EXTENSIONS ]] && echo "Error: DEPLOYER_PHP_EXTENSIONS required" && exit 1
-export DEPLOYER_PERMS
+[[ -z $DEPLOY_OUTPUT_FILE ]] && echo "Error: DEPLOY_OUTPUT_FILE required" && exit 1
+[[ -z $DEPLOY_PERMS ]] && echo "Error: DEPLOY_PERMS required" && exit 1
+[[ -z $DEPLOY_PHP_VERSION ]] && echo "Error: DEPLOY_PHP_VERSION required" && exit 1
+[[ -z $DEPLOY_PHP_SET_DEFAULT ]] && echo "Error: DEPLOY_PHP_SET_DEFAULT required" && exit 1
+[[ -z $DEPLOY_PHP_EXTENSIONS ]] && echo "Error: DEPLOY_PHP_EXTENSIONS required" && exit 1
+export DEPLOY_PERMS
 
 # Shared helpers are automatically inlined when executing playbooks remotely
 # source "$(dirname "$0")/helpers.sh"
@@ -34,20 +34,20 @@ export DEPLOYER_PERMS
 # Install PHP packages for specified version
 
 install_php_packages() {
-	echo "→ Installing PHP ${DEPLOYER_PHP_VERSION}..."
+	echo "→ Installing PHP ${DEPLOY_PHP_VERSION}..."
 
 	# Parse comma-separated extensions
-	IFS=',' read -ra extensions <<< "$DEPLOYER_PHP_EXTENSIONS"
+	IFS=',' read -ra extensions <<< "$DEPLOY_PHP_EXTENSIONS"
 	local packages=()
 
 	for ext in "${extensions[@]}"; do
 		ext=$(echo "$ext" | xargs) # trim whitespace
-		packages+=("php${DEPLOYER_PHP_VERSION}-${ext}")
+		packages+=("php${DEPLOY_PHP_VERSION}-${ext}")
 	done
 
 	# Install selected packages
 	if ! apt_get_with_retry install -y "${packages[@]}" 2>&1; then
-		echo "Error: Failed to install PHP ${DEPLOYER_PHP_VERSION} packages" >&2
+		echo "Error: Failed to install PHP ${DEPLOY_PHP_VERSION} packages" >&2
 		exit 1
 	fi
 }
@@ -94,7 +94,7 @@ install_composer() {
 # Configure PHP-FPM service umask for cooperative deployer/www-data writes
 
 configure_php_fpm_umask() {
-	local override_dir="/etc/systemd/system/php${DEPLOYER_PHP_VERSION}-fpm.service.d"
+	local override_dir="/etc/systemd/system/php${DEPLOY_PHP_VERSION}-fpm.service.d"
 	local override_file="${override_dir}/deployer-umask.conf"
 
 	if ! run_cmd mkdir -p "$override_dir"; then
@@ -120,9 +120,9 @@ configure_php_fpm_umask() {
 # Configure PHP-FPM for the installed version
 
 configure_php_fpm() {
-	echo "→ Configuring PHP-FPM for PHP ${DEPLOYER_PHP_VERSION}..."
+	echo "→ Configuring PHP-FPM for PHP ${DEPLOY_PHP_VERSION}..."
 
-	local pool_config="/etc/php/${DEPLOYER_PHP_VERSION}/fpm/pool.d/www.conf"
+	local pool_config="/etc/php/${DEPLOY_PHP_VERSION}/fpm/pool.d/www.conf"
 
 	# Set socket ownership for Nginx (www-data user)
 	if ! run_cmd sed -i 's/^;*listen\.owner = .*/listen.owner = www-data/' "$pool_config"; then
@@ -145,8 +145,8 @@ configure_php_fpm() {
 	fi
 
 	# Enable PHP-FPM service
-	if ! systemctl is-enabled --quiet php${DEPLOYER_PHP_VERSION}-fpm 2> /dev/null; then
-		if ! run_cmd systemctl enable --quiet php${DEPLOYER_PHP_VERSION}-fpm; then
+	if ! systemctl is-enabled --quiet php${DEPLOY_PHP_VERSION}-fpm 2> /dev/null; then
+		if ! run_cmd systemctl enable --quiet php${DEPLOY_PHP_VERSION}-fpm; then
 			echo "Error: Failed to enable PHP-FPM service" >&2
 			exit 1
 		fi
@@ -156,7 +156,7 @@ configure_php_fpm() {
 	configure_php_fpm_umask
 
 	# Restart PHP-FPM to apply configuration changes (idempotent - starts if not running)
-	if ! run_cmd systemctl restart php${DEPLOYER_PHP_VERSION}-fpm; then
+	if ! run_cmd systemctl restart php${DEPLOY_PHP_VERSION}-fpm; then
 		echo "Error: Failed to restart PHP-FPM service" >&2
 		exit 1
 	fi
@@ -170,13 +170,13 @@ configure_php_fpm() {
 # Ensure OPcache is enabled for PHP-FPM only
 
 configure_opcache() {
-	echo "→ Enabling OPcache for PHP ${DEPLOYER_PHP_VERSION}..."
+	echo "→ Enabling OPcache for PHP ${DEPLOY_PHP_VERSION}..."
 
 	local fpm_opcache_ini
-	fpm_opcache_ini="/etc/php/${DEPLOYER_PHP_VERSION}/fpm/conf.d/99-deployer-opcache.ini"
+	fpm_opcache_ini="/etc/php/${DEPLOY_PHP_VERSION}/fpm/conf.d/99-deployer-opcache.ini"
 
 	if ! run_cmd tee "$fpm_opcache_ini" > /dev/null <<- 'EOF'; then
-		; Managed by DeployerPHP
+		; Managed by DeployCore
 		opcache.enable=1
 	EOF
 		echo "Error: Failed to write OPcache config for PHP-FPM" >&2
@@ -221,17 +221,17 @@ config_logrotate() {
 # Set PHP version as system default
 
 set_as_default() {
-	if [[ $DEPLOYER_PHP_SET_DEFAULT != 'true' ]]; then
+	if [[ $DEPLOY_PHP_SET_DEFAULT != 'true' ]]; then
 		return 0
 	fi
 
-	echo "→ Setting PHP ${DEPLOYER_PHP_VERSION} as system default..."
+	echo "→ Setting PHP ${DEPLOY_PHP_VERSION} as system default..."
 
 	# Set alternatives for php binaries
 	if command -v update-alternatives > /dev/null 2>&1; then
-		run_cmd update-alternatives --set php /usr/bin/php${DEPLOYER_PHP_VERSION} 2> /dev/null
-		run_cmd update-alternatives --set php-config /usr/bin/php-config${DEPLOYER_PHP_VERSION} 2> /dev/null
-		run_cmd update-alternatives --set phpize /usr/bin/phpize${DEPLOYER_PHP_VERSION} 2> /dev/null
+		run_cmd update-alternatives --set php /usr/bin/php${DEPLOY_PHP_VERSION} 2> /dev/null
+		run_cmd update-alternatives --set php-config /usr/bin/php-config${DEPLOY_PHP_VERSION} 2> /dev/null
+		run_cmd update-alternatives --set phpize /usr/bin/phpize${DEPLOY_PHP_VERSION} 2> /dev/null
 	fi
 }
 
@@ -251,26 +251,26 @@ update_nginx_config() {
 	fi
 
 	# Check if this PHP version's endpoint already exists
-	if grep -q "location /php${DEPLOYER_PHP_VERSION}/" "$stub_status" 2> /dev/null; then
-		echo "→ PHP ${DEPLOYER_PHP_VERSION} status endpoint already configured"
+	if grep -q "location /php${DEPLOY_PHP_VERSION}/" "$stub_status" 2> /dev/null; then
+		echo "→ PHP ${DEPLOY_PHP_VERSION} status endpoint already configured"
 		return 0
 	fi
 
-	echo "→ Adding PHP ${DEPLOYER_PHP_VERSION} status endpoint to Nginx..."
+	echo "→ Adding PHP ${DEPLOY_PHP_VERSION} status endpoint to Nginx..."
 
 	# Check if the marker exists
-	if ! grep -q "#### DEPLOYER-PHP CONFIG ####" "$stub_status" 2> /dev/null; then
+	if ! grep -q "#### DEPLOY-PHP CONFIG ####" "$stub_status" 2> /dev/null; then
 		echo "Error: stub_status marker not found. File may have been modified manually." >&2
 		exit 1
 	fi
 
 	# Create the new location block
 	local php_block="
-        # PHP ${DEPLOYER_PHP_VERSION} FPM Status
-        location /php${DEPLOYER_PHP_VERSION}/fpm-status {
+        # PHP ${DEPLOY_PHP_VERSION} FPM Status
+        location /php${DEPLOY_PHP_VERSION}/fpm-status {
             include fastcgi_params;
             fastcgi_param SCRIPT_FILENAME /fpm-status;
-            fastcgi_pass unix:/run/php/php${DEPLOYER_PHP_VERSION}-fpm.sock;
+            fastcgi_pass unix:/run/php/php${DEPLOY_PHP_VERSION}-fpm.sock;
             access_log off;
             allow 127.0.0.1;
             deny all;
@@ -282,7 +282,7 @@ update_nginx_config() {
 	temp_config=$(mktemp)
 
 	if ! awk -v block="$php_block" '
-		/#### DEPLOYER-PHP CONFIG ####/ {
+		/#### DEPLOY-PHP CONFIG ####/ {
 			print block
 		}
 		{ print }
@@ -328,7 +328,7 @@ main() {
 	update_nginx_config
 
 	# Write output YAML
-	if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+	if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 		status: success
 	EOF
 		echo "Error: Failed to write output file" >&2

@@ -2,23 +2,23 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Contracts;
+namespace DeployCore\Contracts;
 
-use DeployerPHP\Container;
-use DeployerPHP\Repositories\ServerRepository;
-use DeployerPHP\Repositories\SiteRepository;
-use DeployerPHP\Services\AwsService;
-use DeployerPHP\Services\CfService;
-use DeployerPHP\Services\DoService;
-use DeployerPHP\Services\EnvService;
-use DeployerPHP\Services\FilesystemService;
-use DeployerPHP\Services\GitService;
-use DeployerPHP\Services\HttpService;
-use DeployerPHP\Services\InventoryService;
-use DeployerPHP\Services\IoService;
-use DeployerPHP\Services\ProcessService;
-use DeployerPHP\Services\RetryService;
-use DeployerPHP\Services\SshService;
+use DeployCore\Container;
+use DeployCore\Repositories\ServerRepository;
+use DeployCore\Repositories\SiteRepository;
+use DeployCore\Services\AwsService;
+use DeployCore\Services\CfService;
+use DeployCore\Services\DoService;
+use DeployCore\Services\EnvService;
+use DeployCore\Services\FilesystemService;
+use DeployCore\Services\GitService;
+use DeployCore\Services\HttpService;
+use DeployCore\Services\InventoryService;
+use DeployCore\Services\IoService;
+use DeployCore\Services\ProcessService;
+use DeployCore\Services\RetryService;
+use DeployCore\Services\SshService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -88,7 +88,7 @@ abstract class BaseCommand extends Command
             'inventory',
             null,
             InputOption::VALUE_OPTIONAL,
-            'Custom path to inventory file (defaults to .deployer/inventory.yml in the current working directory)'
+            'Custom path to inventory file (defaults to .deploy-core/inventory.yml in the current working directory)'
         );
     }
 
@@ -309,7 +309,7 @@ abstract class BaseCommand extends Command
     /**
      * Get the appropriate executable path for command replay.
      *
-     * Detects whether deployer is running from a global Composer install
+     * Detects whether deploy is running from a global Composer install
      * or a project-level vendor directory.
      */
     protected function getExecutablePath(): string
@@ -321,11 +321,11 @@ abstract class BaseCommand extends Command
 
         // If script is in project's vendor/bin, use relative path
         if (false !== $scriptPath && false !== $vendorBinPath && str_starts_with($scriptPath, $vendorBinPath . '/')) {
-            return 'vendor/bin/deployer';
+            return 'vendor/bin/deploy';
         }
 
         // Global install - just use the command name
-        return 'deployer';
+        return 'deploy';
     }
 
     /**

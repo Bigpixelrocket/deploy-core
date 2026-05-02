@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Traits;
+namespace DeployCore\Traits;
 
-use DeployerPHP\Services\Aws\AwsRoute53DnsService;
-use DeployerPHP\Services\AwsService;
-use DeployerPHP\Services\IoService;
+use DeployCore\Services\Aws\AwsRoute53DnsService;
+use DeployCore\Services\AwsService;
+use DeployCore\Services\IoService;
 
 /**
  * Reusable AWS Route53 DNS things.

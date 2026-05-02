@@ -19,11 +19,11 @@
 set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-[[ -z $DEPLOYER_OUTPUT_FILE ]] && echo "Error: DEPLOYER_OUTPUT_FILE required" && exit 1
-[[ -z $DEPLOYER_PERMS ]] && echo "Error: DEPLOYER_PERMS required" && exit 1
-[[ -z $DEPLOYER_SSH_PORT ]] && echo "Error: DEPLOYER_SSH_PORT required" && exit 1
-[[ -z $DEPLOYER_ALLOWED_PORTS ]] && echo "Error: DEPLOYER_ALLOWED_PORTS required" && exit 1
-export DEPLOYER_PERMS
+[[ -z $DEPLOY_OUTPUT_FILE ]] && echo "Error: DEPLOY_OUTPUT_FILE required" && exit 1
+[[ -z $DEPLOY_PERMS ]] && echo "Error: DEPLOY_PERMS required" && exit 1
+[[ -z $DEPLOY_SSH_PORT ]] && echo "Error: DEPLOY_SSH_PORT required" && exit 1
+[[ -z $DEPLOY_ALLOWED_PORTS ]] && echo "Error: DEPLOY_ALLOWED_PORTS required" && exit 1
+export DEPLOY_PERMS
 
 # Shared helpers are automatically inlined when executing playbooks remotely
 # source "$(dirname "$0")/helpers.sh"
@@ -45,8 +45,8 @@ allow_ssh_port() {
 	run_cmd ufw allow "${detected_port}/tcp" > /dev/null 2>&1 || true
 
 	# Also allow configured port if different (handles port forwarding)
-	if [[ $DEPLOYER_SSH_PORT -ne $detected_port ]]; then
-		run_cmd ufw allow "$DEPLOYER_SSH_PORT/tcp" > /dev/null 2>&1 || true
+	if [[ $DEPLOY_SSH_PORT -ne $detected_port ]]; then
+		run_cmd ufw allow "$DEPLOY_SSH_PORT/tcp" > /dev/null 2>&1 || true
 	fi
 }
 
@@ -72,7 +72,7 @@ set_default_policies() {
 
 allow_selected_ports() {
 	local port
-	IFS=',' read -ra ports <<< "$DEPLOYER_ALLOWED_PORTS"
+	IFS=',' read -ra ports <<< "$DEPLOY_ALLOWED_PORTS"
 
 	echo "→ Allowing selected ports..."
 	for port in "${ports[@]}"; do
@@ -118,10 +118,10 @@ main() {
 	# Write YAML output
 
 	local rules_count
-	IFS=',' read -ra port_array <<< "$DEPLOYER_ALLOWED_PORTS"
+	IFS=',' read -ra port_array <<< "$DEPLOY_ALLOWED_PORTS"
 	rules_count=${#port_array[@]}
 
-	if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+	if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 		status: success
 		ufw_installed: true
 		ufw_enabled: true
@@ -135,7 +135,7 @@ main() {
 	# Write allowed ports list
 	local port
 	for port in "${port_array[@]}"; do
-		if ! echo "  - ${port}" >> "$DEPLOYER_OUTPUT_FILE"; then
+		if ! echo "  - ${port}" >> "$DEPLOY_OUTPUT_FILE"; then
 			echo "Error: Failed to write port $port to output" >&2
 			exit 1
 		fi

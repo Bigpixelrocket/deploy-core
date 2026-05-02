@@ -7,7 +7,7 @@
 # Resolve paths relative to test file location
 export BATS_TEST_ROOT="${BATS_TEST_DIRNAME:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 export PROJECT_ROOT="$(cd "${BATS_TEST_ROOT}/../.." && pwd)"
-export DEPLOYER_BIN="${PROJECT_ROOT}/bin/deployer"
+export DEPLOY_BIN="${PROJECT_ROOT}/bin/deploy"
 # Per-suite inventory isolation (enables parallel test execution)
 # Uses BATS_INVENTORY_SUFFIX (set by bats.sh for VM tests) instead of BATS_DISTRO
 # to avoid leakage from helpers.bash's own default on line 27 via BATS subprocess model
@@ -97,7 +97,7 @@ assert_bullet_output() {
 # Usage: assert_command_replay "server:add"
 assert_command_replay() {
 	local command="$1"
-	if [[ ! "$output" =~ "\$> ".*"deployer ${command}" ]]; then
+	if [[ ! "$output" =~ "\$> ".*"deploy ${command}" ]]; then
 		echo "Expected command replay for '${command}' in output"
 		echo "Actual output: $output"
 		return 1
@@ -150,23 +150,23 @@ assert_failure() {
 # Test Execution Helpers
 # ----
 
-# Run deployer command with test inventory
-# Usage: run_deployer server:info --server=test-server
-run_deployer() {
-	run "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi "$@"
+# Run deploy command with test inventory
+# Usage: run_deploy server:info --server=test-server
+run_deploy() {
+	run "$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi "$@"
 }
 
-# Run deployer command expecting success (exit code 0)
-# Usage: run_deployer_success server:info --server=test-server
-run_deployer_success() {
-	run_deployer "$@"
+# Run deploy command expecting success (exit code 0)
+# Usage: run_deploy_success server:info --server=test-server
+run_deploy_success() {
+	run_deploy "$@"
 	assert_success
 }
 
-# Run deployer command expecting failure (exit code non-zero)
-# Usage: run_deployer_failure server:add --name=""
-run_deployer_failure() {
-	run_deployer "$@"
+# Run deploy command expecting failure (exit code non-zero)
+# Usage: run_deploy_failure server:add --name=""
+run_deploy_failure() {
+	run_deploy "$@"
 	assert_failure
 }
 
