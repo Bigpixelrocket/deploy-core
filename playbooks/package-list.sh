@@ -9,7 +9,7 @@
 #   status: success
 #   repos_configured: true
 #
-# Output (with DEPLOYER_GATHER_PHP=true):
+# Output (with DEPLOY_GATHER_PHP=true):
 #   status: success
 #   repos_configured: true
 #   php:
@@ -22,9 +22,9 @@
 set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-[[ -z $DEPLOYER_OUTPUT_FILE ]] && echo "Error: DEPLOYER_OUTPUT_FILE required" && exit 1
-[[ -z $DEPLOYER_PERMS ]] && echo "Error: DEPLOYER_PERMS required" && exit 1
-export DEPLOYER_PERMS
+[[ -z $DEPLOY_OUTPUT_FILE ]] && echo "Error: DEPLOY_OUTPUT_FILE required" && exit 1
+[[ -z $DEPLOY_PERMS ]] && echo "Error: DEPLOY_PERMS required" && exit 1
+export DEPLOY_PERMS
 
 # Shared helpers are automatically inlined when executing playbooks remotely
 # source "$(dirname "$0")/helpers.sh"
@@ -84,12 +84,12 @@ smart_apt_update() {
 get_php_with_cache() {
 	PHP_CACHE_YAML=""
 	local force=${1:-false}
-	local cache_file="/tmp/deployer-php-cache"
+	local cache_file="/tmp/deploy-core-cache"
 	local threshold_seconds=$((24 * 60 * 60)) # 24 hours
 	local now current_timestamp age
 
 	# Check if PHP gathering is requested
-	if [[ $DEPLOYER_GATHER_PHP != 'true' ]]; then
+	if [[ $DEPLOY_GATHER_PHP != 'true' ]]; then
 		return 0
 	fi
 
@@ -226,15 +226,15 @@ main() {
 			echo "status: success"
 			echo "repos_configured: true"
 			printf '%b\n' "$yaml_php"
-		} > "$DEPLOYER_OUTPUT_FILE"
+		} > "$DEPLOY_OUTPUT_FILE"
 	else
 		{
 			echo "status: success"
 			echo "repos_configured: true"
-		} > "$DEPLOYER_OUTPUT_FILE"
+		} > "$DEPLOY_OUTPUT_FILE"
 	fi
 
-	if [[ ! -f $DEPLOYER_OUTPUT_FILE ]]; then
+	if [[ ! -f $DEPLOY_OUTPUT_FILE ]]; then
 		echo "Error: Failed to write output file" >&2
 		exit 1
 	fi

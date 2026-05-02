@@ -13,16 +13,16 @@
 set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-[[ -z $DEPLOYER_OUTPUT_FILE ]] && echo "Error: DEPLOYER_OUTPUT_FILE required" && exit 1
-[[ -z $DEPLOYER_PERMS ]] && echo "Error: DEPLOYER_PERMS required" && exit 1
-[[ -z $DEPLOYER_SITE_DOMAIN ]] && echo "Error: DEPLOYER_SITE_DOMAIN required" && exit 1
-[[ -z $DEPLOYER_SUPERVISORS ]] && echo "Error: DEPLOYER_SUPERVISORS required" && exit 1
-export DEPLOYER_PERMS
+[[ -z $DEPLOY_OUTPUT_FILE ]] && echo "Error: DEPLOY_OUTPUT_FILE required" && exit 1
+[[ -z $DEPLOY_PERMS ]] && echo "Error: DEPLOY_PERMS required" && exit 1
+[[ -z $DEPLOY_SITE_DOMAIN ]] && echo "Error: DEPLOY_SITE_DOMAIN required" && exit 1
+[[ -z $DEPLOY_SUPERVISORS ]] && echo "Error: DEPLOY_SUPERVISORS required" && exit 1
+export DEPLOY_PERMS
 
 # Shared helpers are automatically inlined when executing playbooks remotely
 # source "$(dirname "$0")/helpers.sh"
 
-SITE_ROOT="/home/deployer/sites/${DEPLOYER_SITE_DOMAIN}"
+SITE_ROOT="/home/deployer/sites/${DEPLOY_SITE_DOMAIN}"
 CURRENT_PATH="${SITE_ROOT}/current"
 RUNNER_PATH="${SITE_ROOT}/runner.sh"
 CONF_DIR="/etc/supervisor/conf.d"
@@ -38,20 +38,20 @@ LOGROTATE_DIR="/etc/logrotate.d"
 # Returns: Number of supervisors parsed, sets SUPERVISOR_COUNT and PROGRAM_NAMES array
 
 parse_supervisors_json() {
-	if ! echo "$DEPLOYER_SUPERVISORS" | jq empty 2> /dev/null; then
-		echo "Error: Invalid DEPLOYER_SUPERVISORS JSON" >&2
+	if ! echo "$DEPLOY_SUPERVISORS" | jq empty 2> /dev/null; then
+		echo "Error: Invalid DEPLOY_SUPERVISORS JSON" >&2
 		exit 1
 	fi
 
-	SUPERVISOR_COUNT=$(echo "$DEPLOYER_SUPERVISORS" | jq 'length')
+	SUPERVISOR_COUNT=$(echo "$DEPLOY_SUPERVISORS" | jq 'length')
 
 	# Build array of program names for orphan cleanup
 	PROGRAM_NAMES=()
 	local i=0
 	while ((i < SUPERVISOR_COUNT)); do
 		local program
-		program=$(echo "$DEPLOYER_SUPERVISORS" | jq -r ".[$i].program")
-		PROGRAM_NAMES+=("${DEPLOYER_SITE_DOMAIN}-${program}")
+		program=$(echo "$DEPLOY_SUPERVISORS" | jq -r ".[$i].program")
+		PROGRAM_NAMES+=("${DEPLOY_SITE_DOMAIN}-${program}")
 		((i++))
 	done
 }
@@ -79,7 +79,7 @@ generate_supervisor_config() {
 	local stopwaitsecs=$5
 	local numprocs=$6
 
-	local full_name="${DEPLOYER_SITE_DOMAIN}-${program}"
+	local full_name="${DEPLOY_SITE_DOMAIN}-${program}"
 
 	cat <<- EOF
 		[program:${full_name}]
@@ -115,17 +115,17 @@ write_supervisor_configs() {
 		local program script autostart autorestart stopwaitsecs numprocs
 		local config_content config_file
 
-		program=$(echo "$DEPLOYER_SUPERVISORS" | jq -r ".[$i].program")
-		script=$(echo "$DEPLOYER_SUPERVISORS" | jq -r ".[$i].script")
-		autostart=$(echo "$DEPLOYER_SUPERVISORS" | jq -r ".[$i].autostart")
-		autorestart=$(echo "$DEPLOYER_SUPERVISORS" | jq -r ".[$i].autorestart")
-		stopwaitsecs=$(echo "$DEPLOYER_SUPERVISORS" | jq -r ".[$i].stopwaitsecs")
-		numprocs=$(echo "$DEPLOYER_SUPERVISORS" | jq -r ".[$i].numprocs")
+		program=$(echo "$DEPLOY_SUPERVISORS" | jq -r ".[$i].program")
+		script=$(echo "$DEPLOY_SUPERVISORS" | jq -r ".[$i].script")
+		autostart=$(echo "$DEPLOY_SUPERVISORS" | jq -r ".[$i].autostart")
+		autorestart=$(echo "$DEPLOY_SUPERVISORS" | jq -r ".[$i].autorestart")
+		stopwaitsecs=$(echo "$DEPLOY_SUPERVISORS" | jq -r ".[$i].stopwaitsecs")
+		numprocs=$(echo "$DEPLOY_SUPERVISORS" | jq -r ".[$i].numprocs")
 
 		config_content=$(generate_supervisor_config "$program" "$script" "$autostart" "$autorestart" "$stopwaitsecs" "$numprocs")
-		config_file="${CONF_DIR}/${DEPLOYER_SITE_DOMAIN}-${program}.conf"
+		config_file="${CONF_DIR}/${DEPLOY_SITE_DOMAIN}-${program}.conf"
 
-		echo "→ Writing config for ${DEPLOYER_SITE_DOMAIN}-${program}..."
+		echo "→ Writing config for ${DEPLOY_SITE_DOMAIN}-${program}..."
 
 		if ! echo "$config_content" | run_cmd tee "$config_file" > /dev/null; then
 			echo "Error: Failed to write ${config_file}" >&2
@@ -249,7 +249,7 @@ reload_supervisor() {
 # Write YAML output file with sync results
 
 write_output() {
-	if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+	if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 		status: success
 		supervisors_synced: ${SUPERVISOR_COUNT}
 	EOF
@@ -266,8 +266,8 @@ main() {
 	parse_supervisors_json
 	write_supervisor_configs
 	write_logrotate_configs
-	cleanup_orphaned_files "$CONF_DIR" "${DEPLOYER_SITE_DOMAIN}-*.conf" "" "config"
-	cleanup_orphaned_files "$LOGROTATE_DIR" "supervisor-${DEPLOYER_SITE_DOMAIN}-*.conf" "supervisor-" "logrotate config"
+	cleanup_orphaned_files "$CONF_DIR" "${DEPLOY_SITE_DOMAIN}-*.conf" "" "config"
+	cleanup_orphaned_files "$LOGROTATE_DIR" "supervisor-${DEPLOY_SITE_DOMAIN}-*.conf" "supervisor-" "logrotate config"
 	reload_supervisor
 	write_output
 }

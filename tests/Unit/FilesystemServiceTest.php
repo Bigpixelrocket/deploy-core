@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use DeployerPHP\Services\FilesystemService;
+use DeployCore\Services\FilesystemService;
 use Symfony\Component\Filesystem\Filesystem;
 
 it('resolves os user cache directory with environment defaults', function () {
@@ -72,7 +72,7 @@ it('returns null cache directory when no user home is available', function () {
 
 function withIsolatedFilesystemEnvironment(callable $callback): void
 {
-    $tempRoot = sys_get_temp_dir() . '/deployer-php-fs-test-' . bin2hex(random_bytes(6));
+    $tempRoot = sys_get_temp_dir() . '/deploy-core-fs-test-' . bin2hex(random_bytes(6));
     $symfonyFs = new Filesystem();
     $symfonyFs->mkdir($tempRoot);
 

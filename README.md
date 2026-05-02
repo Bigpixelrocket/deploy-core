@@ -1,28 +1,28 @@
 <p align="center">
-    <a href="https://deployerphp.com" target="_blank">
-        <img src="https://raw.githubusercontent.com/loadinglucian/deployer-php/main/docs/images/logo-mark.svg" width="400" alt="DeployerPHP Logo">
+    <a href="https://bigpixelrocket.com/deploy-core" target="_blank">
+        <img src="https://raw.githubusercontent.com/bigpixelrocket/deploy-core/main/docs/images/logo-mark.svg" width="400" alt="DeployCore Logo">
     </a>
 </p>
 
 <p align="center">
-    <a href="https://packagist.org/packages/loadinglucian/deployer-php"><img src="https://img.shields.io/badge/php-%5E8.2-blue.svg" alt="Supports PHP >= 8.2"></a>
-    <a href="https://packagist.org/packages/loadinglucian/deployer-php"><img src="https://img.shields.io/packagist/v/loadinglucian/deployer-php" alt="Latest Stable Version"></a>
-    <a href="https://packagist.org/packages/loadinglucian/deployer-php"><img src="https://img.shields.io/packagist/l/loadinglucian/deployer-php" alt="License"></a>
+    <a href="https://packagist.org/packages/bigpixelrocket/deploy-core"><img src="https://img.shields.io/badge/php-%5E8.2-blue.svg" alt="Supports PHP >= 8.2"></a>
+    <a href="https://packagist.org/packages/bigpixelrocket/deploy-core"><img src="https://img.shields.io/packagist/v/bigpixelrocket/deploy-core" alt="Latest Stable Version"></a>
+    <a href="https://packagist.org/packages/bigpixelrocket/deploy-core"><img src="https://img.shields.io/packagist/l/bigpixelrocket/deploy-core" alt="License"></a>
 </p>
 
 <p align="center">
-    <a href="https://deployerphp.com/">https://deployerphp.com</a>
+    <a href="https://bigpixelrocket.com/deploy-core/">https://bigpixelrocket.com/deploy-core</a>
 </p>
 
-# Meet DeployerPHP
+# Meet DeployCore
 
-This is DeployerPHP, a complete set of CLI tools for provisioning, installing, and deploying servers and sites using PHP. It serves as an open-source alternative to services such as Ploi, RunCloud or Laravel Forge.
+This is DeployCore, a complete set of CLI tools for provisioning, installing, and deploying servers and sites using PHP. It serves as an open-source alternative to services such as Ploi, RunCloud or Laravel Forge.
 
 Here it is in action:
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/loadinglucian/deployer-php/main/docs/images/deployerphp.webp#gh-light-mode-only" width="auto" alt="DeployerPHP in action" class="dark:hidden">
-    <img src="https://raw.githubusercontent.com/loadinglucian/deployer-php/main/docs/images/deployerphp-dark.webp#gh-dark-mode-only" width="auto" alt="DeployerPHP in action" class="hidden dark:block">
+    <img src="https://raw.githubusercontent.com/bigpixelrocket/deploy-core/main/docs/images/deploy-core.webp#gh-light-mode-only" width="auto" alt="DeployCore in action" class="dark:hidden">
+    <img src="https://raw.githubusercontent.com/bigpixelrocket/deploy-core/main/docs/images/deploy-core-dark.webp#gh-dark-mode-only" width="auto" alt="DeployCore in action" class="hidden dark:block">
 </p>
 
 <!-- toc -->
@@ -46,42 +46,42 @@ Here it is in action:
 Here's a quick but complete run-through to start deploying immediately. Run each of these commands in sequence to go from zero to deploy:
 
 ```shell
-# Install DeployerPHP
-composer require --dev loadinglucian/deployer-php
-alias deployer="./vendor/bin/deployer"
+# Install DeployCore
+composer require --dev bigpixelrocket/deploy-core
+alias deploy="./vendor/bin/deploy"
 
 # Add your server to the inventory
-deployer server:add
+deploy server:add
 
 # Alternatively, set up a cloud instance and add it to
 # the inventory automatically with a single command:
 #
-# $> deployer aws:provision
-# $> deployer do:provision
+# $> deploy aws:provision
+# $> deploy do:provision
 
 # Install Nginx, PHP, Bun and generate a deploy key
-deployer server:install
+deploy server:install
 
 # Optionally, install your preferred database service:
 #
-# $> deployer mariadb:install
-# $> deployer postgresql:install
-# $> deployer redis:install
-# $> deployer memcached:install
+# $> deploy mariadb:install
+# $> deploy postgresql:install
+# $> deploy redis:install
+# $> deploy memcached:install
 
 # Create a site
-deployer site:create
+deploy site:create
 
 # Optionally, create deployment scripts and upload shared files:
 #
-# $> deployer scaffold:scripts
-# $> deployer site:shared:push
+# $> deploy scaffold:scripts
+# $> deploy site:shared:push
 
 # Deploy your application
-deployer site:deploy
+deploy site:deploy
 
 # Enable HTTPS
-deployer site:https
+deploy site:https
 ```
 
 <a name="benefits"></a>
@@ -98,13 +98,13 @@ There aren't any limits or restrictions on how many servers and sites you can de
 
 ### No Vendor Lock-In
 
-You can manage servers and deploy sites with any hosting or cloud provider. If your server runs Ubuntu LTS and you can SSH into it, you can manage it with DeployerPHP.
+You can manage servers and deploy sites with any hosting or cloud provider. If your server runs Ubuntu LTS and you can SSH into it, you can manage it with DeployCore.
 
 <a name="end-to-end-management"></a>
 
 ### End-To-End Management
 
-With DeployerPHP, you can effortlessly provision cloud instances, install services, and manage deployments and operations directly from the command line.
+With DeployCore, you can effortlessly provision cloud instances, install services, and manage deployments and operations directly from the command line.
 
 <a name="composable-commands"></a>
 
@@ -116,13 +116,13 @@ Atomic commands allow you to easily spin up new servers and create automation pi
 
 ### AI Agent Support
 
-Use your favorite AI agents to debug server and site issues, using DeployerPHP's built-in agent skills scaffolding.
+Use your favorite AI agents to debug server and site issues, using DeployCore's built-in agent skills scaffolding.
 
 <a name="license"></a>
 
 ## License
 
-DeployerPHP is open-source software distributed under the [MIT License](/LICENSE).
+DeployCore is open-source software distributed under the [MIT License](/LICENSE).
 
 You can use it freely for personal or commercial projects, without any restrictions.
 
@@ -132,6 +132,6 @@ This also means there are no guarantees or warranties. You are on your own.
 
 ## Contributing
 
-Thank you for considering contributing to DeployerPHP!
+Thank you for considering contributing to DeployCore!
 
 Please see [CONTRIBUTING](/CONTRIBUTING) for details.

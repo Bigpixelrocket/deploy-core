@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Console\Cloud\Cf;
+namespace DeployCore\Console\Cloud\Cf;
 
-use DeployerPHP\Contracts\BaseCommand;
-use DeployerPHP\Exceptions\ValidationException;
-use DeployerPHP\Traits\CfTrait;
-use DeployerPHP\Traits\DnsCommandTrait;
+use DeployCore\Contracts\BaseCommand;
+use DeployCore\Exceptions\ValidationException;
+use DeployCore\Traits\CfTrait;
+use DeployCore\Traits\DnsCommandTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

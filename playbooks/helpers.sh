@@ -17,9 +17,9 @@
 #
 
 run_cmd() {
-	if [[ $DEPLOYER_PERMS == 'root' ]]; then
+	if [[ $DEPLOY_PERMS == 'root' ]]; then
 		"$@"
-	elif [[ $DEPLOYER_PERMS == 'sudo' ]]; then
+	elif [[ $DEPLOY_PERMS == 'sudo' ]]; then
 		sudo -n "$@"
 	else
 		"$@"
@@ -33,7 +33,7 @@ run_cmd() {
 #   $@ - Command and arguments to execute
 
 run_as_deployer() {
-	if [[ $DEPLOYER_PERMS == 'root' || $DEPLOYER_PERMS == 'sudo' ]]; then
+	if [[ $DEPLOY_PERMS == 'root' || $DEPLOY_PERMS == 'sudo' ]]; then
 		sudo -n -u deployer --preserve-env="$PRESERVE_ENV_VARS" "$@"
 	else
 		"$@"

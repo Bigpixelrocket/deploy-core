@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services\Aws;
+namespace DeployCore\Services\Aws;
 
 /**
  * AWS Route53 hosted zone service.

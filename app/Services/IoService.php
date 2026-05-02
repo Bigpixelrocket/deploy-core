@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services;
+namespace DeployCore\Services;
 
 use Closure;
-use DeployerPHP\Exceptions\ValidationException;
+use DeployCore\Exceptions\ValidationException;
 
 use function Laravel\Prompts\confirm;
 use function Laravel\Prompts\multiselect;

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use DeployerPHP\Container;
-use DeployerPHP\Exceptions\ValidationException;
-use DeployerPHP\Services\HttpService;
-use DeployerPHP\Traits\DomainOperationsTrait;
+use DeployCore\Container;
+use DeployCore\Exceptions\ValidationException;
+use DeployCore\Services\HttpService;
+use DeployCore\Traits\DomainOperationsTrait;
 use Symfony\Component\Filesystem\Filesystem;
 
 interface DomainOperationsSubject
@@ -41,7 +41,7 @@ it('surfaces classifier failures as validation exceptions', function () {
 
 function withIsolatedHomeEnvironment(callable $callback): void
 {
-    $tempHome = sys_get_temp_dir() . '/deployer-php-domain-test-' . bin2hex(random_bytes(6));
+    $tempHome = sys_get_temp_dir() . '/deploy-core-domain-test-' . bin2hex(random_bytes(6));
     $fs = new Filesystem();
     $fs->mkdir($tempHome);
 

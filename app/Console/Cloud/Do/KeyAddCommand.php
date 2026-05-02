@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Console\Cloud\Do;
+namespace DeployCore\Console\Cloud\Do;
 
-use DeployerPHP\Contracts\BaseCommand;
-use DeployerPHP\Exceptions\ValidationException;
-use DeployerPHP\Traits\DoTrait;
-use DeployerPHP\Traits\KeysTrait;
+use DeployCore\Contracts\BaseCommand;
+use DeployCore\Exceptions\ValidationException;
+use DeployCore\Traits\DoTrait;
+use DeployCore\Traits\KeysTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -129,7 +129,7 @@ class KeyAddCommand extends BaseCommand
                 throw new ValidationException('SSH public key not found.');
             }
 
-            $defaultName = 'deployer-key';
+            $defaultName = 'deploy-core-key';
 
             /** @var string $keyName */
             $keyName = $this->io->getValidatedOptionOrPrompt(

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services;
+namespace DeployCore\Services;
 
 use Symfony\Component\Yaml\Yaml;
 
@@ -220,7 +220,7 @@ class InventoryService
      */
     private function getInventoryPath(): string
     {
-        return $this->inventoryPath ?? rtrim($this->fs->getCwd(), '/') . '/.deployer/inventory.yml';
+        return $this->inventoryPath ?? rtrim($this->fs->getCwd(), '/') . '/.deploy-core/inventory.yml';
     }
 
     /**
@@ -276,7 +276,7 @@ class InventoryService
     }
 
     /**
-     * Return a note if a legacy deployer.yml exists and is ignored.
+     * Return a note if a legacy deploy-core.yml exists and is ignored.
      */
     private function getLegacyNote(): string
     {
@@ -284,9 +284,9 @@ class InventoryService
             return '';
         }
 
-        $legacyPath = rtrim($this->fs->getCwd(), '/') . '/deployer.yml';
+        $legacyPath = rtrim($this->fs->getCwd(), '/') . '/deploy-core.yml';
         if ($this->fs->exists($legacyPath)) {
-            return ' (legacy deployer.yml ignored)';
+            return ' (legacy deploy-core.yml ignored)';
         }
 
         return '';

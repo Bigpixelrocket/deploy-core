@@ -9,7 +9,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 MODE="sweep"
 MIN_AGE_MINUTES="${MIN_AGE_MINUTES:-30}"
 DRY_RUN=0
-RUN_DEPLOYER_TIER="${CLOUD_JANITOR_RUN_DEPLOYER_TIER:-1}"
+RUN_DEPLOY_TIER="${CLOUD_JANITOR_RUN_DEPLOY_TIER:-1}"
 PROVIDERS_CSV="aws,do,cf"
 
 declare -a REQUESTED_SUFFIXES=()
@@ -73,11 +73,11 @@ provider_enabled() {
 
 record_suffix_from_value() {
 	local value="$1"
-	if [[ "$value" =~ ^deployer-bats-aws-([a-zA-Z0-9]+)$ ]]; then
+	if [[ "$value" =~ ^deploy-core-bats-aws-([a-zA-Z0-9]+)$ ]]; then
 		add_candidate_suffix "${BASH_REMATCH[1]}"
-	elif [[ "$value" =~ ^deployer-bats-do-([a-zA-Z0-9]+)$ ]]; then
+	elif [[ "$value" =~ ^deploy-core-bats-do-([a-zA-Z0-9]+)$ ]]; then
 		add_candidate_suffix "${BASH_REMATCH[1]}"
-	elif [[ "$value" =~ ^deployer-bats-run-([a-zA-Z0-9]+)$ ]]; then
+	elif [[ "$value" =~ ^deploy-core-bats-run-([a-zA-Z0-9]+)$ ]]; then
 		add_candidate_suffix "${BASH_REMATCH[1]}"
 	elif [[ "$value" =~ ^testrunsuffix-([a-zA-Z0-9]+)$ ]]; then
 		add_candidate_suffix "${BASH_REMATCH[1]}"
@@ -113,7 +113,7 @@ parse_args() {
 			--providers=*) PROVIDERS_CSV="${arg#*=}" ;;
 			--min-age-minutes=*) MIN_AGE_MINUTES="${arg#*=}" ;;
 			--dry-run) DRY_RUN=1 ;;
-			--skip-deployer) RUN_DEPLOYER_TIER=0 ;;
+			--skip-deployer) RUN_DEPLOY_TIER=0 ;;
 			--help)
 				echo "Usage: cloud-janitor.sh [--mode=targeted|sweep] [--suffix=ID] [--suffixes=ID1,ID2] [--providers=aws,do,cf] [--min-age-minutes=30] [--dry-run]"
 				exit 0
@@ -135,13 +135,13 @@ parse_args() {
 }
 
 deployer_available() {
-	[[ "$RUN_DEPLOYER_TIER" == "1" ]] || return 1
+	[[ "$RUN_DEPLOY_TIER" == "1" ]] || return 1
 	command -v php > /dev/null 2>&1 || return 1
-	[[ -f "${PROJECT_ROOT}/bin/deployer" ]] || return 1
+	[[ -f "${PROJECT_ROOT}/bin/deploy" ]] || return 1
 	[[ -f "${PROJECT_ROOT}/vendor/autoload.php" ]] || return 1
 }
 
-deployer_run() { php "${PROJECT_ROOT}/bin/deployer" "$@"; }
+deployer_run() { php "${PROJECT_ROOT}/bin/deploy" "$@"; }
 aws_cli_available() { command -v aws > /dev/null 2>&1 && command -v jq > /dev/null 2>&1; }
 do_token() { printf '%s' "${DO_API_TOKEN:-${DIGITALOCEAN_API_TOKEN:-}}"; }
 cf_token() { printf '%s' "${CF_API_TOKEN:-${CLOUDFLARE_API_TOKEN:-}}"; }
@@ -184,7 +184,7 @@ cf_cleanup_records_for_suffix() {
 
 aws_cleanup_suffix() {
 	local suffix="$1"
-	local server_name="deployer-bats-aws-${suffix}"
+	local server_name="deploy-core-bats-aws-${suffix}"
 	local inventory="${PROJECT_ROOT}/tests/bats/fixtures/inventory/cloud-aws.yml"
 
 	if deployer_available; then
@@ -258,7 +258,7 @@ do_cleanup_suffix() {
 	token="$(do_token)"
 	[[ -n "$token" ]] || return 0
 
-	local server_name="deployer-bats-do-${suffix}"
+	local server_name="deploy-core-bats-do-${suffix}"
 	local inventory="${PROJECT_ROOT}/tests/bats/fixtures/inventory/cloud-do.yml"
 
 	if deployer_available; then

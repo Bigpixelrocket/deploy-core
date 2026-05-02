@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Console\Server;
+namespace DeployCore\Console\Server;
 
-use DeployerPHP\Builders\ServerBuilder;
-use DeployerPHP\Contracts\BaseCommand;
-use DeployerPHP\Exceptions\ValidationException;
-use DeployerPHP\Traits\KeysTrait;
-use DeployerPHP\Traits\PlaybooksTrait;
-use DeployerPHP\Traits\ServersTrait;
+use DeployCore\Builders\ServerBuilder;
+use DeployCore\Contracts\BaseCommand;
+use DeployCore\Exceptions\ValidationException;
+use DeployCore\Traits\KeysTrait;
+use DeployCore\Traits\PlaybooksTrait;
+use DeployCore\Traits\ServersTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

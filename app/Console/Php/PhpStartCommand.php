@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Console\Php;
+namespace DeployCore\Console\Php;
 
-use DeployerPHP\Contracts\BaseCommand;
-use DeployerPHP\Traits\PhpTrait;
-use DeployerPHP\Traits\PlaybooksTrait;
-use DeployerPHP\Traits\ServersTrait;
+use DeployCore\Contracts\BaseCommand;
+use DeployCore\Traits\PhpTrait;
+use DeployCore\Traits\PlaybooksTrait;
+use DeployCore\Traits\ServersTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -103,8 +103,8 @@ class PhpStartCommand extends BaseCommand
             'php-service',
             "Starting {$versionDisplay}...",
             [
-                'DEPLOYER_ACTION' => 'start',
-                'DEPLOYER_PHP_VERSIONS' => $versionList,
+                'DEPLOY_ACTION' => 'start',
+                'DEPLOY_PHP_VERSIONS' => $versionList,
             ],
         );
 

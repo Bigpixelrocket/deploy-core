@@ -1,9 +1,9 @@
 ---
-name: deployerphp-observer
-description: Read-only DeployerPHP observer for infrastructure triage. Use when an agent must inspect inventory, server metadata, and logs without making changes. Supports only non-interactive read commands (`server:info`, `server:logs`) with explicit CLI options.
+name: deploy-core-observer
+description: Read-only DeployCore observer for infrastructure triage. Use when an agent must inspect inventory, server metadata, and logs without making changes. Supports only non-interactive read commands (`server:info`, `server:logs`) with explicit CLI options.
 ---
 
-# DeployerPHP (Observer Tier)
+# DeployCore (Observer Tier)
 
 Use this skill to inspect state only. Do not modify infrastructure.
 
@@ -21,26 +21,26 @@ Set concrete values before running commands:
 ```bash
 PROJECT_ROOT="/path/to/project"
 ENV_FILE="$PROJECT_ROOT/.env"
-INVENTORY_FILE="$PROJECT_ROOT/.deployer/inventory.yml"
+INVENTORY_FILE="$PROJECT_ROOT/.deploy-core/inventory.yml"
 SERVER="production"
 SITE="example.com"
 ```
 
 ## References
 
-- Inventory schema: `.deployer/inventory.yml`
-- Command catalog: `deployer list --raw`
-- Command reference: `deployer help server:info`
-- Command reference: `deployer help server:logs`
+- Inventory schema: `.deploy-core/inventory.yml`
+- Command catalog: `deploy list --raw`
+- Command reference: `deploy help server:info`
+- Command reference: `deploy help server:logs`
 
 ## Non-Interactive Command Reference
 
 | Command                         | Reference                   | Complete non-interactive example                                                                                                                      |
 | ------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `server:info`                   | `deployer help server:info` | `deployer server:info --env="$ENV_FILE" --inventory="$INVENTORY_FILE" --server="$SERVER"`                                                             |
-| `server:logs` (system/services) | `deployer help server:logs` | `deployer server:logs --env="$ENV_FILE" --inventory="$INVENTORY_FILE" --server="$SERVER" --service="system,nginx,php8.3-fpm" --lines=200`             |
-| `server:logs` (site scope)      | `deployer help server:logs` | `deployer server:logs --env="$ENV_FILE" --inventory="$INVENTORY_FILE" --server="$SERVER" --site="$SITE" --lines=200`                                  |
-| `server:logs` (aggregate)       | `deployer help server:logs` | `deployer server:logs --env="$ENV_FILE" --inventory="$INVENTORY_FILE" --server="$SERVER" --service="all-sites,all-crons,all-supervisors" --lines=200` |
+| `server:info`                   | `deploy help server:info` | `deploy server:info --env="$ENV_FILE" --inventory="$INVENTORY_FILE" --server="$SERVER"`                                                             |
+| `server:logs` (system/services) | `deploy help server:logs` | `deploy server:logs --env="$ENV_FILE" --inventory="$INVENTORY_FILE" --server="$SERVER" --service="system,nginx,php8.3-fpm" --lines=200`             |
+| `server:logs` (site scope)      | `deploy help server:logs` | `deploy server:logs --env="$ENV_FILE" --inventory="$INVENTORY_FILE" --server="$SERVER" --site="$SITE" --lines=200`                                  |
+| `server:logs` (aggregate)       | `deploy help server:logs` | `deploy server:logs --env="$ENV_FILE" --inventory="$INVENTORY_FILE" --server="$SERVER" --service="all-sites,all-crons,all-supervisors" --lines=200` |
 
 ## Log Source Reference
 
@@ -68,7 +68,7 @@ Use these values with `--service` on `server:logs`:
 
 ## Standard Observation Workflow
 
-1. Read `.deployer/inventory.yml`.
+1. Read `.deploy-core/inventory.yml`.
 2. Run `server:info` for target server.
 3. Run `server:logs` with focused `--service` or `--site` filters.
 4. Return findings and recommended next command for a human/admin-tier agent.

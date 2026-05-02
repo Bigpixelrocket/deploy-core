@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Tests;
+namespace DeployCore\Tests;
 
 use PHPUnit\Framework\TestCase as BaseTestCase;
 

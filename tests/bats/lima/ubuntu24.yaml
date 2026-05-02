@@ -1,5 +1,5 @@
 # Lima VM configuration for Ubuntu 24.04 LTS (Noble Numbat)
-# Used for Deployer BATS integration testing
+# Used for DeployCore BATS integration testing
 
 images:
   - location: "https://cloud-images.ubuntu.com/releases/24.04/release/ubuntu-24.04-server-cloudimg-amd64.img"
@@ -73,4 +73,4 @@ provision:
     script: |
       #!/bin/bash
       # This runs as the lima user - placeholder for any user-level setup
-      echo "Ubuntu 24.04 VM provisioned for Deployer testing"
+      echo "Ubuntu 24.04 VM provisioned for DeployCore testing"

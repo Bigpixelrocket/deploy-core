@@ -44,7 +44,7 @@ teardown() {
 # ----
 
 @test "do:key:add uploads public key to DigitalOcean" {
-	run_deployer do:key:add \
+	run_deploy do:key:add \
 		--name="$DO_TEST_KEY_NAME" \
 		--public-key-path="$CLOUD_TEST_KEY_PATH"
 
@@ -62,7 +62,7 @@ teardown() {
 # ----
 
 @test "do:key:list shows uploaded key" {
-	run_deployer do:key:list
+	run_deploy do:key:list
 
 	debug_output
 
@@ -83,7 +83,7 @@ teardown() {
 	# Safety: only proceed if we found a key with our test name
 	[[ -n "$key_id" ]] || skip "Test key not found"
 
-	run_deployer do:key:delete \
+	run_deploy do:key:delete \
 		--key="$key_id" \
 		--force \
 		--yes
@@ -97,7 +97,7 @@ teardown() {
 }
 
 @test "do:key:list confirms key deleted" {
-	run_deployer do:key:list
+	run_deploy do:key:list
 
 	debug_output
 
@@ -115,7 +115,7 @@ teardown() {
 	# Cleanup any leftover test server
 	do_cleanup_test_server
 
-	run_deployer do:provision \
+	run_deploy do:provision \
 		--name="$DO_TEST_SERVER_NAME" \
 		--region="$DO_TEST_REGION" \
 		--size="$DO_TEST_SIZE" \
@@ -148,7 +148,7 @@ teardown() {
 	secondary_php_version="$CLOUD_TEST_PHP_SECONDARY_VERSION"
 
 	# Full install takes time - use longer timeout
-	run timeout 600 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:install \
+	run timeout 600 "$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:install \
 		--server="$DO_TEST_SERVER_NAME" \
 		--generate-deploy-key \
 		--timezone="UTC" \
@@ -164,7 +164,7 @@ teardown() {
 	assert_command_replay "server:install"
 
 	# Install secondary PHP-FPM version on the same server (keep primary as default)
-	run timeout 600 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:install \
+	run timeout 600 "$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:install \
 		--server="$DO_TEST_SERVER_NAME" \
 		--generate-deploy-key \
 		--timezone="UTC" \
@@ -194,7 +194,7 @@ teardown() {
 	# Cleanup any leftover test site
 	cleanup_test_site "$DO_TEST_SITE_DOMAIN"
 
-	run_deployer site:create \
+	run_deploy site:create \
 		--domain="$DO_TEST_SITE_DOMAIN" \
 		--server="$DO_TEST_SERVER_NAME" \
 		--php-version="$CLOUD_TEST_PHP_PRIMARY_VERSION" \
@@ -214,7 +214,7 @@ teardown() {
 	# Cleanup any leftover secondary test site
 	cleanup_test_site "$DO_TEST_SITE_DOMAIN_SECONDARY"
 
-	run_deployer site:create \
+	run_deploy site:create \
 		--domain="$DO_TEST_SITE_DOMAIN_SECONDARY" \
 		--server="$DO_TEST_SERVER_NAME" \
 		--php-version="$CLOUD_TEST_PHP_SECONDARY_VERSION" \
@@ -241,7 +241,7 @@ teardown() {
 
 	[[ -n "$server_ip" ]] || skip "Could not determine server IP"
 
-	run_deployer do:dns:set \
+	run_deploy do:dns:set \
 		--zone="$DO_TEST_DOMAIN" \
 		--type="A" \
 		--name="$DO_TEST_DNS_ROOT" \
@@ -265,7 +265,7 @@ teardown() {
 
 	[[ -n "$server_ip" ]] || skip "Could not determine server IP"
 
-	run_deployer do:dns:set \
+	run_deploy do:dns:set \
 		--zone="$DO_TEST_DOMAIN" \
 		--type="A" \
 		--name="$DO_TEST_DNS_ROOT_SECONDARY" \
@@ -284,7 +284,7 @@ teardown() {
 @test "do:dns:list shows ${DO_TEST_DNS_ROOT_FQDN} and ${DO_TEST_DNS_ROOT_SECONDARY_FQDN}" {
 	require_do_provision_config
 
-	run_deployer do:dns:list \
+	run_deploy do:dns:list \
 		--zone="$DO_TEST_DOMAIN"
 
 	debug_output
@@ -308,7 +308,7 @@ teardown() {
 
 	[[ -n "$server_ip" ]] || skip "Could not determine server IP"
 
-	run_deployer site:dns:check \
+	run_deploy site:dns:check \
 		--domain="$DO_TEST_SITE_DOMAIN"
 
 	debug_output
@@ -330,7 +330,7 @@ teardown() {
 
 	[[ -n "$server_ip" ]] || skip "Could not determine server IP"
 
-	run_deployer site:dns:check \
+	run_deploy site:dns:check \
 		--domain="$DO_TEST_SITE_DOMAIN_SECONDARY"
 
 	debug_output
@@ -351,7 +351,7 @@ teardown() {
 @test "site:shared:push uploads .env to DigitalOcean site" {
 	require_do_provision_config
 
-	run_deployer site:shared:push \
+	run_deploy site:shared:push \
 		--domain="$DO_TEST_SITE_DOMAIN" \
 		--local="${BATS_TEST_ROOT}/fixtures/env/deploy-me.env" \
 		--remote=".env"
@@ -367,7 +367,7 @@ teardown() {
 @test "site:shared:push uploads .env to DigitalOcean secondary site" {
 	require_do_provision_config
 
-	run_deployer site:shared:push \
+	run_deploy site:shared:push \
 		--domain="$DO_TEST_SITE_DOMAIN_SECONDARY" \
 		--local="${BATS_TEST_ROOT}/fixtures/env/deploy-me.env" \
 		--remote=".env"
@@ -387,7 +387,7 @@ teardown() {
 @test "site:shared:list shows uploaded shared files for DigitalOcean site" {
 	require_do_provision_config
 
-	run_deployer site:shared:list \
+	run_deploy site:shared:list \
 		--domain="$DO_TEST_SITE_DOMAIN"
 
 	debug_output
@@ -406,7 +406,7 @@ teardown() {
 
 	local pulled_env="${BATS_TEST_TMPDIR}/do-shared.env"
 
-	run_deployer site:shared:pull \
+	run_deploy site:shared:pull \
 		--domain="$DO_TEST_SITE_DOMAIN" \
 		--remote=".env" \
 		--local="$pulled_env" \
@@ -432,7 +432,7 @@ teardown() {
 	require_do_provision_config
 
 	# Deploy takes time - use longer timeout
-	run timeout 300 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi site:deploy \
+	run timeout 300 "$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi site:deploy \
 		--domain="$DO_TEST_SITE_DOMAIN" \
 		--repo="$CLOUD_TEST_DEPLOY_REPO" \
 		--branch="$CLOUD_TEST_DEPLOY_BRANCH" \
@@ -450,7 +450,7 @@ teardown() {
 @test "site:deploy deploys application to DigitalOcean secondary site" {
 	require_do_provision_config
 
-	run timeout 300 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi site:deploy \
+	run timeout 300 "$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi site:deploy \
 		--domain="$DO_TEST_SITE_DOMAIN_SECONDARY" \
 		--repo="$CLOUD_TEST_DEPLOY_REPO" \
 		--branch="$CLOUD_TEST_DEPLOY_BRANCH" \
@@ -472,7 +472,7 @@ teardown() {
 @test "cron:create adds hello.sh cron for DigitalOcean site" {
 	require_do_provision_config
 
-	run_deployer cron:create \
+	run_deploy cron:create \
 		--domain="$DO_TEST_SITE_DOMAIN" \
 		--script="$CLOUD_TEST_CRON_SUPERVISOR_SCRIPT" \
 		--schedule="* * * * *"
@@ -488,7 +488,7 @@ teardown() {
 @test "cron:sync applies hello.sh cron to DigitalOcean server" {
 	require_do_provision_config
 
-	run_deployer cron:sync \
+	run_deploy cron:sync \
 		--domain="$DO_TEST_SITE_DOMAIN"
 
 	debug_output
@@ -502,7 +502,7 @@ teardown() {
 @test "cron:sync writes DigitalOcean crontab entry and log file for hello.sh" {
 	require_do_provision_config
 
-	run_deployer server:run \
+	run_deploy server:run \
 		--server="$DO_TEST_SERVER_NAME" \
 		--command="sudo -n crontab -l -u deployer | grep -F 'runner.sh $CLOUD_TEST_CRON_SUPERVISOR_SCRIPT'"
 
@@ -511,7 +511,7 @@ teardown() {
 	[ "$status" -eq 0 ]
 	assert_output_contains "runner.sh $CLOUD_TEST_CRON_SUPERVISOR_SCRIPT"
 
-	run_deployer server:run \
+	run_deploy server:run \
 		--server="$DO_TEST_SERVER_NAME" \
 		--command="test -f /var/log/cron/$DO_TEST_SITE_DOMAIN-$CLOUD_TEST_CRON_SUPERVISOR_SCRIPT.log && echo cron-log-found"
 
@@ -524,7 +524,7 @@ teardown() {
 @test "supervisor:create adds hello.sh program for DigitalOcean site" {
 	require_do_provision_config
 
-	run_deployer supervisor:create \
+	run_deploy supervisor:create \
 		--domain="$DO_TEST_SITE_DOMAIN" \
 		--program="$CLOUD_TEST_SUPERVISOR_PROGRAM" \
 		--script="$CLOUD_TEST_CRON_SUPERVISOR_SCRIPT" \
@@ -544,7 +544,7 @@ teardown() {
 @test "supervisor:sync applies hello.sh program to DigitalOcean server" {
 	require_do_provision_config
 
-	run_deployer supervisor:sync \
+	run_deploy supervisor:sync \
 		--domain="$DO_TEST_SITE_DOMAIN"
 
 	debug_output
@@ -558,7 +558,7 @@ teardown() {
 @test "supervisor:sync writes DigitalOcean supervisor config for hello.sh" {
 	require_do_provision_config
 
-	run_deployer server:run \
+	run_deploy server:run \
 		--server="$DO_TEST_SERVER_NAME" \
 		--command="test -f /etc/supervisor/conf.d/$DO_TEST_SITE_DOMAIN-$CLOUD_TEST_SUPERVISOR_PROGRAM.conf && grep -F 'runner.sh $CLOUD_TEST_CRON_SUPERVISOR_SCRIPT' /etc/supervisor/conf.d/$DO_TEST_SITE_DOMAIN-$CLOUD_TEST_SUPERVISOR_PROGRAM.conf && echo supervisor-config-found"
 
@@ -571,7 +571,7 @@ teardown() {
 @test "supervisor lifecycle commands restart/stop/start work on DigitalOcean server" {
 	require_do_provision_config
 
-	run_deployer supervisor:restart \
+	run_deploy supervisor:restart \
 		--server="$DO_TEST_SERVER_NAME"
 
 	debug_output
@@ -580,7 +580,7 @@ teardown() {
 	assert_success_output
 	assert_command_replay "supervisor:restart"
 
-	run_deployer supervisor:stop \
+	run_deploy supervisor:stop \
 		--server="$DO_TEST_SERVER_NAME"
 
 	debug_output
@@ -589,7 +589,7 @@ teardown() {
 	assert_success_output
 	assert_command_replay "supervisor:stop"
 
-	run_deployer supervisor:start \
+	run_deploy supervisor:start \
 		--server="$DO_TEST_SERVER_NAME"
 
 	debug_output
@@ -602,7 +602,7 @@ teardown() {
 @test "cron:delete removes hello.sh cron for DigitalOcean site" {
 	require_do_provision_config
 
-	run_deployer cron:delete \
+	run_deploy cron:delete \
 		--domain="$DO_TEST_SITE_DOMAIN" \
 		--script="$CLOUD_TEST_CRON_SUPERVISOR_SCRIPT" \
 		--force \
@@ -619,7 +619,7 @@ teardown() {
 @test "cron:sync removes hello.sh crontab entry from DigitalOcean server" {
 	require_do_provision_config
 
-	run_deployer cron:sync \
+	run_deploy cron:sync \
 		--domain="$DO_TEST_SITE_DOMAIN"
 
 	debug_output
@@ -628,7 +628,7 @@ teardown() {
 	assert_success_output
 	assert_command_replay "cron:sync"
 
-	run_deployer server:run \
+	run_deploy server:run \
 		--server="$DO_TEST_SERVER_NAME" \
 		--command="if sudo -n crontab -l -u deployer 2>/dev/null | grep -Fq 'runner.sh $CLOUD_TEST_CRON_SUPERVISOR_SCRIPT'; then echo cron-entry-present; exit 1; else echo cron-entry-absent; fi"
 
@@ -641,7 +641,7 @@ teardown() {
 @test "supervisor:delete removes hello.sh program for DigitalOcean site" {
 	require_do_provision_config
 
-	run_deployer supervisor:delete \
+	run_deploy supervisor:delete \
 		--domain="$DO_TEST_SITE_DOMAIN" \
 		--program="$CLOUD_TEST_SUPERVISOR_PROGRAM" \
 		--force \
@@ -658,7 +658,7 @@ teardown() {
 @test "supervisor:sync removes hello.sh supervisor config from DigitalOcean server" {
 	require_do_provision_config
 
-	run_deployer supervisor:sync \
+	run_deploy supervisor:sync \
 		--domain="$DO_TEST_SITE_DOMAIN"
 
 	debug_output
@@ -667,7 +667,7 @@ teardown() {
 	assert_success_output
 	assert_command_replay "supervisor:sync"
 
-	run_deployer server:run \
+	run_deploy server:run \
 		--server="$DO_TEST_SERVER_NAME" \
 		--command="if test -f /etc/supervisor/conf.d/$DO_TEST_SITE_DOMAIN-$CLOUD_TEST_SUPERVISOR_PROGRAM.conf; then echo supervisor-config-present; exit 1; else echo supervisor-config-absent; fi"
 
@@ -684,7 +684,7 @@ teardown() {
 @test "site:https enables HTTPS for ${DO_TEST_SITE_DOMAIN}" {
 	require_do_provision_config
 
-	run timeout 300 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi site:https \
+	run timeout 300 "$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi site:https \
 		--domain="$DO_TEST_SITE_DOMAIN"
 
 	debug_output
@@ -698,7 +698,7 @@ teardown() {
 @test "site:https enables HTTPS for ${DO_TEST_SITE_DOMAIN_SECONDARY}" {
 	require_do_provision_config
 
-	run timeout 300 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi site:https \
+	run timeout 300 "$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi site:https \
 		--domain="$DO_TEST_SITE_DOMAIN_SECONDARY"
 
 	debug_output
@@ -733,7 +733,7 @@ teardown() {
 @test "site:rollback shows forward-only deployment guidance" {
 	require_do_provision_config
 
-	run_deployer site:rollback
+	run_deploy site:rollback
 
 	debug_output
 
@@ -750,7 +750,7 @@ teardown() {
 @test "site:delete removes ${DO_TEST_SITE_DOMAIN_SECONDARY} from server and inventory" {
 	require_do_provision_config
 
-	run_deployer site:delete \
+	run_deploy site:delete \
 		--domain="$DO_TEST_SITE_DOMAIN_SECONDARY" \
 		--force \
 		--yes
@@ -766,7 +766,7 @@ teardown() {
 @test "site:delete removes ${DO_TEST_SITE_DOMAIN} from server and inventory" {
 	require_do_provision_config
 
-	run_deployer site:delete \
+	run_deploy site:delete \
 		--domain="$DO_TEST_SITE_DOMAIN" \
 		--force \
 		--yes
@@ -786,7 +786,7 @@ teardown() {
 @test "do:dns:delete removes prefixed A record ${DO_TEST_DNS_ROOT_SECONDARY_FQDN}" {
 	require_do_provision_config
 
-	run_deployer do:dns:delete \
+	run_deploy do:dns:delete \
 		--zone="$DO_TEST_DOMAIN" \
 		--type="A" \
 		--name="$DO_TEST_DNS_ROOT_SECONDARY" \
@@ -804,7 +804,7 @@ teardown() {
 @test "do:dns:delete removes prefixed A record ${DO_TEST_DNS_ROOT_FQDN}" {
 	require_do_provision_config
 
-	run_deployer do:dns:delete \
+	run_deploy do:dns:delete \
 		--zone="$DO_TEST_DOMAIN" \
 		--type="A" \
 		--name="$DO_TEST_DNS_ROOT" \
@@ -826,7 +826,7 @@ teardown() {
 @test "server:delete removes DigitalOcean droplet" {
 	require_do_provision_config
 
-	run_deployer server:delete \
+	run_deploy server:delete \
 		--server="$DO_TEST_SERVER_NAME" \
 		--force \
 		--yes \

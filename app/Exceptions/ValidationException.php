@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Exceptions;
+namespace DeployCore\Exceptions;
 
 /**
  * Thrown when user input validation fails.

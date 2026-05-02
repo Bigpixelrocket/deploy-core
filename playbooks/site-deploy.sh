@@ -18,43 +18,43 @@
 set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-[[ -z $DEPLOYER_OUTPUT_FILE ]] && echo "Error: DEPLOYER_OUTPUT_FILE required" && exit 1
-[[ -z $DEPLOYER_PERMS ]] && echo "Error: DEPLOYER_PERMS required" && exit 1
-[[ -z $DEPLOYER_SITE_DOMAIN ]] && echo "Error: DEPLOYER_SITE_DOMAIN required" && exit 1
-[[ -z $DEPLOYER_SITE_REPO ]] && echo "Error: DEPLOYER_SITE_REPO required" && exit 1
-[[ -z $DEPLOYER_SITE_BRANCH ]] && echo "Error: DEPLOYER_SITE_BRANCH required" && exit 1
-[[ -z $DEPLOYER_PHP_VERSION ]] && echo "Error: DEPLOYER_PHP_VERSION required" && exit 1
+[[ -z $DEPLOY_OUTPUT_FILE ]] && echo "Error: DEPLOY_OUTPUT_FILE required" && exit 1
+[[ -z $DEPLOY_PERMS ]] && echo "Error: DEPLOY_PERMS required" && exit 1
+[[ -z $DEPLOY_SITE_DOMAIN ]] && echo "Error: DEPLOY_SITE_DOMAIN required" && exit 1
+[[ -z $DEPLOY_SITE_REPO ]] && echo "Error: DEPLOY_SITE_REPO required" && exit 1
+[[ -z $DEPLOY_SITE_BRANCH ]] && echo "Error: DEPLOY_SITE_BRANCH required" && exit 1
+[[ -z $DEPLOY_PHP_VERSION ]] && echo "Error: DEPLOY_PHP_VERSION required" && exit 1
 
-DEPLOYER_KEEP_RELEASES=${DEPLOYER_KEEP_RELEASES:-5}
-if ! [[ $DEPLOYER_KEEP_RELEASES =~ ^[0-9]+$ ]] || ((DEPLOYER_KEEP_RELEASES < 1)); then
-	DEPLOYER_KEEP_RELEASES=5
+DEPLOY_KEEP_RELEASES=${DEPLOY_KEEP_RELEASES:-5}
+if ! [[ $DEPLOY_KEEP_RELEASES =~ ^[0-9]+$ ]] || ((DEPLOY_KEEP_RELEASES < 1)); then
+	DEPLOY_KEEP_RELEASES=5
 fi
-export DEPLOYER_PERMS
+export DEPLOY_PERMS
 
 # Shared helpers are automatically inlined when executing playbooks remotely
 # source "$(dirname "$0")/helpers.sh"
 
-SITE_ROOT="/home/deployer/sites/${DEPLOYER_SITE_DOMAIN}"
+SITE_ROOT="/home/deployer/sites/${DEPLOY_SITE_DOMAIN}"
 RELEASE_NAME=$(date +%Y%m%d_%H%M%S)
 RELEASE_PATH="${SITE_ROOT}/releases/${RELEASE_NAME}"
 SHARED_PATH="${SITE_ROOT}/shared"
 CURRENT_PATH="${SITE_ROOT}/current"
 REPO_PATH="${SITE_ROOT}/repo"
 
-export DEPLOYER_RELEASE_PATH="$RELEASE_PATH"
-export DEPLOYER_SHARED_PATH="$SHARED_PATH"
-export DEPLOYER_CURRENT_PATH="$CURRENT_PATH"
-export DEPLOYER_REPO_PATH="$REPO_PATH"
-export DEPLOYER_DOMAIN="$DEPLOYER_SITE_DOMAIN"
-export DEPLOYER_BRANCH="$DEPLOYER_SITE_BRANCH"
-export DEPLOYER_KEEP_RELEASES
+export DEPLOY_RELEASE_PATH="$RELEASE_PATH"
+export DEPLOY_SHARED_PATH="$SHARED_PATH"
+export DEPLOY_CURRENT_PATH="$CURRENT_PATH"
+export DEPLOY_REPO_PATH="$REPO_PATH"
+export DEPLOY_DOMAIN="$DEPLOY_SITE_DOMAIN"
+export DEPLOY_BRANCH="$DEPLOY_SITE_BRANCH"
+export DEPLOY_KEEP_RELEASES
 
 # Variables to preserve when sudo sanitizes the environment for security.
 # Scripts need deployment context (paths, domain, PHP version, etc).
 # Used by run_as_deployer() in helpers.sh and by run_script() when it
 # executes deploy.sh via sudo.
 # shellcheck disable=SC2034 # Used by inlined helpers.sh
-PRESERVE_ENV_VARS="DEPLOYER_RELEASE_PATH,DEPLOYER_SHARED_PATH,DEPLOYER_CURRENT_PATH,DEPLOYER_REPO_PATH,DEPLOYER_DOMAIN,DEPLOYER_BRANCH,DEPLOYER_PHP_VERSION,DEPLOYER_PHP,DEPLOYER_KEEP_RELEASES,DEPLOYER_PERMS"
+PRESERVE_ENV_VARS="DEPLOY_RELEASE_PATH,DEPLOY_SHARED_PATH,DEPLOY_CURRENT_PATH,DEPLOY_REPO_PATH,DEPLOY_DOMAIN,DEPLOY_BRANCH,DEPLOY_PHP_VERSION,DEPLOY_PHP,DEPLOY_KEEP_RELEASES,DEPLOY_PERMS"
 
 # ----
 # Helper Functions
@@ -72,7 +72,7 @@ PRESERVE_ENV_VARS="DEPLOYER_RELEASE_PATH,DEPLOYER_SHARED_PATH,DEPLOYER_CURRENT_P
 
 run_script() {
 	local script_name=$1
-	local script_path="${DEPLOYER_RELEASE_PATH}/.deployer/scripts/${script_name}"
+	local script_path="${DEPLOY_RELEASE_PATH}/.deploy-core/scripts/${script_name}"
 
 	if ! run_cmd test -f "$script_path"; then
 		return 0
@@ -86,11 +86,11 @@ run_script() {
 
 	# Run project deploy scripts with elevated permissions so they can perform
 	# permission/ownership cleanup across framework-specific runtime paths.
-	if [[ $DEPLOYER_PERMS == 'sudo' ]]; then
-		if ! sudo -n --preserve-env="$PRESERVE_ENV_VARS" env HOME=/home/deployer USER=deployer LOGNAME=deployer COMPOSER_ALLOW_SUPERUSER=1 bash -c "cd $(printf '%q' "$DEPLOYER_RELEASE_PATH") && $(printf '%q' "$script_path")"; then
+	if [[ $DEPLOY_PERMS == 'sudo' ]]; then
+		if ! sudo -n --preserve-env="$PRESERVE_ENV_VARS" env HOME=/home/deployer USER=deployer LOGNAME=deployer COMPOSER_ALLOW_SUPERUSER=1 bash -c "cd $(printf '%q' "$DEPLOY_RELEASE_PATH") && $(printf '%q' "$script_path")"; then
 			fail "${script_name} script failed"
 		fi
-	elif ! run_cmd env HOME=/home/deployer USER=deployer LOGNAME=deployer COMPOSER_ALLOW_SUPERUSER=1 bash -c "cd $(printf '%q' "$DEPLOYER_RELEASE_PATH") && $(printf '%q' "$script_path")"; then
+	elif ! run_cmd env HOME=/home/deployer USER=deployer LOGNAME=deployer COMPOSER_ALLOW_SUPERUSER=1 bash -c "cd $(printf '%q' "$DEPLOY_RELEASE_PATH") && $(printf '%q' "$script_path")"; then
 		fail "${script_name} script failed"
 	fi
 }
@@ -103,19 +103,19 @@ run_script() {
 # Detect and export PHP binary path for specified version
 #
 # Side effects:
-#   Sets DEPLOYER_PHP environment variable with binary path
+#   Sets DEPLOY_PHP environment variable with binary path
 
 detect_php_binary() {
 	local candidate
-	if command -v "php${DEPLOYER_PHP_VERSION}" > /dev/null 2>&1; then
-		candidate=$(command -v "php${DEPLOYER_PHP_VERSION}")
+	if command -v "php${DEPLOY_PHP_VERSION}" > /dev/null 2>&1; then
+		candidate=$(command -v "php${DEPLOY_PHP_VERSION}")
 	elif command -v php > /dev/null 2>&1; then
 		candidate=$(command -v php)
 	else
-		fail "Unable to locate PHP ${DEPLOYER_PHP_VERSION} binary on the server"
+		fail "Unable to locate PHP ${DEPLOY_PHP_VERSION} binary on the server"
 	fi
 
-	export DEPLOYER_PHP="$candidate"
+	export DEPLOY_PHP="$candidate"
 }
 
 # ----
@@ -160,9 +160,9 @@ prepare_directories() {
 ensure_git_host_known() {
 	local repo_domain=""
 
-	if [[ $DEPLOYER_SITE_REPO =~ ^git@([^:]+): ]]; then
+	if [[ $DEPLOY_SITE_REPO =~ ^git@([^:]+): ]]; then
 		repo_domain="${BASH_REMATCH[1]}"
-	elif [[ $DEPLOYER_SITE_REPO =~ ^ssh://[^@]+@([^/]+)/ ]]; then
+	elif [[ $DEPLOY_SITE_REPO =~ ^ssh://[^@]+@([^/]+)/ ]]; then
 		repo_domain="${BASH_REMATCH[1]}"
 	fi
 
@@ -199,19 +199,19 @@ clone_or_update_repo() {
 	if ! run_cmd test -d "${REPO_PATH}/objects"; then
 		echo "→ Cloning repository..."
 		run_cmd rm -rf "$REPO_PATH" || true
-		if ! run_as_deployer git clone --bare "$DEPLOYER_SITE_REPO" "$REPO_PATH"; then
+		if ! run_as_deployer git clone --bare "$DEPLOY_SITE_REPO" "$REPO_PATH"; then
 			fail "Failed to clone repository"
 		fi
 	else
 		echo "→ Fetching latest changes..."
-		run_as_deployer git --git-dir="$REPO_PATH" remote set-url origin "$DEPLOYER_SITE_REPO" || fail "Failed to update repository URL"
+		run_as_deployer git --git-dir="$REPO_PATH" remote set-url origin "$DEPLOY_SITE_REPO" || fail "Failed to update repository URL"
 		if ! run_as_deployer git --git-dir="$REPO_PATH" fetch origin '+refs/heads/*:refs/heads/*' --prune; then
 			fail "Failed to fetch repository updates"
 		fi
 	fi
 
-	if ! run_as_deployer git --git-dir="$REPO_PATH" rev-parse --verify "$DEPLOYER_SITE_BRANCH" > /dev/null 2>&1; then
-		fail "Branch '${DEPLOYER_SITE_BRANCH}' not found in repository"
+	if ! run_as_deployer git --git-dir="$REPO_PATH" rev-parse --verify "$DEPLOY_SITE_BRANCH" > /dev/null 2>&1; then
+		fail "Branch '${DEPLOY_SITE_BRANCH}' not found in repository"
 	fi
 }
 
@@ -232,11 +232,11 @@ build_release() {
 
 	local repo_q branch_q release_q
 	printf -v repo_q "%q" "$REPO_PATH"
-	printf -v branch_q "%q" "$DEPLOYER_SITE_BRANCH"
+	printf -v branch_q "%q" "$DEPLOY_SITE_BRANCH"
 	printf -v release_q "%q" "$RELEASE_PATH"
 
 	if ! run_as_deployer bash -c "set -euo pipefail; git --git-dir=${repo_q} archive ${branch_q} | tar -x -C ${release_q}"; then
-		fail "Failed to export code for ${DEPLOYER_SITE_BRANCH}"
+		fail "Failed to export code for ${DEPLOY_SITE_BRANCH}"
 	fi
 
 	# Ensure strict ownership and permissions on the release directory after extraction
@@ -279,11 +279,11 @@ cleanup_releases() {
 	mapfile -t releases < <(run_cmd find "${SITE_ROOT}/releases" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort) || true
 	total=${#releases[@]}
 
-	if ((total <= DEPLOYER_KEEP_RELEASES)); then
+	if ((total <= DEPLOY_KEEP_RELEASES)); then
 		return
 	fi
 
-	local remove_count=$((total - DEPLOYER_KEEP_RELEASES))
+	local remove_count=$((total - DEPLOY_KEEP_RELEASES))
 	for ((i = 0; i < remove_count; i++)); do
 		local old_release="${SITE_ROOT}/releases/${releases[i]}"
 		echo "→ Removing old release ${releases[i]}..."
@@ -298,7 +298,7 @@ cleanup_releases() {
 
 reload_php_fpm() {
 	echo "→ Reloading PHP-FPM..."
-	run_cmd systemctl reload "php${DEPLOYER_PHP_VERSION}-fpm" || fail "Failed to reload PHP-FPM"
+	run_cmd systemctl reload "php${DEPLOY_PHP_VERSION}-fpm" || fail "Failed to reload PHP-FPM"
 }
 
 # ----
@@ -308,18 +308,18 @@ reload_php_fpm() {
 #
 # Restart supervisor programs for this site
 #
-# Reads DEPLOYER_SUPERVISORS JSON and restarts each program.
+# Reads DEPLOY_SUPERVISORS JSON and restarts each program.
 # Failures are warnings, not errors (deployment already succeeded).
 
 restart_supervisor_programs() {
 	# Skip if no supervisors configured
-	if [[ -z ${DEPLOYER_SUPERVISORS:-} ]]; then
+	if [[ -z ${DEPLOY_SUPERVISORS:-} ]]; then
 		return 0
 	fi
 
 	# Parse supervisor count
 	local supervisor_count
-	supervisor_count=$(echo "$DEPLOYER_SUPERVISORS" | jq 'length' 2> /dev/null) || supervisor_count=0
+	supervisor_count=$(echo "$DEPLOY_SUPERVISORS" | jq 'length' 2> /dev/null) || supervisor_count=0
 
 	if ((supervisor_count == 0)); then
 		return 0
@@ -330,8 +330,8 @@ restart_supervisor_programs() {
 	local i=0 failed=0
 	while ((i < supervisor_count)); do
 		local program full_name
-		program=$(echo "$DEPLOYER_SUPERVISORS" | jq -r ".[$i].program")
-		full_name="${DEPLOYER_SITE_DOMAIN}-${program}"
+		program=$(echo "$DEPLOY_SUPERVISORS" | jq -r ".[$i].program")
+		full_name="${DEPLOY_SITE_DOMAIN}-${program}"
 
 		echo "→ Restarting ${full_name}..."
 		if ! run_cmd supervisorctl restart "$full_name" > /dev/null 2>&1; then
@@ -366,12 +366,12 @@ create_runner_script() {
 		#!/usr/bin/env bash
 		set -o pipefail
 
-		export DEPLOYER_RELEASE_PATH="__RELEASE_PATH__"
-		export DEPLOYER_SHARED_PATH="__SHARED_PATH__"
-		export DEPLOYER_CURRENT_PATH="__CURRENT_PATH__"
-		export DEPLOYER_DOMAIN="__DOMAIN__"
-		export DEPLOYER_BRANCH="__BRANCH__"
-		export DEPLOYER_PHP="__PHP__"
+		export DEPLOY_RELEASE_PATH="__RELEASE_PATH__"
+		export DEPLOY_SHARED_PATH="__SHARED_PATH__"
+		export DEPLOY_CURRENT_PATH="__CURRENT_PATH__"
+		export DEPLOY_DOMAIN="__DOMAIN__"
+		export DEPLOY_BRANCH="__BRANCH__"
+		export DEPLOY_PHP="__PHP__"
 
 		[[ -z ${1:-} ]] && echo "Error: Script path required" >&2 && exit 1
 
@@ -382,17 +382,17 @@ create_runner_script() {
 		[[ $script_path == *..* ]] && echo "Error: Path cannot contain '..'" >&2 && exit 1
 
 		# Build and validate full path
-		full_path="${DEPLOYER_CURRENT_PATH}/${script_path}"
+		full_path="${DEPLOY_CURRENT_PATH}/${script_path}"
 		[[ ! -f $full_path ]] && echo "Error: Script not found: ${script_path}" >&2 && exit 1
 
 		# Verify script is within current release
 		resolved_path=$(realpath "$full_path" 2>/dev/null)
-		resolved_current=$(realpath "$DEPLOYER_CURRENT_PATH" 2>/dev/null)
+		resolved_current=$(realpath "$DEPLOY_CURRENT_PATH" 2>/dev/null)
 		[[ $resolved_path != ${resolved_current}/* ]] && echo "Error: Script must be within current release" >&2 && exit 1
 
 		# Make executable and run
 		[[ ! -x $full_path ]] && chmod +x "$full_path"
-		cd "$DEPLOYER_CURRENT_PATH" || exit 1
+		cd "$DEPLOY_CURRENT_PATH" || exit 1
 		exec "$full_path"
 	RUNNER_EOF
 		fail "Failed to create runner script"
@@ -403,9 +403,9 @@ create_runner_script() {
 		-e "s|__RELEASE_PATH__|${RELEASE_PATH}|g" \
 		-e "s|__SHARED_PATH__|${SHARED_PATH}|g" \
 		-e "s|__CURRENT_PATH__|${CURRENT_PATH}|g" \
-		-e "s|__DOMAIN__|${DEPLOYER_SITE_DOMAIN}|g" \
-		-e "s|__BRANCH__|${DEPLOYER_SITE_BRANCH}|g" \
-		-e "s|__PHP__|${DEPLOYER_PHP}|g" \
+		-e "s|__DOMAIN__|${DEPLOY_SITE_DOMAIN}|g" \
+		-e "s|__BRANCH__|${DEPLOY_SITE_BRANCH}|g" \
+		-e "s|__PHP__|${DEPLOY_PHP}|g" \
 		"$runner_path" || fail "Failed to configure runner script"
 
 	run_cmd chown deployer:deployer "$runner_path" || fail "Failed to set runner script ownership"
@@ -420,14 +420,14 @@ create_runner_script() {
 # Write YAML output file with deployment results
 
 write_output() {
-	if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+	if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 		status: success
-		domain: ${DEPLOYER_SITE_DOMAIN}
-		branch: ${DEPLOYER_SITE_BRANCH}
+		domain: ${DEPLOY_SITE_DOMAIN}
+		branch: ${DEPLOY_SITE_BRANCH}
 		release_name: ${RELEASE_NAME}
 		release_path: ${RELEASE_PATH}
 		current_path: ${CURRENT_PATH}
-		keep_releases: ${DEPLOYER_KEEP_RELEASES}
+		keep_releases: ${DEPLOY_KEEP_RELEASES}
 	EOF
 		echo "Error: Failed to write output file" >&2
 		exit 1

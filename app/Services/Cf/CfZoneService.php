@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services\Cf;
+namespace DeployCore\Services\Cf;
 
 /**
  * Cloudflare zone management service.

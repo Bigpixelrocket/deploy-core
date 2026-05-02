@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services;
+namespace DeployCore\Services;
 
 /**
  * Git operations service.
@@ -66,7 +66,7 @@ final readonly class GitService
      */
     public function checkRemoteFilesExist(string $repo, string $branch, array $paths): array
     {
-        $tempDir = sys_get_temp_dir().'/deployer-git-check-'.bin2hex(random_bytes(8));
+        $tempDir = sys_get_temp_dir().'/deploy-core-git-check-'.bin2hex(random_bytes(8));
 
         try {
             // Shallow clone with depth=1 to minimize data transfer
@@ -111,7 +111,7 @@ final readonly class GitService
      */
     public function listRemoteDirectoryFiles(string $repo, string $branch, string $directory): array
     {
-        $tempDir = sys_get_temp_dir().'/deployer-git-check-'.bin2hex(random_bytes(8));
+        $tempDir = sys_get_temp_dir().'/deploy-core-git-check-'.bin2hex(random_bytes(8));
 
         try {
             // Shallow clone with depth=1 to minimize data transfer

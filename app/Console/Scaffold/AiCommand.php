@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Console\Scaffold;
+namespace DeployCore\Console\Scaffold;
 
-use DeployerPHP\Contracts\BaseCommand;
-use DeployerPHP\Exceptions\ValidationException;
-use DeployerPHP\Traits\ScaffoldsTrait;
+use DeployCore\Contracts\BaseCommand;
+use DeployCore\Exceptions\ValidationException;
+use DeployCore\Traits\ScaffoldsTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -14,7 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
     name: 'scaffold:ai',
-    description: 'Scaffold AI agent skill for DeployerPHP (observer, debugger, or admin tier)'
+    description: 'Scaffold AI agent skill for DeployCore (observer, debugger, or admin tier)'
 )]
 class AiCommand extends BaseCommand
 {
@@ -135,7 +135,7 @@ class AiCommand extends BaseCommand
     {
         /** @var string $tier */
         $tier = $context['tier'];
-        $templateDir = sprintf('deployerphp-%s', $tier);
+        $templateDir = sprintf('deploy-core-%s', $tier);
 
         return $this->fs->joinPaths(dirname(__DIR__, 3), 'scaffolds', $type, $templateDir);
     }
@@ -232,7 +232,7 @@ class AiCommand extends BaseCommand
     private function buildAgentTargetPath(string $destinationDir, string $agent, string $tier): string
     {
         $agentDir = self::AGENT_DIRS[$agent];
-        $skillDir = sprintf('deployerphp-%s', $tier);
+        $skillDir = sprintf('deploy-core-%s', $tier);
 
         return $this->fs->joinPaths($destinationDir, $agentDir, 'skills', $skillDir);
     }

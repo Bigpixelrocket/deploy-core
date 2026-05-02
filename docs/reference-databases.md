@@ -74,7 +74,7 @@ Use database commands to install and operate MariaDB, PostgreSQL, Redis, and Mem
 
 MariaDB, PostgreSQL, and Redis share a credential delivery workflow during installation. After installing the service, you can choose to display credentials on screen or save them to a file (written with 0600 permissions, appending to existing credential files).
 
-Each install command is idempotent: if the service is already installed, DeployerPHP detects it and skips reinstallation. Credentials are only generated on fresh installs, so capture them during the initial installation.
+Each install command is idempotent: if the service is already installed, DeployCore detects it and skips reinstallation. Credentials are only generated on fresh installs, so capture them during the initial installation.
 
 <a name="memcached-installation"></a>
 

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Console\Redis;
+namespace DeployCore\Console\Redis;
 
-use DeployerPHP\Contracts\BaseCommand;
-use DeployerPHP\Traits\PlaybooksTrait;
-use DeployerPHP\Traits\ServersTrait;
+use DeployCore\Contracts\BaseCommand;
+use DeployCore\Traits\PlaybooksTrait;
+use DeployCore\Traits\ServersTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -62,7 +62,7 @@ class RedisStartCommand extends BaseCommand
             'redis-service',
             'Starting Redis service...',
             [
-                'DEPLOYER_ACTION' => 'start',
+                'DEPLOY_ACTION' => 'start',
             ],
         );
 

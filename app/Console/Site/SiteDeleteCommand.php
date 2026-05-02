@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Console\Site;
+namespace DeployCore\Console\Site;
 
-use DeployerPHP\Builders\SiteServerBuilder;
-use DeployerPHP\Contracts\BaseCommand;
-use DeployerPHP\Traits\PlaybooksTrait;
-use DeployerPHP\Traits\ServersTrait;
-use DeployerPHP\Traits\SitesTrait;
+use DeployCore\Builders\SiteServerBuilder;
+use DeployCore\Contracts\BaseCommand;
+use DeployCore\Traits\PlaybooksTrait;
+use DeployCore\Traits\ServersTrait;
+use DeployCore\Traits\SitesTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

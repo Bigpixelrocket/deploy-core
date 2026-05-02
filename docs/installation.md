@@ -2,7 +2,7 @@
 
 <!-- toc -->
 
-- [Install DeployerPHP](#install-deployerphp)
+- [Install DeployCore](#install-deploy-core)
 - [Requirements](#requirements)
 - [The Commands](#the-commands)
 - [The Inventory](#the-inventory)
@@ -12,23 +12,23 @@
 
 <!-- /toc -->
 
-This guide is your starting point for understanding DeployerPHP. It walks you through the main operational concepts so you can move forward with the right mental model.
+This guide is your starting point for understanding DeployCore. It walks you through the main operational concepts so you can move forward with the right mental model.
 
-<a name="install-deployerphp"></a>
+<a name="install-deploy-core"></a>
 
-## Install DeployerPHP
+## Install DeployCore
 
-Install DeployerPHP like any other Composer package:
+Install DeployCore like any other Composer package:
 
 ```shell
 # Install as a dev dependency
-composer require --dev loadinglucian/deployer-php
+composer require --dev bigpixelrocket/deploy-core
 
 # Add an alias for convenience
-alias deployer="./vendor/bin/deployer"
+alias deploy="./vendor/bin/deploy"
 
 # I use it a lot, so I prefer to shorten it even more
-alias dep="deployer"
+alias dep="deploy"
 ```
 
 > [!NOTE]
@@ -38,7 +38,7 @@ alias dep="deployer"
 
 ## Requirements
 
-DeployerPHP has some pretty basic requirements:
+DeployCore has some pretty basic requirements:
 
 - At least PHP 8.2
 - The `pcntl` PHP extension (if you want to use the `server:ssh` command)
@@ -49,12 +49,12 @@ Your target servers should run Ubuntu LTS >= 24.04 (no interim releases like 25.
 
 ## The Commands
 
-DeployerPHP has a lot of commands and capabilities. There are quite a few, which can feel a bit daunting at first. The key is not to try to remember what each one is called or what it does but rather how they're all organized.
+DeployCore has a lot of commands and capabilities. There are quite a few, which can feel a bit daunting at first. The key is not to try to remember what each one is called or what it does but rather how they're all organized.
 
 Run the `list` command to see all the available commands:
 
 ```shell
-deployer list
+deploy list
 ```
 
 Commands are organized into namespaces that represent what each group manages:
@@ -74,7 +74,7 @@ For namespace-by-namespace behavior details, see the [Documentation Index](docum
 
 ## The Inventory
 
-DeployerPHP tracks your servers and sites in an inventory file, which it initializes in your current working directory as `.deployer/inventory.yml`. This inventory file stores the details of servers you add and sites you create, so you don't have to re-enter connection details, domain names or IPs each time you run a command.
+DeployCore tracks your servers and sites in an inventory file, which it initializes in your current working directory as `.deploy-core/inventory.yml`. This inventory file stores the details of servers you add and sites you create, so you don't have to re-enter connection details, domain names or IPs each time you run a command.
 
 Commands automatically reference the inventory, making it easy to manage multiple servers or sites. This file does not contain any sensitive information, so it is safe to commit to version control.
 
@@ -84,20 +84,20 @@ Commands automatically reference the inventory, making it easy to manage multipl
 
 Besides the inventory, commands also automatically reference the `.env` file in your current working directory if it exists.
 
-Running any DeployerPHP command should display which environment or inventory files are being actively referenced right at the top:
+Running any DeployCore command should display which environment or inventory files are being actively referenced right at the top:
 
 ```EXAMPLE nocopy
-▒ ≡ DeployerPHP ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▒ ≡ DeployCore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ▒
 ▒ Ver: ...
 ▒ Env: ~/example.com/.env
-▒ Inv: ~/example.com/.deployer/inventory.yml
+▒ Inv: ~/example.com/.deploy-core/inventory.yml
 .
 .
 .
 ```
 
-By default, DeployerPHP looks for both files in your current working directory. This works well for most projects, but you may need a little more flexibility when managing multiple environments or working from different directories.
+By default, DeployCore looks for both files in your current working directory. This works well for most projects, but you may need a little more flexibility when managing multiple environments or working from different directories.
 
 Every command accepts two global options for overriding these paths:
 
@@ -111,18 +111,18 @@ This is particularly useful when you:
 - Keep environment files in a centralized location
 - Use different cloud provider credentials for different environments
 
-For example, you might maintain `deployer-staging.yml` and `deployer-production.yml` in the same project, then use `--inventory` to target the appropriate environment.
+For example, you might maintain `deploy-core-staging.yml` and `deploy-core-production.yml` in the same project, then use `--inventory` to target the appropriate environment.
 
 <a name="command-replays"></a>
 
 ## Command Replays
 
-Every DeployerPHP command prints a non-interactive replay at the end of its run. This replay shows the exact command with all of your prompt responses filled in as CLI options:
+Every DeployCore command prints a non-interactive replay at the end of its run. This replay shows the exact command with all of your prompt responses filled in as CLI options:
 
 ```EXAMPLE nocopy
 Non-interactive command replay:
 ───────────────────────────────────────────────────────────────────────────
-$> deployer server:add  \
+$> deploy server:add  \
   --name='web1' \
   --host='123.456.789.123' \
   --port='22' \

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Console\Server;
+namespace DeployCore\Console\Server;
 
-use DeployerPHP\Contracts\BaseCommand;
-use DeployerPHP\DTOs\ServerDTO;
-use DeployerPHP\Exceptions\ValidationException;
-use DeployerPHP\Traits\KeysTrait;
-use DeployerPHP\Traits\PlaybooksTrait;
-use DeployerPHP\Traits\ServersTrait;
+use DeployCore\Contracts\BaseCommand;
+use DeployCore\DTOs\ServerDTO;
+use DeployCore\Exceptions\ValidationException;
+use DeployCore\Traits\KeysTrait;
+use DeployCore\Traits\PlaybooksTrait;
+use DeployCore\Traits\ServersTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -72,7 +72,7 @@ class ServerInstallCommand extends BaseCommand
             'package-list',
             'Preparing packages...',
             [
-                'DEPLOYER_GATHER_PHP' => 'true',
+                'DEPLOY_GATHER_PHP' => 'true',
             ],
         );
 
@@ -272,8 +272,8 @@ class ServerInstallCommand extends BaseCommand
                 return Command::FAILURE;
             }
 
-            $playbookVars['DEPLOYER_KEY_PRIVATE'] = base64_encode($privateKeyContent);
-            $playbookVars['DEPLOYER_KEY_PUBLIC'] = base64_encode($publicKeyContent);
+            $playbookVars['DEPLOY_KEY_PRIVATE'] = base64_encode($privateKeyContent);
+            $playbookVars['DEPLOY_KEY_PUBLIC'] = base64_encode($publicKeyContent);
         }
 
         //
@@ -363,7 +363,7 @@ class ServerInstallCommand extends BaseCommand
             'timezone-configure',
             'Configuring timezone...',
             [
-                'DEPLOYER_TIMEZONE' => $timezone,
+                'DEPLOY_TIMEZONE' => $timezone,
             ],
         );
 
@@ -675,9 +675,9 @@ class ServerInstallCommand extends BaseCommand
             'php-install',
             "Installing PHP...",
             [
-                'DEPLOYER_PHP_VERSION' => $phpVersion,
-                'DEPLOYER_PHP_SET_DEFAULT' => $setAsDefault ? 'true' : 'false',
-                'DEPLOYER_PHP_EXTENSIONS' => implode(',', $selectedExtensions),
+                'DEPLOY_PHP_VERSION' => $phpVersion,
+                'DEPLOY_PHP_SET_DEFAULT' => $setAsDefault ? 'true' : 'false',
+                'DEPLOY_PHP_EXTENSIONS' => implode(',', $selectedExtensions),
             ],
         );
 

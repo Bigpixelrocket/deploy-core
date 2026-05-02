@@ -28,10 +28,10 @@ setup() {
 # Install Test Helpers
 # ----
 
-run_deployer_timeout() {
+run_deploy_timeout() {
 	local seconds="$1"
 	shift
-	run timeout "$seconds" "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi "$@"
+	run timeout "$seconds" "$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi "$@"
 }
 
 assert_file_mode_600() {
@@ -121,7 +121,7 @@ assert_lifecycle_command_success() {
 	local command="$1"
 	shift
 
-	run_deployer_timeout 180 "$command" \
+	run_deploy_timeout 180 "$command" \
 		--server="$TEST_SERVER_NAME" \
 		"$@"
 
@@ -227,7 +227,7 @@ assert_kv_auth_via_credentials() {
 # ----
 
 @test "server:add creates server in inventory with valid options" {
-	run_deployer server:add \
+	run_deploy server:add \
 		--name="$TEST_SERVER_NAME" \
 		--host="$TEST_SERVER_HOST" \
 		--port="$TEST_SERVER_PORT" \
@@ -244,7 +244,7 @@ assert_kv_auth_via_credentials() {
 }
 
 @test "server:add accepts IP address as host" {
-	run_deployer server:add \
+	run_deploy server:add \
 		--name="ip-server" \
 		--host="$TEST_SERVER_HOST" \
 		--port="$TEST_SERVER_PORT" \
@@ -259,7 +259,7 @@ assert_kv_auth_via_credentials() {
 }
 
 @test "server:add accepts hostname as host" {
-	run_deployer server:add \
+	run_deploy server:add \
 		--name="hostname-server" \
 		--host="localhost" \
 		--port="$TEST_SERVER_PORT" \
@@ -280,7 +280,7 @@ assert_kv_auth_via_credentials() {
 @test "server:info displays server information" {
 	add_test_server
 
-	run_deployer server:info --server="$TEST_SERVER_NAME"
+	run_deploy server:info --server="$TEST_SERVER_NAME"
 
 	debug_output
 
@@ -299,7 +299,7 @@ assert_kv_auth_via_credentials() {
 @test "server:info shows correct server details" {
 	add_test_server
 
-	run_deployer server:info --server="$TEST_SERVER_NAME"
+	run_deploy server:info --server="$TEST_SERVER_NAME"
 
 	debug_output
 
@@ -315,7 +315,7 @@ assert_kv_auth_via_credentials() {
 	add_test_server
 	inventory_has_server "$TEST_SERVER_NAME"
 
-	run_deployer server:delete \
+	run_deploy server:delete \
 		--server="$TEST_SERVER_NAME" \
 		--force \
 		--yes \
@@ -333,7 +333,7 @@ assert_kv_auth_via_credentials() {
 	add_test_server "no-destroy-server"
 	inventory_has_server "no-destroy-server"
 
-	run_deployer server:delete \
+	run_deploy server:delete \
 		--server="no-destroy-server" \
 		--force \
 		--yes \
@@ -360,7 +360,7 @@ assert_kv_auth_via_credentials() {
 	local primary_php_version="${VM_TEST_PHP_PRIMARY_VERSION:-8.5}"
 
 	# Full install takes time - use longer timeout
-	run timeout 300 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:install \
+	run timeout 300 "$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:install \
 		--server="$TEST_SERVER_NAME" \
 		--generate-deploy-key \
 		--timezone="UTC" \
@@ -435,7 +435,7 @@ assert_kv_auth_via_credentials() {
 	expected_key=$(cat "${TEST_KEY}.pub")
 
 	# Run install with custom key (cli,fpm are always installed, must include optional extension)
-	run timeout 300 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:install \
+	run timeout 300 "$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:install \
 		--server="$TEST_SERVER_NAME" \
 		--custom-deploy-key="$TEST_KEY" \
 		--timezone="UTC" \
@@ -469,7 +469,7 @@ assert_kv_auth_via_credentials() {
 
 	# After server:install, Nginx stub_status listens on port 8080
 	# Port 80 only listens after site:create creates a vhost
-	run_deployer server:firewall \
+	run_deploy server:firewall \
 		--server="$TEST_SERVER_NAME" \
 		--allow="8080" \
 		--yes
@@ -498,7 +498,7 @@ assert_kv_auth_via_credentials() {
 @test "server:logs retrieves system logs" {
 	add_test_server
 
-	run_deployer server:logs \
+	run_deploy server:logs \
 		--server="$TEST_SERVER_NAME" \
 		--service="system" \
 		--lines=10
@@ -513,7 +513,7 @@ assert_kv_auth_via_credentials() {
 @test "server:logs retrieves multiple service logs" {
 	add_test_server
 
-	run_deployer server:logs \
+	run_deploy server:logs \
 		--server="$TEST_SERVER_NAME" \
 		--service="system,cron" \
 		--lines=5
@@ -532,7 +532,7 @@ assert_kv_auth_via_credentials() {
 @test "server:run executes command on server" {
 	add_test_server
 
-	run_deployer server:run \
+	run_deploy server:run \
 		--server="$TEST_SERVER_NAME" \
 		--command="whoami"
 
@@ -546,7 +546,7 @@ assert_kv_auth_via_credentials() {
 @test "server:run shows command output" {
 	add_test_server
 
-	run_deployer server:run \
+	run_deploy server:run \
 		--server="$TEST_SERVER_NAME" \
 		--command="echo hello-deployer-test"
 
@@ -618,7 +618,7 @@ assert_kv_auth_via_credentials() {
 	local creds_file="${BATS_TEST_TMPDIR}/mariadb.credentials"
 	cleanup_local_credential_file "$creds_file"
 
-	run_deployer_timeout 540 mariadb:install \
+	run_deploy_timeout 540 mariadb:install \
 		--server="$TEST_SERVER_NAME" \
 		--save-credentials="$creds_file"
 
@@ -654,7 +654,7 @@ assert_kv_auth_via_credentials() {
 	add_test_server
 	cleanup_sql_stack
 
-	run_deployer_timeout 540 mariadb:install \
+	run_deploy_timeout 540 mariadb:install \
 		--server="$TEST_SERVER_NAME" \
 		--display-credentials
 
@@ -692,7 +692,7 @@ assert_kv_auth_via_credentials() {
 	local creds_file="${BATS_TEST_TMPDIR}/postgresql.credentials"
 	cleanup_local_credential_file "$creds_file"
 
-	run_deployer_timeout 540 postgresql:install \
+	run_deploy_timeout 540 postgresql:install \
 		--server="$TEST_SERVER_NAME" \
 		--save-credentials="$creds_file"
 
@@ -729,7 +729,7 @@ assert_kv_auth_via_credentials() {
 	cleanup_postgresql_stack
 	assert_remote_service_inactive "postgresql"
 
-	run_deployer_timeout 540 postgresql:install \
+	run_deploy_timeout 540 postgresql:install \
 		--server="$TEST_SERVER_NAME" \
 		--display-credentials
 
@@ -766,7 +766,7 @@ assert_kv_auth_via_credentials() {
 	local creds_file="${BATS_TEST_TMPDIR}/redis.credentials"
 	cleanup_local_credential_file "$creds_file"
 
-	run_deployer_timeout 300 redis:install \
+	run_deploy_timeout 300 redis:install \
 		--server="$TEST_SERVER_NAME" \
 		--save-credentials="$creds_file"
 
@@ -794,7 +794,7 @@ assert_kv_auth_via_credentials() {
 	add_test_server
 	cleanup_kv_stack
 
-	run_deployer_timeout 300 redis:install \
+	run_deploy_timeout 300 redis:install \
 		--server="$TEST_SERVER_NAME" \
 		--display-credentials
 
@@ -821,7 +821,7 @@ assert_kv_auth_via_credentials() {
 @test "memcached:install completes successfully and configures localhost-only access" {
 	add_test_server
 
-	run_deployer_timeout 300 memcached:install \
+	run_deploy_timeout 300 memcached:install \
 		--server="$TEST_SERVER_NAME"
 
 	debug_output
@@ -898,10 +898,10 @@ assert_kv_auth_via_credentials() {
 
 @test "scaffold:ai creates agents debugger skill from template" {
 	local destination="${BATS_TEST_TMPDIR}/scaffold-ai"
-	local skill_path="${destination}/.agents/skills/deployerphp-debugger/SKILL.md"
+	local skill_path="${destination}/.agents/skills/deploy-core-debugger/SKILL.md"
 	mkdir -p "$destination"
 
-	run_deployer scaffold:ai \
+	run_deploy scaffold:ai \
 		--agent=".agents" \
 		--tier="debugger" \
 		--destination="$destination"
@@ -917,16 +917,16 @@ assert_kv_auth_via_credentials() {
 	assert_output_contains "--destination='${destination}'"
 
 	[ -f "${skill_path}" ]
-	cmp -s "${skill_path}" "${PROJECT_ROOT}/scaffolds/ai/deployerphp-debugger/SKILL.md"
+	cmp -s "${skill_path}" "${PROJECT_ROOT}/scaffolds/ai/deploy-core-debugger/SKILL.md"
 }
 
 @test "scaffold:ai auto-detects multiple agent directories and scaffolds both" {
 	local destination="${BATS_TEST_TMPDIR}/scaffold-ai-detected-multi"
-	local agents_skill_path="${destination}/.agents/skills/deployerphp-debugger/SKILL.md"
-	local claude_skill_path="${destination}/.claude/skills/deployerphp-debugger/SKILL.md"
+	local agents_skill_path="${destination}/.agents/skills/deploy-core-debugger/SKILL.md"
+	local claude_skill_path="${destination}/.claude/skills/deploy-core-debugger/SKILL.md"
 	mkdir -p "${destination}/.agents" "${destination}/.claude"
 
-	run_deployer scaffold:ai \
+	run_deploy scaffold:ai \
 		--tier="debugger" \
 		--destination="$destination"
 
@@ -942,17 +942,17 @@ assert_kv_auth_via_credentials() {
 
 	[ -f "${agents_skill_path}" ]
 	[ -f "${claude_skill_path}" ]
-	cmp -s "${agents_skill_path}" "${PROJECT_ROOT}/scaffolds/ai/deployerphp-debugger/SKILL.md"
-	cmp -s "${claude_skill_path}" "${PROJECT_ROOT}/scaffolds/ai/deployerphp-debugger/SKILL.md"
+	cmp -s "${agents_skill_path}" "${PROJECT_ROOT}/scaffolds/ai/deploy-core-debugger/SKILL.md"
+	cmp -s "${claude_skill_path}" "${PROJECT_ROOT}/scaffolds/ai/deploy-core-debugger/SKILL.md"
 }
 
 @test "scaffold:ai supports explicit multi-agent csv option" {
 	local destination="${BATS_TEST_TMPDIR}/scaffold-ai-cli-multi"
-	local agents_skill_path="${destination}/.agents/skills/deployerphp-debugger/SKILL.md"
-	local claude_skill_path="${destination}/.claude/skills/deployerphp-debugger/SKILL.md"
+	local agents_skill_path="${destination}/.agents/skills/deploy-core-debugger/SKILL.md"
+	local claude_skill_path="${destination}/.claude/skills/deploy-core-debugger/SKILL.md"
 	mkdir -p "$destination"
 
-	run_deployer scaffold:ai \
+	run_deploy scaffold:ai \
 		--agent=".agents,.claude" \
 		--tier="debugger" \
 		--destination="$destination"
@@ -969,16 +969,16 @@ assert_kv_auth_via_credentials() {
 
 	[ -f "${agents_skill_path}" ]
 	[ -f "${claude_skill_path}" ]
-	cmp -s "${agents_skill_path}" "${PROJECT_ROOT}/scaffolds/ai/deployerphp-debugger/SKILL.md"
-	cmp -s "${claude_skill_path}" "${PROJECT_ROOT}/scaffolds/ai/deployerphp-debugger/SKILL.md"
+	cmp -s "${agents_skill_path}" "${PROJECT_ROOT}/scaffolds/ai/deploy-core-debugger/SKILL.md"
+	cmp -s "${claude_skill_path}" "${PROJECT_ROOT}/scaffolds/ai/deploy-core-debugger/SKILL.md"
 }
 
 @test "scaffold:scripts creates script templates from scaffolds" {
 	local destination="${BATS_TEST_TMPDIR}/scaffold-scripts"
-	local target_dir="${destination}/.deployer/scripts"
+	local target_dir="${destination}/.deploy-core/scripts"
 	mkdir -p "$destination"
 
-	run_deployer scaffold:scripts \
+	run_deploy scaffold:scripts \
 		--destination="$destination"
 
 	debug_output

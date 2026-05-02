@@ -7,10 +7,10 @@
 # Supports operating on multiple PHP versions at once.
 #
 # Required Environment Variables:
-#   DEPLOYER_OUTPUT_FILE   - Output file path
-#   DEPLOYER_PERMS         - Permissions: root|sudo|none
-#   DEPLOYER_ACTION        - Service action: start|stop|restart
-#   DEPLOYER_PHP_VERSIONS  - Comma-separated PHP versions (e.g., "8.3,8.4")
+#   DEPLOY_OUTPUT_FILE   - Output file path
+#   DEPLOY_PERMS         - Permissions: root|sudo|none
+#   DEPLOY_ACTION        - Service action: start|stop|restart
+#   DEPLOY_PHP_VERSIONS  - Comma-separated PHP versions (e.g., "8.3,8.4")
 #
 # Output:
 #   status: success
@@ -19,11 +19,11 @@
 set -o pipefail
 export DEBIAN_FRONTEND=noninteractive
 
-[[ -z $DEPLOYER_OUTPUT_FILE ]] && echo "Error: DEPLOYER_OUTPUT_FILE required" && exit 1
-[[ -z $DEPLOYER_PERMS ]] && echo "Error: DEPLOYER_PERMS required" && exit 1
-[[ -z $DEPLOYER_ACTION ]] && echo "Error: DEPLOYER_ACTION required" && exit 1
-[[ -z $DEPLOYER_PHP_VERSIONS ]] && echo "Error: DEPLOYER_PHP_VERSIONS required" && exit 1
-export DEPLOYER_PERMS
+[[ -z $DEPLOY_OUTPUT_FILE ]] && echo "Error: DEPLOY_OUTPUT_FILE required" && exit 1
+[[ -z $DEPLOY_PERMS ]] && echo "Error: DEPLOY_PERMS required" && exit 1
+[[ -z $DEPLOY_ACTION ]] && echo "Error: DEPLOY_ACTION required" && exit 1
+[[ -z $DEPLOY_PHP_VERSIONS ]] && echo "Error: DEPLOY_PHP_VERSIONS required" && exit 1
+export DEPLOY_PERMS
 
 # Shared helpers are automatically inlined when executing playbooks remotely
 # source "$(dirname "$0")/helpers.sh"
@@ -42,11 +42,11 @@ execute_action_for_version() {
 	local version=$1
 	local service="php${version}-fpm"
 
-	case $DEPLOYER_ACTION in
+	case $DEPLOY_ACTION in
 		start | restart)
-			echo "→ Running systemctl ${DEPLOYER_ACTION} ${service}..."
-			if ! run_cmd systemctl "$DEPLOYER_ACTION" "$service"; then
-				echo "Error: Failed to ${DEPLOYER_ACTION} ${service}" >&2
+			echo "→ Running systemctl ${DEPLOY_ACTION} ${service}..."
+			if ! run_cmd systemctl "$DEPLOY_ACTION" "$service"; then
+				echo "Error: Failed to ${DEPLOY_ACTION} ${service}" >&2
 				return 1
 			fi
 			verify_service_active "$service"
@@ -60,7 +60,7 @@ execute_action_for_version() {
 			verify_service_stopped "$service"
 			;;
 		*)
-			echo "Error: Invalid action '${DEPLOYER_ACTION}'" >&2
+			echo "Error: Invalid action '${DEPLOY_ACTION}'" >&2
 			return 1
 			;;
 	esac
@@ -118,7 +118,7 @@ main() {
 	local failed=0
 
 	# Parse comma-separated versions
-	IFS=',' read -ra versions <<< "$DEPLOYER_PHP_VERSIONS"
+	IFS=',' read -ra versions <<< "$DEPLOY_PHP_VERSIONS"
 
 	for version in "${versions[@]}"; do
 		if ! execute_action_for_version "$version"; then
@@ -130,7 +130,7 @@ main() {
 		exit 1
 	fi
 
-	if ! cat > "$DEPLOYER_OUTPUT_FILE" <<- EOF; then
+	if ! cat > "$DEPLOY_OUTPUT_FILE" <<- EOF; then
 		status: success
 	EOF
 		echo "Error: Failed to write output file" >&2

@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Traits;
+namespace DeployCore\Traits;
 
-use DeployerPHP\Builders\SiteServerBuilder;
-use DeployerPHP\DTOs\ServerDTO;
-use DeployerPHP\DTOs\SiteDTO;
-use DeployerPHP\DTOs\SiteServerDTO;
-use DeployerPHP\Enums\WwwMode;
-use DeployerPHP\Exceptions\ValidationException;
-use DeployerPHP\Repositories\ServerRepository;
-use DeployerPHP\Repositories\SiteRepository;
-use DeployerPHP\Services\GitService;
-use DeployerPHP\Services\IoService;
-use DeployerPHP\Services\ProcessService;
-use DeployerPHP\Services\SshService;
+use DeployCore\Builders\SiteServerBuilder;
+use DeployCore\DTOs\ServerDTO;
+use DeployCore\DTOs\SiteDTO;
+use DeployCore\DTOs\SiteServerDTO;
+use DeployCore\Enums\WwwMode;
+use DeployCore\Exceptions\ValidationException;
+use DeployCore\Repositories\ServerRepository;
+use DeployCore\Repositories\SiteRepository;
+use DeployCore\Services\GitService;
+use DeployCore\Services\IoService;
+use DeployCore\Services\ProcessService;
+use DeployCore\Services\SshService;
 use Symfony\Component\Console\Command\Command;
 
 /**
@@ -111,7 +111,7 @@ trait SitesTrait
     /**
      * Get available scripts from a remote site directory.
      *
-     * @param string $directory Directory path (e.g., '.deployer/scripts')
+     * @param string $directory Directory path (e.g., '.deploy-core/scripts')
      * @return array<int, string> Script list (empty if none found)
      * @throws \RuntimeException If git operations fail
      */

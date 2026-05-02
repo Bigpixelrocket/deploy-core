@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Builders;
+namespace DeployCore\Builders;
 
-use DeployerPHP\DTOs\ServerDTO;
-use DeployerPHP\DTOs\SiteDTO;
-use DeployerPHP\DTOs\SiteServerDTO;
+use DeployCore\DTOs\ServerDTO;
+use DeployCore\DTOs\SiteDTO;
+use DeployCore\DTOs\SiteServerDTO;
 
 /**
  * Builder for SiteServerDTO - centralizes all SiteServerDTO instantiation.

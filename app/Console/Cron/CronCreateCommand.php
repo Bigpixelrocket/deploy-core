@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Console\Cron;
+namespace DeployCore\Console\Cron;
 
-use DeployerPHP\Builders\CronBuilder;
-use DeployerPHP\Contracts\BaseCommand;
-use DeployerPHP\DTOs\SiteDTO;
-use DeployerPHP\Exceptions\ValidationException;
-use DeployerPHP\Traits\CronsTrait;
-use DeployerPHP\Traits\PlaybooksTrait;
-use DeployerPHP\Traits\ServersTrait;
-use DeployerPHP\Traits\SitesTrait;
+use DeployCore\Builders\CronBuilder;
+use DeployCore\Contracts\BaseCommand;
+use DeployCore\DTOs\SiteDTO;
+use DeployCore\Exceptions\ValidationException;
+use DeployCore\Traits\CronsTrait;
+use DeployCore\Traits\PlaybooksTrait;
+use DeployCore\Traits\ServersTrait;
+use DeployCore\Traits\SitesTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -133,7 +133,7 @@ class CronCreateCommand extends BaseCommand
                 'script',
                 fn ($validate) => $this->io->promptText(
                     label: 'Cron script path (relative to project root):',
-                    placeholder: '.deployer/scripts/cron.sh',
+                    placeholder: '.deploy-core/scripts/cron.sh',
                     required: true,
                     validate: $validate
                 ),

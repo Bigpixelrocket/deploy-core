@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services\Aws;
+namespace DeployCore\Services\Aws;
 
-use DeployerPHP\Enums\Distribution;
+use DeployCore\Enums\Distribution;
 
 /**
  * AWS account data service.

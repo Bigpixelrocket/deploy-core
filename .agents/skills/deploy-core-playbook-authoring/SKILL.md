@@ -1,6 +1,6 @@
 ---
-name: deployerphp-playbook-authoring
-description: Author and update DeployerPHP playbooks with idempotent bash, DEPLOYER_* environment validation, helper usage, YAML output contracts, credential patterns, and logging/logrotate conventions. Use when editing playbooks/* or playbook-adjacent command behavior.
+name: deploy-core-playbook-authoring
+description: Author and update DeployCore playbooks with idempotent bash, DEPLOY_* environment validation, helper usage, YAML output contracts, credential patterns, and logging/logrotate conventions. Use when editing playbooks/* or playbook-adjacent command behavior.
 ---
 
 # Playbook Authoring

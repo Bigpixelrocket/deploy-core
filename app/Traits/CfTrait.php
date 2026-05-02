@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Traits;
+namespace DeployCore\Traits;
 
-use DeployerPHP\Services\Cf\CfDnsService;
-use DeployerPHP\Services\CfService;
-use DeployerPHP\Services\EnvService;
-use DeployerPHP\Services\IoService;
+use DeployCore\Services\Cf\CfDnsService;
+use DeployCore\Services\CfService;
+use DeployCore\Services\EnvService;
+use DeployCore\Services\IoService;
 use Symfony\Component\Console\Command\Command;
 
 /**

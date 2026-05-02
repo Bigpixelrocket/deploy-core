@@ -1,5 +1,5 @@
 {
-    "name": "loadinglucian/deployer-php",
+    "name": "bigpixelrocket/deploy-core",
     "description": "Server and site deployment tool for PHP",
     "type": "library",
     "keywords": [
@@ -38,7 +38,7 @@
     },
     "autoload": {
         "psr-4": {
-            "DeployerPHP\\": "app"
+            "DeployCore\\": "app"
         }
     },
     "autoload-dev": {
@@ -47,7 +47,7 @@
         ]
     },
     "bin": [
-        "bin/deployer"
+        "bin/deploy"
     ],
     "scripts": {
         "lint": [
@@ -60,13 +60,13 @@
             "vendor/bin/pint --parallel --test",
             "vendor/bin/phpstan analyse --memory-limit=2G"
         ],
-        "test": [
-            "@lint:check",
-            "vendor/bin/pest --parallel --coverage --coverage-text"
-        ],
         "ci:check": [
             "Composer\\Config::disableProcessTimeout",
             "@test"
+        ],
+        "test": [
+            "@lint:check",
+            "vendor/bin/pest --parallel --coverage --coverage-text"
         ],
         "bash": [
             "shfmt -i 0 -bn -ci -sr -w playbooks/*.sh"

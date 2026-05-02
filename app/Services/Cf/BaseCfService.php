@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services\Cf;
+namespace DeployCore\Services\Cf;
 
-use DeployerPHP\Services\RetryService;
+use DeployCore\Services\RetryService;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 

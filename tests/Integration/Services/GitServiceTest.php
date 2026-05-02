@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-use DeployerPHP\Services\FilesystemService;
-use DeployerPHP\Services\GitService;
-use DeployerPHP\Services\ProcessService;
+use DeployCore\Services\FilesystemService;
+use DeployCore\Services\GitService;
+use DeployCore\Services\ProcessService;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Process\Process;
 
@@ -24,7 +24,7 @@ it('returns file-only results for remote script paths', function (): void {
         return $process;
     };
 
-    $tmpRoot = sys_get_temp_dir().'/deployer-git-service-test-'.bin2hex(random_bytes(8));
+    $tmpRoot = sys_get_temp_dir().'/deploy-core-git-service-test-'.bin2hex(random_bytes(8));
     $origin = $tmpRoot.'/origin.git';
     $worktree = $tmpRoot.'/worktree';
 
@@ -36,13 +36,13 @@ it('returns file-only results for remote script paths', function (): void {
         $runCommand(['git', 'config', 'user.email', 'test@example.com'], $worktree);
         $runCommand(['git', 'config', 'user.name', 'Test User'], $worktree);
 
-        $filesystem->mkdir($worktree.'/.deployer/scripts');
+        $filesystem->mkdir($worktree.'/.deploy-core/scripts');
         $filesystem->dumpFile(
-            $worktree.'/.deployer/scripts/cron',
+            $worktree.'/.deploy-core/scripts/cron',
             "#!/usr/bin/env bash\necho 'ok'\n"
         );
         $filesystem->dumpFile(
-            $worktree.'/.deployer/scripts/cron.sh',
+            $worktree.'/.deploy-core/scripts/cron.sh',
             "#!/usr/bin/env bash\necho 'ok'\n"
         );
 
@@ -56,17 +56,17 @@ it('returns file-only results for remote script paths', function (): void {
         $runCommand(['git', 'push', 'origin', $branch], $worktree);
 
         $checks = $git->checkRemoteFilesExist($origin, $branch, [
-            '.deployer/scripts',
-            '.deployer/scripts/cron',
-            '.deployer/scripts/cron.sh',
-            '.deployer/scripts/missing.sh',
+            '.deploy-core/scripts',
+            '.deploy-core/scripts/cron',
+            '.deploy-core/scripts/cron.sh',
+            '.deploy-core/scripts/missing.sh',
         ]);
 
         expect($checks)->toBe([
-            '.deployer/scripts' => false,
-            '.deployer/scripts/cron' => true,
-            '.deployer/scripts/cron.sh' => true,
-            '.deployer/scripts/missing.sh' => false,
+            '.deploy-core/scripts' => false,
+            '.deploy-core/scripts/cron' => true,
+            '.deploy-core/scripts/cron.sh' => true,
+            '.deploy-core/scripts/missing.sh' => false,
         ]);
     } finally {
         $filesystem->remove($tmpRoot);

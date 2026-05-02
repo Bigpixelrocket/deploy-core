@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services\Aws;
+namespace DeployCore\Services\Aws;
 
 /**
  * AWS EC2 instance management service.
@@ -15,7 +15,7 @@ class AwsInstanceService extends BaseAwsService
 
     private const BATS_TEST_PROVIDER = 'aws';
 
-    private const MANAGED_BY = 'deployer';
+    private const MANAGED_BY = 'deploy-core';
 
     /**
      * Create a new EC2 instance with the specified configuration.
@@ -360,7 +360,7 @@ class AwsInstanceService extends BaseAwsService
 
     private function extractBatsRunSuffix(string $name): ?string
     {
-        if (1 !== preg_match('/^deployer-bats-aws-([a-zA-Z0-9]+)$/', $name, $matches)) {
+        if (1 !== preg_match('/^deploy-core-bats-aws-([a-zA-Z0-9]+)$/', $name, $matches)) {
             return null;
         }
 

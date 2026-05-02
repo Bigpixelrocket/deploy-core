@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Builders;
+namespace DeployCore\Builders;
 
-use DeployerPHP\DTOs\SupervisorDTO;
+use DeployCore\DTOs\SupervisorDTO;
 
 /**
  * Builder for SupervisorDTO - centralizes all SupervisorDTO instantiation.

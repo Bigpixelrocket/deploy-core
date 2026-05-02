@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Traits;
+namespace DeployCore\Traits;
 
-use DeployerPHP\Container;
-use DeployerPHP\DTOs\CronDTO;
-use DeployerPHP\DTOs\ServerDTO;
-use DeployerPHP\DTOs\SiteServerDTO;
-use DeployerPHP\DTOs\SupervisorDTO;
-use DeployerPHP\Exceptions\SshTimeoutException;
-use DeployerPHP\Services\FilesystemService;
-use DeployerPHP\Services\IoService;
-use DeployerPHP\Services\SshService;
+use DeployCore\Container;
+use DeployCore\DTOs\CronDTO;
+use DeployCore\DTOs\ServerDTO;
+use DeployCore\DTOs\SiteServerDTO;
+use DeployCore\DTOs\SupervisorDTO;
+use DeployCore\Exceptions\SshTimeoutException;
+use DeployCore\Services\FilesystemService;
+use DeployCore\Services\IoService;
+use DeployCore\Services\SshService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Yaml\Yaml;
 
@@ -36,21 +36,21 @@ trait PlaybooksTrait
      * Execute a playbook on a server.
      *
      * Handles SSH execution, error display, and YAML parsing.
-     * Playbooks write YAML output to a temp file (DEPLOYER_OUTPUT_FILE).
+     * Playbooks write YAML output to a temp file (DEPLOY_OUTPUT_FILE).
      * Displays errors via IoService and returns Command::FAILURE on any error.
      *
      * Standard playbook environment variables (auto-injected from context):
-     *   - DEPLOYER_OUTPUT_FILE: Output file path (always provided)
-     *   - DEPLOYER_SERVER_NAME: Server name - from server
-     *   - DEPLOYER_SSH_PORT: SSH port - from server
-     *   - DEPLOYER_PERMS: User permissions (root|sudo|none) - from server->info
-     *   - DEPLOYER_SITE_DOMAIN: Site domain - from site (when SiteServerDTO context)
-     *   - DEPLOYER_PHP_VERSION: PHP version - from site (when SiteServerDTO context)
-     *   - DEPLOYER_WEB_ROOT: Public web directory relative to current/ - from site (when SiteServerDTO context)
-     *   - DEPLOYER_SITE_REPO: Git repository URL - from site (when SiteServerDTO context and not null)
-     *   - DEPLOYER_SITE_BRANCH: Git branch - from site (when SiteServerDTO context and not null)
-     *   - DEPLOYER_CRONS: Cron jobs as JSON array - from site (when SiteServerDTO context)
-     *   - DEPLOYER_SUPERVISORS: Supervisor programs as JSON array - from site (when SiteServerDTO context)
+     *   - DEPLOY_OUTPUT_FILE: Output file path (always provided)
+     *   - DEPLOY_SERVER_NAME: Server name - from server
+     *   - DEPLOY_SSH_PORT: SSH port - from server
+     *   - DEPLOY_PERMS: User permissions (root|sudo|none) - from server->info
+     *   - DEPLOY_SITE_DOMAIN: Site domain - from site (when SiteServerDTO context)
+     *   - DEPLOY_PHP_VERSION: PHP version - from site (when SiteServerDTO context)
+     *   - DEPLOY_WEB_ROOT: Public web directory relative to current/ - from site (when SiteServerDTO context)
+     *   - DEPLOY_SITE_REPO: Git repository URL - from site (when SiteServerDTO context and not null)
+     *   - DEPLOY_SITE_BRANCH: Git branch - from site (when SiteServerDTO context and not null)
+     *   - DEPLOY_CRONS: Cron jobs as JSON array - from site (when SiteServerDTO context)
+     *   - DEPLOY_SUPERVISORS: Supervisor programs as JSON array - from site (when SiteServerDTO context)
      *
      * @param ServerDTO|SiteServerDTO $context Server or site+server context for playbook execution
      * @param string $playbookName Playbook name without .sh extension (e.g., 'server-info', 'php-install', etc)
@@ -74,8 +74,8 @@ trait PlaybooksTrait
 
         // Auto-inject server vars (always available)
         $baseVars = [
-            'DEPLOYER_SERVER_NAME' => $server->name,
-            'DEPLOYER_SSH_PORT' => (int) $server->port,
+            'DEPLOY_SERVER_NAME' => $server->name,
+            'DEPLOY_SSH_PORT' => (int) $server->port,
         ];
 
         // Auto-inject server info vars (when info has been gathered)
@@ -83,31 +83,31 @@ trait PlaybooksTrait
             /** @var string $permissions */
             $permissions = $server->info['permissions'] ?? 'none';
 
-            $baseVars['DEPLOYER_PERMS'] = $permissions;
+            $baseVars['DEPLOY_PERMS'] = $permissions;
         }
 
         // Auto-inject site vars when SiteServerDTO context
         if ($context instanceof SiteServerDTO) {
             $site = $context->site;
 
-            $baseVars['DEPLOYER_SITE_DOMAIN'] = $site->domain;
-            $baseVars['DEPLOYER_PHP_VERSION'] = $site->phpVersion;
-            $baseVars['DEPLOYER_WEB_ROOT'] = $site->webRoot;
+            $baseVars['DEPLOY_SITE_DOMAIN'] = $site->domain;
+            $baseVars['DEPLOY_PHP_VERSION'] = $site->phpVersion;
+            $baseVars['DEPLOY_WEB_ROOT'] = $site->webRoot;
 
             if (null !== $site->repo && '' !== $site->repo) {
-                $baseVars['DEPLOYER_SITE_REPO'] = $site->repo;
+                $baseVars['DEPLOY_SITE_REPO'] = $site->repo;
             }
 
             if (null !== $site->branch && '' !== $site->branch) {
-                $baseVars['DEPLOYER_SITE_BRANCH'] = $site->branch;
+                $baseVars['DEPLOY_SITE_BRANCH'] = $site->branch;
             }
 
-            $baseVars['DEPLOYER_CRONS'] = array_map(
+            $baseVars['DEPLOY_CRONS'] = array_map(
                 fn (CronDTO $cron) => ['script' => $cron->script, 'schedule' => $cron->schedule],
                 $site->crons
             );
 
-            $baseVars['DEPLOYER_SUPERVISORS'] = array_map(
+            $baseVars['DEPLOY_SUPERVISORS'] = array_map(
                 fn (SupervisorDTO $supervisor) => [
                     'program' => $supervisor->program,
                     'script' => $supervisor->script,
@@ -138,11 +138,11 @@ trait PlaybooksTrait
         }
 
         // Unique output file name
-        $outputFile = sprintf('/tmp/deployer-output-%d-%s.yml', time(), bin2hex(random_bytes(8)));
+        $outputFile = sprintf('/tmp/deploy-core-output-%d-%s.yml', time(), bin2hex(random_bytes(8)));
 
         // Override default vars with playbook vars
         $vars = [
-            'DEPLOYER_OUTPUT_FILE' => $outputFile,
+            'DEPLOY_OUTPUT_FILE' => $outputFile,
             ...$playbookVars,
         ];
 
@@ -155,7 +155,7 @@ trait PlaybooksTrait
 
         // Wrap script with environment and heredoc
         $scriptWithVars = sprintf(
-            "%sbash <<'DEPLOYER_SCRIPT_EOF'\n%s\nDEPLOYER_SCRIPT_EOF",
+            "%sbash <<'DEPLOY_SCRIPT_EOF'\n%s\nDEPLOY_SCRIPT_EOF",
             $varsPrefix,
             $scriptContents
         );

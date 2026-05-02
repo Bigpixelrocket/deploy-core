@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Traits;
+namespace DeployCore\Traits;
 
-use DeployerPHP\Exceptions\ValidationException;
-use DeployerPHP\Services\AwsService;
-use DeployerPHP\Services\EnvService;
-use DeployerPHP\Services\IoService;
+use DeployCore\Exceptions\ValidationException;
+use DeployCore\Services\AwsService;
+use DeployCore\Services\EnvService;
+use DeployCore\Services\IoService;
 use Symfony\Component\Console\Command\Command;
 
 /**

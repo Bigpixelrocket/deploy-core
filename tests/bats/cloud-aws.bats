@@ -48,7 +48,7 @@ teardown() {
 # ----
 
 @test "aws:key:add uploads public key to AWS" {
-	run_deployer aws:key:add \
+	run_deploy aws:key:add \
 		--name="$AWS_TEST_KEY_NAME" \
 		--public-key-path="$CLOUD_TEST_KEY_PATH"
 
@@ -66,7 +66,7 @@ teardown() {
 # ----
 
 @test "aws:key:list shows uploaded key" {
-	run_deployer aws:key:list
+	run_deploy aws:key:list
 
 	debug_output
 
@@ -80,7 +80,7 @@ teardown() {
 # ----
 
 @test "aws:key:delete removes key from AWS" {
-	run_deployer aws:key:delete \
+	run_deploy aws:key:delete \
 		--key="$AWS_TEST_KEY_NAME" \
 		--force \
 		--yes
@@ -94,7 +94,7 @@ teardown() {
 }
 
 @test "aws:key:list confirms key deleted" {
-	run_deployer aws:key:list
+	run_deploy aws:key:list
 
 	debug_output
 
@@ -112,7 +112,7 @@ teardown() {
 	# Cleanup any leftover test server
 	aws_cleanup_test_server
 
-	run_deployer aws:provision \
+	run_deploy aws:provision \
 		--name="$AWS_TEST_SERVER_NAME" \
 		--instance-type="$AWS_TEST_INSTANCE_TYPE" \
 		--image="$AWS_TEST_IMAGE" \
@@ -147,7 +147,7 @@ teardown() {
 	secondary_php_version="$CLOUD_TEST_PHP_SECONDARY_VERSION"
 
 	# Full install takes time - use longer timeout
-	run timeout 600 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:install \
+	run timeout 600 "$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:install \
 		--server="$AWS_TEST_SERVER_NAME" \
 		--generate-deploy-key \
 		--timezone="UTC" \
@@ -163,7 +163,7 @@ teardown() {
 	assert_command_replay "server:install"
 
 	# Install secondary PHP-FPM version on the same server (keep primary as default)
-	run timeout 600 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:install \
+	run timeout 600 "$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi server:install \
 		--server="$AWS_TEST_SERVER_NAME" \
 		--generate-deploy-key \
 		--timezone="UTC" \
@@ -193,7 +193,7 @@ teardown() {
 	# Cleanup any leftover test site
 	cleanup_test_site "$AWS_TEST_SITE_DOMAIN"
 
-	run_deployer site:create \
+	run_deploy site:create \
 		--domain="$AWS_TEST_SITE_DOMAIN" \
 		--server="$AWS_TEST_SERVER_NAME" \
 		--php-version="$CLOUD_TEST_PHP_PRIMARY_VERSION" \
@@ -213,7 +213,7 @@ teardown() {
 	# Cleanup any leftover secondary test site
 	cleanup_test_site "$AWS_TEST_SITE_DOMAIN_SECONDARY"
 
-	run_deployer site:create \
+	run_deploy site:create \
 		--domain="$AWS_TEST_SITE_DOMAIN_SECONDARY" \
 		--server="$AWS_TEST_SERVER_NAME" \
 		--php-version="$CLOUD_TEST_PHP_SECONDARY_VERSION" \
@@ -240,7 +240,7 @@ teardown() {
 
 	[[ -n "$server_ip" ]] || skip "Could not determine server IP"
 
-	run_deployer aws:dns:set \
+	run_deploy aws:dns:set \
 		--zone="$AWS_TEST_HOSTED_ZONE" \
 		--type="A" \
 		--name="$AWS_TEST_DNS_ROOT" \
@@ -263,7 +263,7 @@ teardown() {
 
 	[[ -n "$server_ip" ]] || skip "Could not determine server IP"
 
-	run_deployer aws:dns:set \
+	run_deploy aws:dns:set \
 		--zone="$AWS_TEST_HOSTED_ZONE" \
 		--type="A" \
 		--name="$AWS_TEST_DNS_ROOT_SECONDARY" \
@@ -281,7 +281,7 @@ teardown() {
 @test "aws:dns:list shows ${AWS_TEST_DNS_ROOT_FQDN} and ${AWS_TEST_DNS_ROOT_SECONDARY_FQDN}" {
 	require_aws_provision_config
 
-	run_deployer aws:dns:list \
+	run_deploy aws:dns:list \
 		--zone="$AWS_TEST_HOSTED_ZONE"
 
 	debug_output
@@ -306,7 +306,7 @@ teardown() {
 
 	[[ -n "$server_ip" ]] || skip "Could not determine server IP"
 
-	run_deployer cf:dns:set \
+	run_deploy cf:dns:set \
 		--zone="$CF_TEST_DOMAIN" \
 		--type="A" \
 		--name="$CF_TEST_DNS_ROOT" \
@@ -326,7 +326,7 @@ teardown() {
 @test "cf:dns:list shows ${CF_TEST_DNS_ROOT_FQDN}" {
 	require_aws_provision_config
 
-	run_deployer cf:dns:list \
+	run_deploy cf:dns:list \
 		--zone="$CF_TEST_DOMAIN"
 
 	debug_output
@@ -348,7 +348,7 @@ teardown() {
 
 	[[ -n "$server_ip" ]] || skip "Could not determine server IP"
 
-	run_deployer site:dns:check \
+	run_deploy site:dns:check \
 		--domain="$AWS_TEST_SITE_DOMAIN"
 
 	debug_output
@@ -370,7 +370,7 @@ teardown() {
 
 	[[ -n "$server_ip" ]] || skip "Could not determine server IP"
 
-	run_deployer site:dns:check \
+	run_deploy site:dns:check \
 		--domain="$AWS_TEST_SITE_DOMAIN_SECONDARY"
 
 	debug_output
@@ -391,7 +391,7 @@ teardown() {
 @test "site:shared:push uploads .env to AWS site" {
 	require_aws_provision_config
 
-	run_deployer site:shared:push \
+	run_deploy site:shared:push \
 		--domain="$AWS_TEST_SITE_DOMAIN" \
 		--local="${BATS_TEST_ROOT}/fixtures/env/deploy-me.env" \
 		--remote=".env"
@@ -407,7 +407,7 @@ teardown() {
 @test "site:shared:push uploads .env to AWS secondary site" {
 	require_aws_provision_config
 
-	run_deployer site:shared:push \
+	run_deploy site:shared:push \
 		--domain="$AWS_TEST_SITE_DOMAIN_SECONDARY" \
 		--local="${BATS_TEST_ROOT}/fixtures/env/deploy-me.env" \
 		--remote=".env"
@@ -427,7 +427,7 @@ teardown() {
 @test "site:shared:list shows uploaded shared files for AWS site" {
 	require_aws_provision_config
 
-	run_deployer site:shared:list \
+	run_deploy site:shared:list \
 		--domain="$AWS_TEST_SITE_DOMAIN"
 
 	debug_output
@@ -446,7 +446,7 @@ teardown() {
 
 	local pulled_env="${BATS_TEST_TMPDIR}/aws-shared.env"
 
-	run_deployer site:shared:pull \
+	run_deploy site:shared:pull \
 		--domain="$AWS_TEST_SITE_DOMAIN" \
 		--remote=".env" \
 		--local="$pulled_env" \
@@ -472,7 +472,7 @@ teardown() {
 	require_aws_provision_config
 
 	# Deploy takes time - use longer timeout
-	run timeout 300 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi site:deploy \
+	run timeout 300 "$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi site:deploy \
 		--domain="$AWS_TEST_SITE_DOMAIN" \
 		--repo="$CLOUD_TEST_DEPLOY_REPO" \
 		--branch="$CLOUD_TEST_DEPLOY_BRANCH" \
@@ -490,7 +490,7 @@ teardown() {
 @test "site:deploy deploys application to AWS secondary site" {
 	require_aws_provision_config
 
-	run timeout 300 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi site:deploy \
+	run timeout 300 "$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi site:deploy \
 		--domain="$AWS_TEST_SITE_DOMAIN_SECONDARY" \
 		--repo="$CLOUD_TEST_DEPLOY_REPO" \
 		--branch="$CLOUD_TEST_DEPLOY_BRANCH" \
@@ -512,7 +512,7 @@ teardown() {
 @test "cron:create adds hello.sh cron for AWS site" {
 	require_aws_provision_config
 
-	run_deployer cron:create \
+	run_deploy cron:create \
 		--domain="$AWS_TEST_SITE_DOMAIN" \
 		--script="$CLOUD_TEST_CRON_SUPERVISOR_SCRIPT" \
 		--schedule="* * * * *"
@@ -528,7 +528,7 @@ teardown() {
 @test "cron:sync applies hello.sh cron to AWS server" {
 	require_aws_provision_config
 
-	run_deployer cron:sync \
+	run_deploy cron:sync \
 		--domain="$AWS_TEST_SITE_DOMAIN"
 
 	debug_output
@@ -542,7 +542,7 @@ teardown() {
 @test "cron:sync writes AWS crontab entry and log file for hello.sh" {
 	require_aws_provision_config
 
-	run_deployer server:run \
+	run_deploy server:run \
 		--server="$AWS_TEST_SERVER_NAME" \
 		--command="sudo -n crontab -l -u deployer | grep -F 'runner.sh $CLOUD_TEST_CRON_SUPERVISOR_SCRIPT'"
 
@@ -551,7 +551,7 @@ teardown() {
 	[ "$status" -eq 0 ]
 	assert_output_contains "runner.sh $CLOUD_TEST_CRON_SUPERVISOR_SCRIPT"
 
-	run_deployer server:run \
+	run_deploy server:run \
 		--server="$AWS_TEST_SERVER_NAME" \
 		--command="test -f /var/log/cron/$AWS_TEST_SITE_DOMAIN-$CLOUD_TEST_CRON_SUPERVISOR_SCRIPT.log && echo cron-log-found"
 
@@ -564,7 +564,7 @@ teardown() {
 @test "supervisor:create adds hello.sh program for AWS site" {
 	require_aws_provision_config
 
-	run_deployer supervisor:create \
+	run_deploy supervisor:create \
 		--domain="$AWS_TEST_SITE_DOMAIN" \
 		--program="$CLOUD_TEST_SUPERVISOR_PROGRAM" \
 		--script="$CLOUD_TEST_CRON_SUPERVISOR_SCRIPT" \
@@ -584,7 +584,7 @@ teardown() {
 @test "supervisor:sync applies hello.sh program to AWS server" {
 	require_aws_provision_config
 
-	run_deployer supervisor:sync \
+	run_deploy supervisor:sync \
 		--domain="$AWS_TEST_SITE_DOMAIN"
 
 	debug_output
@@ -598,7 +598,7 @@ teardown() {
 @test "supervisor:sync writes AWS supervisor config for hello.sh" {
 	require_aws_provision_config
 
-	run_deployer server:run \
+	run_deploy server:run \
 		--server="$AWS_TEST_SERVER_NAME" \
 		--command="test -f /etc/supervisor/conf.d/$AWS_TEST_SITE_DOMAIN-$CLOUD_TEST_SUPERVISOR_PROGRAM.conf && grep -F 'runner.sh $CLOUD_TEST_CRON_SUPERVISOR_SCRIPT' /etc/supervisor/conf.d/$AWS_TEST_SITE_DOMAIN-$CLOUD_TEST_SUPERVISOR_PROGRAM.conf && echo supervisor-config-found"
 
@@ -611,7 +611,7 @@ teardown() {
 @test "supervisor lifecycle commands restart/stop/start work on AWS server" {
 	require_aws_provision_config
 
-	run_deployer supervisor:restart \
+	run_deploy supervisor:restart \
 		--server="$AWS_TEST_SERVER_NAME"
 
 	debug_output
@@ -620,7 +620,7 @@ teardown() {
 	assert_success_output
 	assert_command_replay "supervisor:restart"
 
-	run_deployer supervisor:stop \
+	run_deploy supervisor:stop \
 		--server="$AWS_TEST_SERVER_NAME"
 
 	debug_output
@@ -629,7 +629,7 @@ teardown() {
 	assert_success_output
 	assert_command_replay "supervisor:stop"
 
-	run_deployer supervisor:start \
+	run_deploy supervisor:start \
 		--server="$AWS_TEST_SERVER_NAME"
 
 	debug_output
@@ -642,7 +642,7 @@ teardown() {
 @test "cron:delete removes hello.sh cron for AWS site" {
 	require_aws_provision_config
 
-	run_deployer cron:delete \
+	run_deploy cron:delete \
 		--domain="$AWS_TEST_SITE_DOMAIN" \
 		--script="$CLOUD_TEST_CRON_SUPERVISOR_SCRIPT" \
 		--force \
@@ -659,7 +659,7 @@ teardown() {
 @test "cron:sync removes hello.sh crontab entry from AWS server" {
 	require_aws_provision_config
 
-	run_deployer cron:sync \
+	run_deploy cron:sync \
 		--domain="$AWS_TEST_SITE_DOMAIN"
 
 	debug_output
@@ -668,7 +668,7 @@ teardown() {
 	assert_success_output
 	assert_command_replay "cron:sync"
 
-	run_deployer server:run \
+	run_deploy server:run \
 		--server="$AWS_TEST_SERVER_NAME" \
 		--command="if sudo -n crontab -l -u deployer 2>/dev/null | grep -Fq 'runner.sh $CLOUD_TEST_CRON_SUPERVISOR_SCRIPT'; then echo cron-entry-present; exit 1; else echo cron-entry-absent; fi"
 
@@ -681,7 +681,7 @@ teardown() {
 @test "supervisor:delete removes hello.sh program for AWS site" {
 	require_aws_provision_config
 
-	run_deployer supervisor:delete \
+	run_deploy supervisor:delete \
 		--domain="$AWS_TEST_SITE_DOMAIN" \
 		--program="$CLOUD_TEST_SUPERVISOR_PROGRAM" \
 		--force \
@@ -698,7 +698,7 @@ teardown() {
 @test "supervisor:sync removes hello.sh supervisor config from AWS server" {
 	require_aws_provision_config
 
-	run_deployer supervisor:sync \
+	run_deploy supervisor:sync \
 		--domain="$AWS_TEST_SITE_DOMAIN"
 
 	debug_output
@@ -707,7 +707,7 @@ teardown() {
 	assert_success_output
 	assert_command_replay "supervisor:sync"
 
-	run_deployer server:run \
+	run_deploy server:run \
 		--server="$AWS_TEST_SERVER_NAME" \
 		--command="if test -f /etc/supervisor/conf.d/$AWS_TEST_SITE_DOMAIN-$CLOUD_TEST_SUPERVISOR_PROGRAM.conf; then echo supervisor-config-present; exit 1; else echo supervisor-config-absent; fi"
 
@@ -724,7 +724,7 @@ teardown() {
 @test "site:https enables HTTPS for ${AWS_TEST_SITE_DOMAIN}" {
 	require_aws_provision_config
 
-	run timeout 300 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi site:https \
+	run timeout 300 "$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi site:https \
 		--domain="$AWS_TEST_SITE_DOMAIN"
 
 	debug_output
@@ -738,7 +738,7 @@ teardown() {
 @test "site:https enables HTTPS for ${AWS_TEST_SITE_DOMAIN_SECONDARY}" {
 	require_aws_provision_config
 
-	run timeout 300 "$DEPLOYER_BIN" --inventory="$TEST_INVENTORY" --no-ansi site:https \
+	run timeout 300 "$DEPLOY_BIN" --inventory="$TEST_INVENTORY" --no-ansi site:https \
 		--domain="$AWS_TEST_SITE_DOMAIN_SECONDARY"
 
 	debug_output
@@ -773,7 +773,7 @@ teardown() {
 @test "site:rollback shows forward-only deployment guidance" {
 	require_aws_provision_config
 
-	run_deployer site:rollback
+	run_deploy site:rollback
 
 	debug_output
 
@@ -790,7 +790,7 @@ teardown() {
 @test "site:delete removes ${AWS_TEST_SITE_DOMAIN_SECONDARY} from server and inventory" {
 	require_aws_provision_config
 
-	run_deployer site:delete \
+	run_deploy site:delete \
 		--domain="$AWS_TEST_SITE_DOMAIN_SECONDARY" \
 		--force \
 		--yes
@@ -806,7 +806,7 @@ teardown() {
 @test "site:delete removes ${AWS_TEST_SITE_DOMAIN} from server and inventory" {
 	require_aws_provision_config
 
-	run_deployer site:delete \
+	run_deploy site:delete \
 		--domain="$AWS_TEST_SITE_DOMAIN" \
 		--force \
 		--yes
@@ -826,7 +826,7 @@ teardown() {
 @test "cf:dns:delete removes prefixed A record ${CF_TEST_DNS_ROOT_FQDN}" {
 	require_aws_provision_config
 
-	run_deployer cf:dns:delete \
+	run_deploy cf:dns:delete \
 		--zone="$CF_TEST_DOMAIN" \
 		--type="A" \
 		--name="$CF_TEST_DNS_ROOT" \
@@ -848,7 +848,7 @@ teardown() {
 @test "aws:dns:delete removes prefixed A record ${AWS_TEST_DNS_ROOT_SECONDARY_FQDN}" {
 	require_aws_provision_config
 
-	run_deployer aws:dns:delete \
+	run_deploy aws:dns:delete \
 		--zone="$AWS_TEST_HOSTED_ZONE" \
 		--type="A" \
 		--name="$AWS_TEST_DNS_ROOT_SECONDARY" \
@@ -866,7 +866,7 @@ teardown() {
 @test "aws:dns:delete removes prefixed A record ${AWS_TEST_DNS_ROOT_FQDN}" {
 	require_aws_provision_config
 
-	run_deployer aws:dns:delete \
+	run_deploy aws:dns:delete \
 		--zone="$AWS_TEST_HOSTED_ZONE" \
 		--type="A" \
 		--name="$AWS_TEST_DNS_ROOT" \
@@ -888,7 +888,7 @@ teardown() {
 @test "server:delete removes AWS instance and cleans up resources" {
 	require_aws_provision_config
 
-	run_deployer server:delete \
+	run_deploy server:delete \
 		--server="$AWS_TEST_SERVER_NAME" \
 		--force \
 		--yes \

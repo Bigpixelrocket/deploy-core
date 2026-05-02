@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Services\Do;
+namespace DeployCore\Services\Do;
 
-use DeployerPHP\Services\RetryService;
+use DeployCore\Services\RetryService;
 use DigitalOceanV2\Client;
 
 /**

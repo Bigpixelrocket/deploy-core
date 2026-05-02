@@ -35,10 +35,10 @@
 
 ### Breaking
 
-- Renamed `.deployer/scripts/deployer.sh` to `.deployer/scripts/deploy.sh`
-- Moved cron and supervisor scripts into `.deployer/scripts` (`cron*.sh`, `supervisor*.sh`)
+- Renamed `.deploy-core/scripts/deployer.sh` to `.deploy-core/scripts/deploy.sh`
+- Moved cron and supervisor scripts into `.deploy-core/scripts` (`cron*.sh`, `supervisor*.sh`)
 - Removed `scaffold:crons` and `scaffold:supervisors` in favor of `scaffold:scripts`
-- Default inventory path is now `.deployer/inventory.yml`; move existing `deployer.yml` or pass `--inventory`
+- Default inventory path is now `.deploy-core/inventory.yml`; move existing `deploy-core.yml` or pass `--inventory`
 
 ### Added
 
@@ -90,4 +90,4 @@
 
 ## [1.0.0] - 2026-01-17
 
-First release of DeployerPHP.
+First release of DeployCore.

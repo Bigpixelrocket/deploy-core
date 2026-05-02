@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace DeployerPHP\Traits;
+namespace DeployCore\Traits;
 
-use DeployerPHP\Services\Do\DoDnsService;
-use DeployerPHP\Services\DoService;
-use DeployerPHP\Services\IoService;
+use DeployCore\Services\Do\DoDnsService;
+use DeployCore\Services\DoService;
+use DeployCore\Services\IoService;
 
 /**
  * Reusable DigitalOcean DNS things.
