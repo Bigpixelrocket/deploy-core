@@ -43,6 +43,7 @@ final class SymfonyApp extends SymfonyApplication
     /**
      * Override default input definition to remove unwanted options.
      */
+    #[\Override]
     protected function getDefaultInputDefinition(): InputDefinition
     {
         return new InputDefinition([
@@ -57,6 +58,7 @@ final class SymfonyApp extends SymfonyApplication
     /**
      * Override to hide default Symfony application name/version display.
      */
+    #[\Override]
     public function getHelp(): string
     {
         return '';
@@ -65,6 +67,7 @@ final class SymfonyApp extends SymfonyApplication
     /**
      * The main execution method in Symfony Console applications.
      */
+    #[\Override]
     public function doRun(InputInterface $input, OutputInterface $output): int
     {
         $this->io = new SymfonyStyle($input, $output);

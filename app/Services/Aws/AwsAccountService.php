@@ -18,7 +18,7 @@ class AwsAccountService extends BaseAwsService
      *
      * @var array<string, array{label: string, families: array<string, string>}>
      */
-    private const INSTANCE_TYPE_FAMILIES = [
+    private const array INSTANCE_TYPE_FAMILIES = [
         'burstable' => [
             'label' => 'Burstable (variable workloads, cost-effective)',
             'families' => [

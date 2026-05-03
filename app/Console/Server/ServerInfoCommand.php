@@ -24,15 +24,16 @@ class ServerInfoCommand extends BaseCommand
     use ServersTrait;
     use ServicesTrait;
 
-    private const LOAD_WARNING_RATIO = 1.0;
-    private const LOAD_CRITICAL_RATIO = 1.5;
-    private const MEMORY_WARNING_PERCENT = 85;
-    private const MEMORY_CRITICAL_PERCENT = 92;
+    private const float LOAD_WARNING_RATIO = 1.0;
+    private const float LOAD_CRITICAL_RATIO = 1.5;
+    private const int MEMORY_WARNING_PERCENT = 85;
+    private const int MEMORY_CRITICAL_PERCENT = 92;
 
     // ----
     // Configuration
     // ----
 
+    #[\Override]
     protected function configure(): void
     {
         parent::configure();
@@ -44,6 +45,7 @@ class ServerInfoCommand extends BaseCommand
     // Execution
     // ----
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);

@@ -56,7 +56,7 @@ All PHP workflows use the local composite action for consistent setup:
 - name: Setup PHP and Composer
   uses: ./.github/actions/setup-php-composer
   with:
-      php-version: '8.2' # Optional, default: 8.2
+      php-version: '8.3' # Optional, default: 8.3
       coverage: 'true' # Optional, default: false (enables xdebug)
 ```
 
@@ -64,7 +64,7 @@ All PHP workflows use the local composite action for consistent setup:
 
 | Input         | Default | Description                |
 | ------------- | ------- | -------------------------- |
-| `php-version` | `8.2`   | PHP version to install     |
+| `php-version` | `8.3`   | PHP version to install     |
 | `coverage`    | `false` | Enable xdebug for coverage |
 
 ### Secrets vs Variables

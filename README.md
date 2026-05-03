@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-    <a href="https://packagist.org/packages/bigpixelrocket/deploy-core"><img src="https://img.shields.io/badge/php-%5E8.2-blue.svg" alt="Supports PHP >= 8.2"></a>
+    <a href="https://packagist.org/packages/bigpixelrocket/deploy-core"><img src="https://img.shields.io/badge/php-%5E8.3-blue.svg" alt="Supports PHP >= 8.3"></a>
     <a href="https://packagist.org/packages/bigpixelrocket/deploy-core"><img src="https://img.shields.io/packagist/v/bigpixelrocket/deploy-core" alt="Latest Stable Version"></a>
     <a href="https://packagist.org/packages/bigpixelrocket/deploy-core"><img src="https://img.shields.io/packagist/l/bigpixelrocket/deploy-core" alt="License"></a>
 </p>

@@ -20,7 +20,7 @@ abstract class BaseCfService
     ) {
     }
 
-    private const API_BASE = 'https://api.cloudflare.com/client/v4/';
+    private const string API_BASE = 'https://api.cloudflare.com/client/v4/';
 
     private ?Client $client = null;
 

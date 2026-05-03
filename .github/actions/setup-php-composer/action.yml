@@ -5,7 +5,7 @@ inputs:
   php-version:
     description: 'PHP version to setup'
     required: false
-    default: '8.2'
+    default: '8.3'
   coverage:
     description: 'Enable xdebug for coverage collection'
     required: false

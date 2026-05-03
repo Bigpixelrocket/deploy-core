@@ -20,6 +20,7 @@ class SiteRollbackCommand extends BaseCommand
     // Execution
     // ----
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);

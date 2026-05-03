@@ -17,7 +17,7 @@ use DeployCore\Services\InventoryService;
  */
 final class SiteRepository
 {
-    private const PREFIX = 'sites';
+    private const string PREFIX = 'sites';
 
     private ?InventoryService $inventory = null;
 

@@ -13,10 +13,10 @@ use RuntimeException;
  */
 final class DomainClassifierService
 {
-    private const PSL_URL = 'https://publicsuffix.org/list/public_suffix_list.dat';
-    private const CACHE_DIRECTORY_NAME = 'deploy-core';
-    private const CACHE_FILENAME = 'public_suffix_list.dat';
-    private const CACHE_TTL_SECONDS = 604800; // 7 days
+    private const string PSL_URL = 'https://publicsuffix.org/list/public_suffix_list.dat';
+    private const string CACHE_DIRECTORY_NAME = 'deploy-core';
+    private const string CACHE_FILENAME = 'public_suffix_list.dat';
+    private const int CACHE_TTL_SECONDS = 604800; // 7 days
 
     private ?Rules $rules = null;
 

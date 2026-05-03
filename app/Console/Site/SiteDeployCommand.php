@@ -28,12 +28,13 @@ class SiteDeployCommand extends BaseCommand
     use ServersTrait;
     use SitesTrait;
 
-    private const DEFAULT_KEEP_RELEASES = 5;
+    private const int DEFAULT_KEEP_RELEASES = 5;
 
     // ----
     // Configuration
     // ----
 
+    #[\Override]
     protected function configure(): void
     {
         parent::configure();
@@ -51,6 +52,7 @@ class SiteDeployCommand extends BaseCommand
     // Execution
     // ----
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);

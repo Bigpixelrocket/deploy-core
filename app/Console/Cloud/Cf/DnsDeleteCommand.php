@@ -28,6 +28,7 @@ class DnsDeleteCommand extends BaseCommand
     // Configuration
     // ----
 
+    #[\Override]
     protected function configure(): void
     {
         parent::configure();
@@ -44,6 +45,7 @@ class DnsDeleteCommand extends BaseCommand
     // Execution
     // ----
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);

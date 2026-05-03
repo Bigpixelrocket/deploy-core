@@ -21,36 +21,37 @@ class AiCommand extends BaseCommand
     use ScaffoldsTrait;
 
     /** @var array<string, string> */
-    private const AGENT_DIRS = [
+    private const array AGENT_DIRS = [
         '.agents' => '.agents',
         '.claude' => '.claude',
     ];
 
     /** @var array<string, string> */
-    private const AGENT_LABELS = [
+    private const array AGENT_LABELS = [
         '.agents' => "'.agents/' directory (Codex, Cursor, OpenCode)",
         '.claude' => "'.claude/' directory (Claude Code)",
     ];
 
     /** @var list<string> */
-    private const AGENT_ORDER = [
+    private const array AGENT_ORDER = [
         '.agents',
         '.claude',
     ];
 
     /** @var array<string, string> */
-    private const TIERS = [
+    private const array TIERS = [
         'observer' => 'Observer - Read-only (view logs, server info)',
         'debugger' => 'Debugger - Inspect + safe shell (default)',
         'admin' => 'Admin - Full access (manage infrastructure)',
     ];
 
-    private const DEFAULT_TIER = 'debugger';
+    private const string DEFAULT_TIER = 'debugger';
 
     // ----
     // Configuration
     // ----
 
+    #[\Override]
     protected function configure(): void
     {
         parent::configure();
@@ -63,6 +64,7 @@ class AiCommand extends BaseCommand
     // Execution
     // ----
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);

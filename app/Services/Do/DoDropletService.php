@@ -14,11 +14,11 @@ use DigitalOceanV2\Exception\ResourceNotFoundException;
  */
 class DoDropletService extends BaseDoService
 {
-    private const BATS_TEST_SUITE = 'bats-cloud';
+    private const string BATS_TEST_SUITE = 'bats-cloud';
 
-    private const BATS_TEST_PROVIDER = 'do';
+    private const string BATS_TEST_PROVIDER = 'do';
 
-    private const MANAGED_BY = 'deploy-core';
+    private const string MANAGED_BY = 'deploy-core';
 
     /**
      * Create a new droplet with the specified configuration.
