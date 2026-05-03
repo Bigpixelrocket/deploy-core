@@ -40,7 +40,7 @@ alias dep="deploy"
 
 DeployCore has some pretty basic requirements:
 
-- At least PHP 8.2
+- At least PHP 8.3
 - The `pcntl` PHP extension (if you want to use the `server:ssh` command)
 
 Your target servers should run Ubuntu LTS >= 24.04 (no interim releases like 25.04).
