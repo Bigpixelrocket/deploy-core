@@ -563,6 +563,9 @@ run_tests_for_distro() {
 	# BATS default behavior shows test names with ✓/✗ and full output on failures
 	# Use BATS_DEBUG=1 to enable debug_output() calls in tests for verbose mode
 	local bats_opts=("--print-output-on-failure")
+	if [[ "$CI_MODE" == "true" ]]; then
+		bats_opts+=("--abort")
+	fi
 
 	if [[ -n "$test_filter" ]]; then
 		# Run specific test file
