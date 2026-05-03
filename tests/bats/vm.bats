@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-# VM command tests (server:add, server:info, etc.)
+# VM command tests for standard-runner benchmark coverage.
 # Tests: server:add, server:info, server:delete, server:install, server:install second PHP version,
 # server:firewall, server:logs, server:run,
 # nginx:start|stop|restart, php:start|stop|restart, supervisor:start|stop|restart,
