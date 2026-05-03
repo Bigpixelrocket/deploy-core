@@ -11,11 +11,11 @@ namespace DeployCore\Services\Aws;
  */
 class AwsInstanceService extends BaseAwsService
 {
-    private const BATS_TEST_SUITE = 'bats-cloud';
+    private const string BATS_TEST_SUITE = 'bats-cloud';
 
-    private const BATS_TEST_PROVIDER = 'aws';
+    private const string BATS_TEST_PROVIDER = 'aws';
 
-    private const MANAGED_BY = 'deploy-core';
+    private const string MANAGED_BY = 'deploy-core';
 
     /**
      * Create a new EC2 instance with the specified configuration.

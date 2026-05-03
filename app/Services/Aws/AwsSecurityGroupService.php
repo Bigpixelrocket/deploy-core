@@ -11,9 +11,9 @@ namespace DeployCore\Services\Aws;
  */
 class AwsSecurityGroupService extends BaseAwsService
 {
-    private const SECURITY_GROUP_NAME = 'deploy-core';
+    private const string SECURITY_GROUP_NAME = 'deploy-core';
 
-    private const SECURITY_GROUP_DESCRIPTION = 'Managed by Bigpixelrocket/DeployCore - allows all traffic (use server:firewall for rules)';
+    private const string SECURITY_GROUP_DESCRIPTION = 'Managed by Bigpixelrocket/DeployCore - allows all traffic (use server:firewall for rules)';
 
     /**
      * Ensure the "deploy-core" security group exists in the VPC.

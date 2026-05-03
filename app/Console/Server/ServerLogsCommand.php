@@ -35,7 +35,7 @@ class ServerLogsCommand extends BaseCommand
      *
      * @var array<string, array{label: string, type: string, unit?: string|null, path?: string}>
      */
-    private const STATIC_SOURCES = [
+    private const array STATIC_SOURCES = [
         'system' => ['label' => 'System logs', 'type' => 'journalctl', 'unit' => null],
         'supervisor' => ['label' => 'Supervisor', 'type' => 'journalctl', 'unit' => 'supervisor'],
         'cron' => ['label' => 'Cron', 'type' => 'journalctl', 'unit' => 'cron'],
@@ -49,7 +49,7 @@ class ServerLogsCommand extends BaseCommand
      *
      * @var array<string, array{type: string, unit?: string, path?: string}>
      */
-    private const PORT_SOURCES = [
+    private const array PORT_SOURCES = [
         'nginx' => ['type' => 'journalctl', 'unit' => 'nginx'],
         'mariadb' => ['type' => 'both', 'unit' => 'mariadb', 'path' => '/var/log/mysql/error.log'],
         'memcached' => ['type' => 'both', 'unit' => 'memcached', 'path' => '/var/log/memcached.log'],
@@ -62,6 +62,7 @@ class ServerLogsCommand extends BaseCommand
     // Configuration
     // ----
 
+    #[\Override]
     protected function configure(): void
     {
         parent::configure();
@@ -76,6 +77,7 @@ class ServerLogsCommand extends BaseCommand
     // Execution
     // ----
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);

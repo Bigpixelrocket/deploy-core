@@ -15,9 +15,9 @@ use Symfony\Component\Console\Attribute\AsCommand;
  */
 class CommandDiscoveryService
 {
-    private const CONSOLE_PATH = 'app/Console';
+    private const string CONSOLE_PATH = 'app/Console';
 
-    private const NAMESPACE_PREFIX = 'DeployCore\\Console\\';
+    private const string NAMESPACE_PREFIX = 'DeployCore\\Console\\';
 
     private readonly string $resolvedBasePath;
 

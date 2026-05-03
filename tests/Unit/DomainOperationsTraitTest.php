@@ -116,11 +116,11 @@ function bindHttpServiceFailure(Container $container): void
 
 function makeDomainOperationsSubject(Container $container): DomainOperationsSubject
 {
-    return new class ($container) implements DomainOperationsSubject {
+    return new readonly class ($container) implements DomainOperationsSubject {
         use DomainOperationsTrait;
 
         public function __construct(
-            protected readonly Container $container,
+            protected Container $container,
         ) {
         }
 

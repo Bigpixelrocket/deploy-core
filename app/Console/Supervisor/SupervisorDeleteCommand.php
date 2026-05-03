@@ -30,6 +30,7 @@ class SupervisorDeleteCommand extends BaseCommand
     // Configuration
     // ----
 
+    #[\Override]
     protected function configure(): void
     {
         parent::configure();
@@ -45,6 +46,7 @@ class SupervisorDeleteCommand extends BaseCommand
     // Execution
     // ----
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);

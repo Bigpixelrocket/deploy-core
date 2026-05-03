@@ -30,6 +30,7 @@ class ServerInstallCommand extends BaseCommand
     // Configuration
     // ----
 
+    #[\Override]
     protected function configure(): void
     {
         parent::configure();
@@ -47,6 +48,7 @@ class ServerInstallCommand extends BaseCommand
     // Execution
     // ----
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);
@@ -315,7 +317,7 @@ class ServerInstallCommand extends BaseCommand
      *
      * @var array<string, string>
      */
-    private const COMMON_TIMEZONES = [
+    private const array COMMON_TIMEZONES = [
         'UTC' => 'UTC (Recommended)',
         'America/New_York' => 'America/New_York (US Eastern)',
         'America/Chicago' => 'America/Chicago (US Central)',
