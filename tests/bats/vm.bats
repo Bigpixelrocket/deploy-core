@@ -21,7 +21,12 @@ teardown_file() {
 }
 
 setup() {
+	vm_check_failed
 	reset_inventory
+}
+
+teardown() {
+	vm_mark_failed
 }
 
 # ----

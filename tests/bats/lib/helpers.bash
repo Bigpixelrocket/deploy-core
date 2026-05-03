@@ -239,3 +239,24 @@ debug() {
 		echo "# DEBUG: $*" >&3
 	fi
 }
+
+# ----
+# VM Fail-Fast Support
+# ----
+# VM tests are sequential and many later checks depend on the first successful
+# server install. Abort the remaining tests after the first failure to avoid
+# cascading CI failures that burn runner minutes.
+
+vm_mark_failed() {
+	if [[ -z "${BATS_TEST_COMPLETED:-}" ]]; then
+		printf '%s' "${BATS_TEST_DESCRIPTION:-unknown}" > "${BATS_FILE_TMPDIR}/vm_failed"
+	fi
+}
+
+vm_check_failed() {
+	if [[ -f "${BATS_FILE_TMPDIR}/vm_failed" ]]; then
+		local failed_test
+		failed_test=$(< "${BATS_FILE_TMPDIR}/vm_failed")
+		skip "Aborted: '${failed_test}' failed"
+	fi
+}
