@@ -1,7 +1,10 @@
 <p align="center">
     <a href="https://bigpixelrocket.com/deploy-core" target="_blank">
-        <img src="https://raw.githubusercontent.com/bigpixelrocket/deploy-core/main/docs/images/logo-mark-light.svg#gh-light-mode-only" width="auto" alt="DeployCore Logo">
-        <img src="https://raw.githubusercontent.com/bigpixelrocket/deploy-core/main/docs/images/logo-mark-dark.svg#gh-dark-mode-only" width="auto" alt="DeployCore Logo">
+        <picture>
+            <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/bigpixelrocket/deploy-core/main/docs/images/logo-mark-dark.svg">
+            <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/bigpixelrocket/deploy-core/main/docs/images/logo-mark-light.svg">
+            <img src="https://raw.githubusercontent.com/bigpixelrocket/deploy-core/main/docs/images/logo-mark-light.svg" width="auto" alt="DeployCore Logo">
+        </picture>
     </a>
 </p>
 
@@ -22,8 +25,11 @@ This is DeployCore, a complete set of CLI tools for provisioning, installing, an
 Here it is in action:
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/bigpixelrocket/deploy-core/main/docs/images/deploy-core.webp#gh-light-mode-only" width="auto" alt="DeployCore in action" class="dark:hidden">
-    <img src="https://raw.githubusercontent.com/bigpixelrocket/deploy-core/main/docs/images/deploy-core-dark.webp#gh-dark-mode-only" width="auto" alt="DeployCore in action" class="hidden dark:block">
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/bigpixelrocket/deploy-core/main/docs/images/deploy-core-dark.webp">
+        <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/bigpixelrocket/deploy-core/main/docs/images/deploy-core.webp">
+        <img src="https://raw.githubusercontent.com/bigpixelrocket/deploy-core/main/docs/images/deploy-core.webp" width="auto" alt="DeployCore in action">
+    </picture>
 </p>
 
 <!-- toc -->
