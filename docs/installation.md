@@ -74,7 +74,7 @@ For namespace-by-namespace behavior details, see the [Documentation Index](docum
 
 ## The Inventory
 
-DeployCore tracks your servers and sites in an inventory file, which it initializes in your current working directory as `.deploy-core/inventory.yml`. This inventory file stores the details of servers you add and sites you create, so you don't have to re-enter connection details, domain names or IPs each time you run a command.
+DeployCore tracks your servers and sites in an inventory file, which it initializes in your current working directory as `.deploy/inventory.yml`. This inventory file stores the details of servers you add and sites you create, so you don't have to re-enter connection details, domain names or IPs each time you run a command.
 
 Commands automatically reference the inventory, making it easy to manage multiple servers or sites. This file does not contain any sensitive information, so it is safe to commit to version control.
 
@@ -91,7 +91,7 @@ Running any DeployCore command should display which environment or inventory fil
 ▒
 ▒ Ver: ...
 ▒ Env: ~/example.com/.env
-▒ Inv: ~/example.com/.deploy-core/inventory.yml
+▒ Inv: ~/example.com/.deploy/inventory.yml
 .
 .
 .

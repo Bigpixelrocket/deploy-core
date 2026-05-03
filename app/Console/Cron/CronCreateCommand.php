@@ -133,7 +133,7 @@ class CronCreateCommand extends BaseCommand
                 'script',
                 fn ($validate) => $this->io->promptText(
                     label: 'Cron script path (relative to project root):',
-                    placeholder: '.deploy-core/scripts/cron.sh',
+                    placeholder: '.deploy/scripts/cron.sh',
                     required: true,
                     validate: $validate
                 ),

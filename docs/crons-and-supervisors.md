@@ -37,7 +37,7 @@ Let's walk through adding a scheduled task to your site. Before you can create a
 deploy scaffold:scripts
 ```
 
-This creates a `cron.sh` script (along with `deploy.sh` and `supervisor.sh`) in your project's `.deploy-core/scripts` directory. The scaffolded `cron.sh` includes framework detection for Laravel, Symfony, and CodeIgniter, so it works out of the box for most PHP applications. You're free to customize it for your needs.
+This creates a `cron.sh` script (along with `deploy.sh` and `supervisor.sh`) in your project's `.deploy/scripts` directory. The scaffolded `cron.sh` includes framework detection for Laravel, Symfony, and CodeIgniter, so it works out of the box for most PHP applications. You're free to customize it for your needs.
 
 ### Creating a Cron
 
@@ -78,7 +78,7 @@ The command will prompt you to select which cron job to remove from your invento
 
 Supervisor processes are long-running workers that need to stay alive continuously, things like queue workers, WebSocket servers, or any daemon your application relies on. Supervisord monitors these processes and automatically restarts them if they crash.
 
-Like cron jobs, you'll need a script for your worker. If you ran `scaffold:scripts` earlier, you already have a `supervisor.sh` in your project's `.deploy-core/scripts` directory. If not, run it now:
+Like cron jobs, you'll need a script for your worker. If you ran `scaffold:scripts` earlier, you already have a `supervisor.sh` in your project's `.deploy/scripts` directory. If not, run it now:
 
 ```shell
 deploy scaffold:scripts

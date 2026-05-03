@@ -145,7 +145,7 @@ class SupervisorCreateCommand extends BaseCommand
                 'script',
                 fn ($validate) => $this->io->promptText(
                     label: 'Supervisor script path (relative to project root):',
-                    placeholder: '.deploy-core/scripts/supervisor.sh',
+                    placeholder: '.deploy/scripts/supervisor.sh',
                     required: true,
                     validate: $validate
                 ),

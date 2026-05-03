@@ -72,7 +72,7 @@ PRESERVE_ENV_VARS="DEPLOY_RELEASE_PATH,DEPLOY_SHARED_PATH,DEPLOY_CURRENT_PATH,DE
 
 run_script() {
 	local script_name=$1
-	local script_path="${DEPLOY_RELEASE_PATH}/.deploy-core/scripts/${script_name}"
+	local script_path="${DEPLOY_RELEASE_PATH}/.deploy/scripts/${script_name}"
 
 	if ! run_cmd test -f "$script_path"; then
 		return 0

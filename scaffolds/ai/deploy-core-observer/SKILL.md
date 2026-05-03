@@ -21,14 +21,14 @@ Set concrete values before running commands:
 ```bash
 PROJECT_ROOT="/path/to/project"
 ENV_FILE="$PROJECT_ROOT/.env"
-INVENTORY_FILE="$PROJECT_ROOT/.deploy-core/inventory.yml"
+INVENTORY_FILE="$PROJECT_ROOT/.deploy/inventory.yml"
 SERVER="production"
 SITE="example.com"
 ```
 
 ## References
 
-- Inventory schema: `.deploy-core/inventory.yml`
+- Inventory schema: `.deploy/inventory.yml`
 - Command catalog: `deploy list --raw`
 - Command reference: `deploy help server:info`
 - Command reference: `deploy help server:logs`
@@ -68,7 +68,7 @@ Use these values with `--service` on `server:logs`:
 
 ## Standard Observation Workflow
 
-1. Read `.deploy-core/inventory.yml`.
+1. Read `.deploy/inventory.yml`.
 2. Run `server:info` for target server.
 3. Run `server:logs` with focused `--service` or `--site` filters.
 4. Return findings and recommended next command for a human/admin-tier agent.

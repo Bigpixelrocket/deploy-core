@@ -980,7 +980,7 @@ assert_kv_auth_via_credentials() {
 
 @test "scaffold:scripts creates script templates from scaffolds" {
 	local destination="${BATS_TEST_TMPDIR}/scaffold-scripts"
-	local target_dir="${destination}/.deploy-core/scripts"
+	local target_dir="${destination}/.deploy/scripts"
 	mkdir -p "$destination"
 
 	run_deploy scaffold:scripts \

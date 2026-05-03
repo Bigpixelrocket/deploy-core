@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Breaking
+
+- Rename the project folder convention from `.deploy-core` to `.deploy`
+
 ## [1.0.5] - 2026-04-30
 
 ### Added

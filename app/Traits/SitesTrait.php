@@ -111,7 +111,7 @@ trait SitesTrait
     /**
      * Get available scripts from a remote site directory.
      *
-     * @param string $directory Directory path (e.g., '.deploy-core/scripts')
+     * @param string $directory Directory path (e.g., '.deploy/scripts')
      * @return array<int, string> Script list (empty if none found)
      * @throws \RuntimeException If git operations fail
      */

@@ -128,7 +128,7 @@ trait ScaffoldsTrait
      */
     protected function buildTargetPath(string $destinationDir, string $type, array $context): string
     {
-        return $this->fs->joinPaths($destinationDir, '.deploy-core', $type);
+        return $this->fs->joinPaths($destinationDir, '.deploy', $type);
     }
 
     /**
