@@ -146,13 +146,15 @@ abstract class BaseCommand extends Command
         //
         // Display env and inventory statuses
 
-        $envStatus = $this->env->getEnvFileStatus();
-        $inventoryStatus = $this->inventory->getInventoryFileStatus();
+        if ($output->isVerbose()) {
+            $envStatus = $this->env->getEnvFileStatus();
+            $inventoryStatus = $this->inventory->getInventoryFileStatus();
 
-        $this->out([
-            "<|gray>Env: {$envStatus}</>",
-            "<|gray>Inv: {$inventoryStatus}</>",
-        ]);
+            $this->out([
+                "<|gray>Env: {$envStatus}</>",
+                "<|gray>Inv: {$inventoryStatus}</>",
+            ]);
+        }
 
         return Command::SUCCESS;
     }

@@ -49,6 +49,7 @@ final class SymfonyApp extends SymfonyApplication
             new InputArgument('command', InputArgument::OPTIONAL, 'The command to execute'),
             new InputOption('--help', '-h', InputOption::VALUE_NONE, 'Display help for the given command. When no command is given display help for the list command'),
             new InputOption('--quiet', '-q', InputOption::VALUE_NONE, 'Do not output any message (except errors)'),
+            new InputOption('--verbose', '-v|vv|vvv', InputOption::VALUE_NONE, 'Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug'),
             new InputOption('--version', '-V', InputOption::VALUE_NONE, 'Display this application version'),
             new InputOption('--ansi', '', InputOption::VALUE_NEGATABLE, 'Force (or disable --no-ansi) ANSI output', null),
         ]);
@@ -68,11 +69,12 @@ final class SymfonyApp extends SymfonyApplication
     public function doRun(InputInterface $input, OutputInterface $output): int
     {
         $this->io = new SymfonyStyle($input, $output);
+        $displayVersion = $input->hasParameterOption(['--version', '-V'], true);
 
-        $this->displayBanner();
+        $this->displayBanner($displayVersion);
 
         // If --version is requested, skip the rest (banner includes version)
-        if ($input->hasParameterOption(['--version', '-V'], true)) {
+        if ($displayVersion) {
             return Command::SUCCESS;
         }
 
@@ -86,21 +88,23 @@ final class SymfonyApp extends SymfonyApplication
     /**
      * Display retro BBS-style ASCII art banner.
      */
-    private function displayBanner(): void
+    private function displayBanner(bool $displayVersion): void
     {
         // Skip banner in quiet mode
         if ($this->io->isQuiet()) {
             return;
         }
 
-        $version = $this->getVersion();
-
-        $this->io->writeln([
+        $lines = [
             '',
             '<fg=cyan>▒ ≡</> <fg=cyan;options=bold>DeployCore</> <fg=cyan>━━━━━━━━━━━━━━━━</><fg=bright-blue>━━━━━━━━━━━━━━━</><fg=magenta>━━━━━━━━━━━━━━━</><fg=gray>━━━━━━━━━━━━━━━━</>',
-            '<fg=gray>▒ </>',
-            '<fg=gray>▒ Ver: '.$version.'</>',
-        ]);
+        ];
+
+        if ($displayVersion) {
+            $lines[] = '<fg=gray>▒ Ver: '.$this->getVersion().'</>';
+        }
+
+        $this->io->writeln($lines);
     }
 
     /**
