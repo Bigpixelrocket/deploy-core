@@ -22,6 +22,7 @@ on:
   push:
     branches:
       - main
+      - "ci/benchmark-*"
     paths: *test_paths
 
 jobs:
@@ -35,6 +36,28 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Record runner benchmark metadata
+        run: |
+          {
+            echo "### Runner metadata"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Runner name | ${RUNNER_NAME:-unknown} |"
+            echo "| Runner OS | ${RUNNER_OS:-unknown} |"
+            echo "| Runner arch | ${RUNNER_ARCH:-unknown} |"
+            echo "| CPU cores | $(nproc) |"
+            echo "| Kernel | $(uname -a) |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo "Runner name: ${RUNNER_NAME:-unknown}"
+          echo "Runner OS: ${RUNNER_OS:-unknown}"
+          echo "Runner arch: ${RUNNER_ARCH:-unknown}"
+          echo "CPU cores: $(nproc)"
+          free -h
+          df -h /
+          uname -a
 
       - name: Setup PHP and Composer
         uses: ./.github/actions/setup-php-composer
@@ -106,6 +129,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
+      - name: Record runner benchmark metadata
+        run: |
+          {
+            echo "### Runner metadata"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Runner name | ${RUNNER_NAME:-unknown} |"
+            echo "| Runner OS | ${RUNNER_OS:-unknown} |"
+            echo "| Runner arch | ${RUNNER_ARCH:-unknown} |"
+            echo "| CPU cores | $(nproc) |"
+            echo "| Kernel | $(uname -a) |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo "Runner name: ${RUNNER_NAME:-unknown}"
+          echo "Runner OS: ${RUNNER_OS:-unknown}"
+          echo "Runner arch: ${RUNNER_ARCH:-unknown}"
+          echo "CPU cores: $(nproc)"
+          free -h
+          df -h /
+          uname -a
+
       - name: Setup PHP and Composer
         uses: ./.github/actions/setup-php-composer
 
@@ -155,6 +200,28 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Record runner benchmark metadata
+        run: |
+          {
+            echo "### Runner metadata"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Runner name | ${RUNNER_NAME:-unknown} |"
+            echo "| Runner OS | ${RUNNER_OS:-unknown} |"
+            echo "| Runner arch | ${RUNNER_ARCH:-unknown} |"
+            echo "| CPU cores | $(nproc) |"
+            echo "| Kernel | $(uname -a) |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo "Runner name: ${RUNNER_NAME:-unknown}"
+          echo "Runner OS: ${RUNNER_OS:-unknown}"
+          echo "Runner arch: ${RUNNER_ARCH:-unknown}"
+          echo "CPU cores: $(nproc)"
+          free -h
+          df -h /
+          uname -a
 
       - name: Setup PHP and Composer
         uses: ./.github/actions/setup-php-composer
