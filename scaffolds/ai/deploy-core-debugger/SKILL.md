@@ -22,7 +22,7 @@ Set concrete values before running commands:
 ```bash
 PROJECT_ROOT="/path/to/project"
 ENV_FILE="$PROJECT_ROOT/.env"
-INVENTORY_FILE="$PROJECT_ROOT/.deploy-core/inventory.yml"
+INVENTORY_FILE="$PROJECT_ROOT/.deploy/inventory.yml"
 SERVER="production"
 SITE="example.com"
 PHP_SERVICE="php8.3-fpm"
@@ -30,7 +30,7 @@ PHP_SERVICE="php8.3-fpm"
 
 ## References
 
-- Inventory schema: `.deploy-core/inventory.yml`
+- Inventory schema: `.deploy/inventory.yml`
 - Command catalog: `deploy list --raw`
 - Command reference: `deploy help server:info`
 - Command reference: `deploy help server:logs`
@@ -82,7 +82,7 @@ deploy server:run --env="$ENV_FILE" --inventory="$INVENTORY_FILE" --server="$SER
 
 ## Standard Debug Workflow
 
-1. Read `.deploy-core/inventory.yml`.
+1. Read `.deploy/inventory.yml`.
 2. Run `server:info`.
 3. Run targeted `server:logs`.
 4. Run safe `server:run` diagnostics.

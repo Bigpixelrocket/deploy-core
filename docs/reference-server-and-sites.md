@@ -112,7 +112,7 @@ A stable flow is `site:create`, then `site:deploy`, then `site:dns:check` and `s
 
 `site:create` auto-detects subdomains (including two-part country-code TLDs like `.co.uk` and `.com.au`) and forces WWW mode to "none" for subdomain sites. Root domains keep the full WWW mode selection with "redirect to root" as the default.
 
-`site:deploy` validates that your deploy script exists in the repository before proceeding. If `.deploy-core/scripts/deploy.sh` is missing, you'll see a warning with a suggestion to run `scaffold:scripts` to generate it. Missing scripts don't block deployment, but they are skipped.
+`site:deploy` validates that your deploy script exists in the repository before proceeding. If `.deploy/scripts/deploy.sh` is missing, you'll see a warning with a suggestion to run `scaffold:scripts` to generate it. Missing scripts don't block deployment, but they are skipped.
 
 <a name="shared-file-operations"></a>
 

@@ -34,7 +34,7 @@ trait CronsTrait
     // ----
 
     /**
-     * Scan .deploy-core/scripts/ directory recursively and return sorted list of cron scripts.
+     * Scan .deploy/scripts/ directory recursively and return sorted list of cron scripts.
      *
      * @param string $cronsDir Absolute path to scripts directory
      * @return array<int, string> Array of script paths relative to scripts directory

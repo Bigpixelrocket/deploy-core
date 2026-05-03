@@ -108,7 +108,7 @@ class SiteDeployCommand extends BaseCommand
         // ----
 
         try {
-            $availableScripts = $this->getAvailableScripts($site, '.deploy-core/scripts');
+            $availableScripts = $this->getAvailableScripts($site, '.deploy/scripts');
         } catch (\RuntimeException $e) {
             $this->nay($e->getMessage());
 

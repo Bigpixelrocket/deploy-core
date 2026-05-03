@@ -36,13 +36,13 @@ it('returns file-only results for remote script paths', function (): void {
         $runCommand(['git', 'config', 'user.email', 'test@example.com'], $worktree);
         $runCommand(['git', 'config', 'user.name', 'Test User'], $worktree);
 
-        $filesystem->mkdir($worktree.'/.deploy-core/scripts');
+        $filesystem->mkdir($worktree.'/.deploy/scripts');
         $filesystem->dumpFile(
-            $worktree.'/.deploy-core/scripts/cron',
+            $worktree.'/.deploy/scripts/cron',
             "#!/usr/bin/env bash\necho 'ok'\n"
         );
         $filesystem->dumpFile(
-            $worktree.'/.deploy-core/scripts/cron.sh',
+            $worktree.'/.deploy/scripts/cron.sh',
             "#!/usr/bin/env bash\necho 'ok'\n"
         );
 
@@ -56,17 +56,17 @@ it('returns file-only results for remote script paths', function (): void {
         $runCommand(['git', 'push', 'origin', $branch], $worktree);
 
         $checks = $git->checkRemoteFilesExist($origin, $branch, [
-            '.deploy-core/scripts',
-            '.deploy-core/scripts/cron',
-            '.deploy-core/scripts/cron.sh',
-            '.deploy-core/scripts/missing.sh',
+            '.deploy/scripts',
+            '.deploy/scripts/cron',
+            '.deploy/scripts/cron.sh',
+            '.deploy/scripts/missing.sh',
         ]);
 
         expect($checks)->toBe([
-            '.deploy-core/scripts' => false,
-            '.deploy-core/scripts/cron' => true,
-            '.deploy-core/scripts/cron.sh' => true,
-            '.deploy-core/scripts/missing.sh' => false,
+            '.deploy/scripts' => false,
+            '.deploy/scripts/cron' => true,
+            '.deploy/scripts/cron.sh' => true,
+            '.deploy/scripts/missing.sh' => false,
         ]);
     } finally {
         $filesystem->remove($tmpRoot);

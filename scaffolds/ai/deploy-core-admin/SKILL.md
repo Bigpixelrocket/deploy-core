@@ -10,7 +10,7 @@ Use this skill for full lifecycle operations.
 ## Execution Protocol
 
 1. Run commands in non-interactive form with explicit options.
-2. Read `.deploy-core/inventory.yml` before changes.
+2. Read `.deploy/inventory.yml` before changes.
 3. Use `deploy help <command>` before first use in a session.
 4. Include confirmation flags (`--yes`, `--force`) for destructive commands.
 5. Do not use interactive SSH commands (`server:ssh`, `site:ssh`) from AI agents.
@@ -22,7 +22,7 @@ Set concrete values before running commands:
 ```bash
 PROJECT_ROOT="/path/to/project"
 ENV_FILE="$PROJECT_ROOT/.env"
-INVENTORY_FILE="$PROJECT_ROOT/.deploy-core/inventory.yml"
+INVENTORY_FILE="$PROJECT_ROOT/.deploy/inventory.yml"
 
 SERVER="production"
 HOST="203.0.113.50"
@@ -38,10 +38,10 @@ PHP_VERSION="8.3"
 WWW_MODE="redirect-to-root"
 WEB_ROOT="public"
 
-CRON_SCRIPT=".deploy-core/scripts/cron.sh"
+CRON_SCRIPT=".deploy/scripts/cron.sh"
 CRON_SCHEDULE="*/5 * * * *"
 SUPERVISOR_PROGRAM="queue-worker"
-SUPERVISOR_SCRIPT=".deploy-core/scripts/supervisor.sh"
+SUPERVISOR_SCRIPT=".deploy/scripts/supervisor.sh"
 
 AWS_KEY_PAIR="deploy-core-key"
 AWS_ZONE="example.com"
@@ -65,7 +65,7 @@ CF_ZONE="example.com"
 
 ## Global References
 
-- Inventory: `.deploy-core/inventory.yml`
+- Inventory: `.deploy/inventory.yml`
 - Command catalog: `deploy list --raw`
 - Per-command reference: `deploy help <command>`
 

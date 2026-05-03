@@ -205,7 +205,7 @@ Run the `scaffold:scripts` command in your project directory to scaffold a few s
 deploy scaffold:scripts
 ```
 
-This creates `deploy.sh`, `cron.sh`, and `supervisor.sh` in your project's `.deploy-core/scripts` directory:
+This creates `deploy.sh`, `cron.sh`, and `supervisor.sh` in your project's `.deploy/scripts` directory:
 
 - The `deploy.sh` script handles your project's deployment workflow by installing dependencies, building assets, linking shared resources, running migrations, and optimizing caches.
 - The `cron.sh` and `supervisor.sh` scripts serve as starting points for scheduled tasks and long-running workers.
@@ -235,7 +235,7 @@ Understanding the deployment lifecycle helps you write effective deployment scri
 
 2. **Release Creation** - A new timestamped directory is created in `releases/` (e.g., `releases/20240115_143052`). Your code is exported from the repository into this directory using `git archive`, ensuring a clean copy without Git metadata.
 
-3. **Deploy Script** - If your project has a `.deploy-core/scripts/deploy.sh` script, it runs now. This script handles your project's deployment workflow: installing dependencies, building assets, linking shared resources, running migrations, and optimizing caches. The release is isolated, so failures won't affect your live site.
+3. **Deploy Script** - If your project has a `.deploy/scripts/deploy.sh` script, it runs now. This script handles your project's deployment workflow: installing dependencies, building assets, linking shared resources, running migrations, and optimizing caches. The release is isolated, so failures won't affect your live site.
 
 4. **Activation** - The `current` symlink atomically switches to point to the new release. This is the moment your new code goes live. The atomic nature of symlink operations means there's no "in-between" state.
 
