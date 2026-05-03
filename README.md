@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://bigpixelrocket.com/deploy-core" target="_blank">
-        <img src="https://raw.githubusercontent.com/bigpixelrocket/deploy-core/main/docs/images/logo-mark.svg" width="400" alt="DeployCore Logo">
+        <img src="https://raw.githubusercontent.com/bigpixelrocket/deploy-core/main/docs/images/logo-mark.svg" width="auto" alt="DeployCore Logo">
     </a>
 </p>
 
