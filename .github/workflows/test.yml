@@ -26,10 +26,15 @@ on:
 
 jobs:
   test:
+    name: test (PHP ${{ matrix.php-version }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ["8.3", "8.4", "8.5"]
     concurrency:
-      group: test-${{ github.ref }}
+      group: test-${{ github.ref }}-${{ matrix.php-version }}
       cancel-in-progress: true
 
     steps:
@@ -46,6 +51,7 @@ jobs:
             echo "| Runner name | ${RUNNER_NAME:-unknown} |"
             echo "| Runner OS | ${RUNNER_OS:-unknown} |"
             echo "| Runner arch | ${RUNNER_ARCH:-unknown} |"
+            echo "| PHP (matrix) | ${{ matrix.php-version }} |"
             echo "| CPU cores | $(nproc) |"
             echo "| Kernel | $(uname -a) |"
           } >> "$GITHUB_STEP_SUMMARY"
@@ -53,6 +59,7 @@ jobs:
           echo "Runner name: ${RUNNER_NAME:-unknown}"
           echo "Runner OS: ${RUNNER_OS:-unknown}"
           echo "Runner arch: ${RUNNER_ARCH:-unknown}"
+          echo "PHP (matrix): ${{ matrix.php-version }}"
           echo "CPU cores: $(nproc)"
           free -h
           df -h /
@@ -61,6 +68,7 @@ jobs:
       - name: Setup PHP and Composer
         uses: ./.github/actions/setup-php-composer
         with:
+          php-version: ${{ matrix.php-version }}
           coverage: "true"
 
       - name: Prepare Rector cache
@@ -70,9 +78,9 @@ jobs:
         uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: /tmp/rector
-          key: ${{ runner.os }}-rector-${{ github.event_name }}-${{ github.ref_name }}-${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-rector-php${{ matrix.php-version }}-${{ github.event_name }}-${{ github.ref_name }}-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
-            ${{ runner.os }}-rector-${{ github.event_name }}-${{ github.ref_name }}-
+            ${{ runner.os }}-rector-php${{ matrix.php-version }}-${{ github.event_name }}-${{ github.ref_name }}-
 
       - name: Verify CI canary failures
         run: |
