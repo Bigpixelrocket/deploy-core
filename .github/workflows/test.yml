@@ -22,7 +22,6 @@ on:
   push:
     branches:
       - main
-      - "ci/benchmark-*"
     paths: *test_paths
 
 jobs:
@@ -119,7 +118,7 @@ jobs:
     name: vm-tests (ubuntu24)
     needs: [test]
     if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}
-    runs-on: ubuntu-24.04
+    runs-on: warp-ubuntu-latest-x64-4x
     timeout-minutes: 12
     concurrency:
       group: bats-vm-ubuntu24-${{ github.ref }}
