@@ -93,7 +93,7 @@ class IoService
                 // Preserve existing color tags (like <fg=cyan>)
                 $line = $matches[1] . '▒ ' . $matches[2];
             } else {
-                $line = '▒ ' . $line;
+                $line = '<fg=#5c5c5c>▒</> ' . $line;
             }
         }
 
@@ -118,6 +118,17 @@ class IoService
 
         $verbosity = $force ? OutputInterface::VERBOSITY_QUIET : OutputInterface::VERBOSITY_NORMAL;
         $this->io->write($messages, $newline, $verbosity);
+    }
+
+    /**
+     * Write-out multiple lines.
+     *
+     * @param string|iterable<string> $lines
+     * @param bool $force Force output even in quiet mode (e.g., for errors)
+     */
+    public function writeln(string|iterable $lines, bool $force = false): void
+    {
+        $this->write($lines, true, $force);
     }
 
     // ----

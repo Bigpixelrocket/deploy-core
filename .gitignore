@@ -1,4 +1,4 @@
-.deployer/
+.deploy/
 .experiments/
 .idea/
 .phpunit.cache/
@@ -10,7 +10,6 @@ vendor/
 .env.*
 *.cache
 *.log
-deployer.yml
 settings.local.json
 Thumbs.db
 

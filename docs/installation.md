@@ -87,14 +87,11 @@ Besides the inventory, commands also automatically reference the `.env` file in 
 Running any DeployCore command should display which environment or inventory files are being actively referenced right at the top:
 
 ```EXAMPLE nocopy
-▒ ≡ DeployCore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+▒ ⬢ DeployCore ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ vX.Y.Z
 ▒
-▒ Ver: ...
 ▒ Env: ~/example.com/.env
 ▒ Inv: ~/example.com/.deploy/inventory.yml
-.
-.
-.
+▒
 ```
 
 By default, DeployCore looks for both files in your current working directory. This works well for most projects, but you may need a little more flexibility when managing multiple environments or working from different directories.
