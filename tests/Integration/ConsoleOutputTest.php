@@ -21,6 +21,7 @@ it('shows the banner without version details for normal application output', fun
 
     expect($status)->toBe(Command::SUCCESS)
         ->and($display)->toContain('DeployCore')
+        ->and($display)->toContain('⬢')
         ->and($display)->not->toContain('Ver:')
         ->and($display)->toContain('Available commands:');
 });
@@ -85,7 +86,10 @@ function withConsoleOutputWorkingDirectory(callable $callback): void
     $filesystem->mkdir($tempRoot);
 
     try {
-        chdir($tempRoot);
+        if (false === chdir($tempRoot)) {
+            throw new RuntimeException(sprintf('Unable to switch to temp working directory: %s', $tempRoot));
+        }
+
         $callback();
     } finally {
         chdir($originalCwd);
