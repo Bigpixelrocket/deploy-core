@@ -8,8 +8,6 @@ use DeployCore\Services\IoService;
 use DeployCore\SymfonyApp;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\ApplicationTester;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
@@ -39,35 +37,14 @@ it('uses Symfony version output for the version option', function (string $optio
         ->and($display)->not->toContain('Available commands:');
 })->with(['--version', '-V']);
 
-it('defines the standard global verbose option shortcuts', function (): void {
-    $option = makeConsoleOutputApplication()->getDefinition()->getOption('verbose');
-
-    expect($option)->toBeInstanceOf(InputOption::class)
-        ->and($option->getShortcut())->toBe('v|vv|vvv')
-        ->and($option->acceptValue())->toBeFalse();
-});
-
-it('shows env and inventory details at normal and verbose command output levels', function (): void {
+it('shows env and inventory details in command output', function (): void {
     withConsoleOutputWorkingDirectory(function (): void {
-        $normalIo = runDiagnosticCommandForConsoleOutput(OutputInterface::VERBOSITY_NORMAL);
-        $normalDisplay = implode("\n", $normalIo->lines);
+        $io = runDiagnosticCommandForConsoleOutput();
+        $display = implode("\n", $io->lines);
 
-        expect($normalDisplay)
+        expect($display)
             ->toContain('Env:')
             ->toContain('Inv:');
-
-        foreach ([
-            OutputInterface::VERBOSITY_VERBOSE,
-            OutputInterface::VERBOSITY_VERY_VERBOSE,
-            OutputInterface::VERBOSITY_DEBUG,
-        ] as $verbosity) {
-            $verboseIo = runDiagnosticCommandForConsoleOutput($verbosity);
-            $display = implode("\n", $verboseIo->lines);
-
-            expect($display)
-                ->toContain('Env:')
-                ->toContain('Inv:');
-        }
     });
 });
 
@@ -79,7 +56,7 @@ function makeConsoleOutputApplication(): SymfonyApp
     return $app;
 }
 
-function runDiagnosticCommandForConsoleOutput(int $verbosity): CapturingConsoleOutputIoService
+function runDiagnosticCommandForConsoleOutput(): CapturingConsoleOutputIoService
 {
     $container = new Container();
     $io = new CapturingConsoleOutputIoService();
@@ -88,7 +65,7 @@ function runDiagnosticCommandForConsoleOutput(int $verbosity): CapturingConsoleO
     /** @var ConsoleOutputDiagnosticCommand $command */
     $command = $container->build(ConsoleOutputDiagnosticCommand::class);
     $tester = new CommandTester($command);
-    $status = $tester->execute([], ['decorated' => false, 'verbosity' => $verbosity]);
+    $status = $tester->execute([], ['decorated' => false]);
 
     expect($status)->toBe(Command::SUCCESS);
 
