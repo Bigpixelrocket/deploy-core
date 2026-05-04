@@ -50,6 +50,7 @@ final class SymfonyApp extends SymfonyApplication
             new InputArgument('command', InputArgument::OPTIONAL, 'The command to execute'),
             new InputOption('--help', '-h', InputOption::VALUE_NONE, 'Display help for the given command. When no command is given display help for the list command'),
             new InputOption('--quiet', '-q', InputOption::VALUE_NONE, 'Do not output any message (except errors)'),
+            new InputOption('--verbose', '-v|vv|vvv', InputOption::VALUE_NONE, 'Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug'),
             new InputOption('--version', '-V', InputOption::VALUE_NONE, 'Display this application version'),
             new InputOption('--ansi', '', InputOption::VALUE_NEGATABLE, 'Force (or disable --no-ansi) ANSI output', null),
         ]);
@@ -72,11 +73,12 @@ final class SymfonyApp extends SymfonyApplication
     {
         $this->io = new SymfonyStyle($input, $output);
 
-        $this->displayBanner();
+        $displayVersion = $input->hasParameterOption(['--version', '-V'], true);
+        $isQuiet = $input->hasParameterOption(['--quiet', '-q'], true);
+        $skipBanner = $displayVersion || $isQuiet; // Skip the banner if --version is requested or in quiet mode
 
-        // If --version is requested, skip the rest (banner includes version)
-        if ($input->hasParameterOption(['--version', '-V'], true)) {
-            return Command::SUCCESS;
+        if (!$skipBanner) {
+            $this->displayBanner();
         }
 
         return parent::doRun($input, $output);
@@ -91,18 +93,30 @@ final class SymfonyApp extends SymfonyApplication
      */
     private function displayBanner(): void
     {
-        // Skip banner in quiet mode
-        if ($this->io->isQuiet()) {
-            return;
-        }
-
+        $logo = '⬢';
+        $brandName = 'DeployCore';
         $version = $this->getVersion();
+        $prefixPlain = $logo.' '.$brandName.' '.$version;
+
+        $targetWidth = 79;
+        $fillLength = $targetWidth - mb_strlen($prefixPlain, 'UTF-8') - 4;
+        $fillLength = max(0, $fillLength);
+
+        $segment = intdiv($fillLength, 4);
+        $remainder = $fillLength % 4;
+
+        $colorFills = [
+            '<fg=cyan>'.str_repeat('━', $segment + ($remainder > 0 ? 1 : 0)).'</>',
+            '<fg=bright-blue>'.str_repeat('━', $segment + ($remainder > 1 ? 1 : 0)).'</>',
+            '<fg=magenta>'.str_repeat('━', $segment + ($remainder > 2 ? 1 : 0)).'</>',
+            '<fg=yellow>'.str_repeat('━', $segment).'</>',
+        ];
+
+        $bannerLine = '<fg=#5c5c5c>▒</> <fg=#5c5c5c>'.$logo.'</> <options=bold>'.$brandName.'</> ' . implode('', $colorFills) . ' ' . $version;
 
         $this->io->writeln([
             '',
-            '<fg=cyan>▒ ≡</> <fg=cyan;options=bold>DeployCore</> <fg=cyan>━━━━━━━━━━━━━━━━</><fg=bright-blue>━━━━━━━━━━━━━━━</><fg=magenta>━━━━━━━━━━━━━━━</><fg=gray>━━━━━━━━━━━━━━━━</>',
-            '<fg=gray>▒ </>',
-            '<fg=gray>▒ Ver: '.$version.'</>',
+            $bannerLine,
         ]);
     }
 

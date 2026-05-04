@@ -149,9 +149,12 @@ abstract class BaseCommand extends Command
         $envStatus = $this->env->getEnvFileStatus();
         $inventoryStatus = $this->inventory->getInventoryFileStatus();
 
-        $this->out([
-            "<|gray>Env: {$envStatus}</>",
-            "<|gray>Inv: {$inventoryStatus}</>",
+        $this->io->writeln([
+            "<fg=#757575>▒</>",
+            "<fg=#8c8c8c>▒ Env: {$envStatus}</>",
+            "<fg=#8c8c8c>▒ Inv: {$inventoryStatus}</>",
+            "<fg=#757575>▒</>",
+
         ]);
 
         return Command::SUCCESS;
@@ -177,7 +180,6 @@ abstract class BaseCommand extends Command
     protected function h1(string $text): void
     {
         $this->out([
-            '',
             "# {$text}",
         ]);
 
