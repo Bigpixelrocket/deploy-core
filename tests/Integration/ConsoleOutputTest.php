@@ -34,7 +34,7 @@ it('uses Symfony version output for the version option', function (string $optio
     $display = $tester->getDisplay();
 
     expect($status)->toBe(Command::SUCCESS)
-        ->and($display)->toContain('DeployCore dev-main')
+        ->and($display)->toMatch('/^DeployCore dev-[^\s]+$/')
         ->and($display)->not->toContain('Ver:')
         ->and($display)->not->toContain('Available commands:');
 })->with(['--version', '-V']);
