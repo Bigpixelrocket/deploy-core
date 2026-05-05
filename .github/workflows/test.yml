@@ -23,6 +23,18 @@ on:
     branches:
       - main
     paths: *test_paths
+  workflow_dispatch:
+    inputs:
+      bats_suite:
+        description: "Optional BATS suite to run"
+        required: true
+        default: "none"
+        type: choice
+        options:
+          - "none"
+          - "vm"
+          - "cloud"
+          - "all"
 
 jobs:
   test:
@@ -101,7 +113,7 @@ jobs:
   vm-tests-ubuntu24:
     name: vm-tests (ubuntu24)
     needs: [test]
-    if: ${{ github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) }}
+    if: ${{ github.event_name == 'workflow_dispatch' && (inputs.bats_suite == 'vm' || inputs.bats_suite == 'all') }}
     runs-on: warp-ubuntu-latest-x64-4x
     timeout-minutes: 12
     concurrency:
@@ -142,8 +154,8 @@ jobs:
 
   cloud-tests:
     name: cloud-tests (${{ matrix.provider }})
-    needs: [vm-tests-ubuntu24]
-    if: ${{ (github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)) && needs.vm-tests-ubuntu24.result == 'success' }}
+    needs: [test, vm-tests-ubuntu24]
+    if: ${{ always() && needs.test.result == 'success' && github.event_name == 'workflow_dispatch' && (inputs.bats_suite == 'cloud' || (inputs.bats_suite == 'all' && needs['vm-tests-ubuntu24'].result == 'success')) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     strategy:
