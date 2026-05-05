@@ -42,6 +42,139 @@ export DEPLOY_PERMS
 # Returns:
 #   0 on success, 1 on failure
 
+configure_php_ppa() {
+	local codename=""
+	local current_contents=""
+	local fallback_uri="https://mirror.dogado.de/ppa.launchpad.net/ondrej/php/ubuntu/"
+	local key_fingerprint="B8DC7E53946656EFBCE4C1DD71DAEAAB4AD4CAB6"
+	local key_url="https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x${key_fingerprint}"
+	local keyring="/etc/apt/keyrings/ondrej-php.gpg"
+	local keyring_tmp=""
+	local key_tmp=""
+	local legacy_source_removed=false
+	local primary_uri="https://ppa.launchpadcontent.net/ondrej/php/ubuntu/"
+	local source_file="/etc/apt/sources.list.d/ondrej-php.sources"
+	local source_contents=""
+	local source_path
+
+	if [[ -r /etc/os-release ]]; then
+		# shellcheck source=/dev/null
+		. /etc/os-release
+		codename="${VERSION_CODENAME:-}"
+	fi
+
+	if [[ -z $codename ]]; then
+		echo "Error: Failed to detect Ubuntu codename" >&2
+		return 1
+	fi
+
+	if [[ ! -f $keyring ]]; then
+		if ! ensure_php_ppa_tools; then
+			return 1
+		fi
+
+		echo "→ Installing PHP PPA signing key..."
+		key_tmp=$(mktemp /tmp/ondrej-php.XXXXXX.asc) || {
+			echo "Error: Failed to create PHP PPA signing key temp file" >&2
+			return 1
+		}
+		keyring_tmp=$(mktemp /tmp/ondrej-php.XXXXXX.gpg) || {
+			rm -f "$key_tmp"
+			echo "Error: Failed to create PHP PPA keyring temp file" >&2
+			return 1
+		}
+		chmod 0600 "$key_tmp" "$keyring_tmp"
+
+		if ! run_cmd mkdir -p /etc/apt/keyrings; then
+			rm -f "$key_tmp" "$keyring_tmp"
+			echo "Error: Failed to create APT keyring directory" >&2
+			return 1
+		fi
+
+		if ! curl -fsSL "$key_url" -o "$key_tmp"; then
+			rm -f "$key_tmp" "$keyring_tmp"
+			echo "Error: Failed to download PHP PPA signing key" >&2
+			return 1
+		fi
+
+		if ! gpg --dearmor --yes -o "$keyring_tmp" "$key_tmp"; then
+			rm -f "$key_tmp" "$keyring_tmp"
+			echo "Error: Failed to install PHP PPA signing key" >&2
+			return 1
+		fi
+
+		if ! run_cmd install -m 0644 "$keyring_tmp" "$keyring"; then
+			rm -f "$key_tmp" "$keyring_tmp"
+			echo "Error: Failed to install PHP PPA signing key" >&2
+			return 1
+		fi
+
+		rm -f "$key_tmp" "$keyring_tmp"
+		if ! run_cmd chmod 0644 "$keyring"; then
+			echo "Error: Failed to set PHP PPA signing key permissions" >&2
+			return 1
+		fi
+		repo_added=true
+	fi
+
+	source_contents=$(cat <<- EOF
+		Types: deb
+		URIs: ${primary_uri} ${fallback_uri}
+		Suites: ${codename}
+		Components: main
+		Languages: none
+		Signed-By: ${keyring}
+	EOF
+	)
+	current_contents=$(cat "$source_file" 2> /dev/null || printf '')
+
+	while IFS= read -r source_path; do
+		[[ $source_path == "$source_file" ]] && continue
+		if run_cmd rm -f "$source_path"; then
+			legacy_source_removed=true
+		fi
+	done < <(grep -rl "ondrej/php" /etc/apt/sources.list.d/ 2> /dev/null || true)
+
+	if [[ $current_contents == "$source_contents" ]]; then
+		[[ $legacy_source_removed == true ]] && repo_added=true
+		return 0
+	fi
+
+	echo "→ Adding PHP PPA with fallback mirror..."
+	if ! printf '%s\n' "$source_contents" | run_cmd tee "$source_file" > /dev/null; then
+		echo "Error: Failed to write PHP PPA source" >&2
+		return 1
+	fi
+
+	repo_added=true
+}
+
+ensure_php_ppa_tools() {
+	local packages=()
+
+	if ! command -v curl > /dev/null 2>&1; then
+		packages+=("curl")
+	fi
+
+	if ! command -v gpg > /dev/null 2>&1; then
+		packages+=("gnupg")
+	fi
+
+	if [[ ! -f /etc/ssl/certs/ca-certificates.crt ]]; then
+		packages+=("ca-certificates")
+	fi
+
+	if ((${#packages[@]} == 0)); then
+		return 0
+	fi
+
+	echo "→ Installing PHP PPA source tools..."
+	if ! apt_get_with_retry install -y "${packages[@]}"; then
+		echo "Error: Failed to install PHP PPA source tools" >&2
+		return 1
+	fi
+}
+
 smart_apt_update() {
 	local force=${1:-false}
 	local timestamp_file="/tmp/deployer-apt-last-update"
@@ -169,27 +302,8 @@ main() {
 	# PHP repository
 	# ----
 
-	#
-	# Ensure add-apt-repository is available
-
-	if ! command -v add-apt-repository > /dev/null 2>&1; then
-		echo "→ Installing software-properties-common..."
-		if ! apt_get_with_retry install -y software-properties-common; then
-			echo "Error: Failed to install software-properties-common" >&2
-			exit 1
-		fi
-	fi
-
-	#
-	# PHP PPA
-
-	if ! grep -qr "ondrej/php" /etc/apt/sources.list /etc/apt/sources.list.d/ 2> /dev/null; then
-		echo "→ Adding PHP PPA..."
-		if ! run_cmd env DEBIAN_FRONTEND=noninteractive add-apt-repository -y ppa:ondrej/php 2>&1; then
-			echo "Error: Failed to add PHP PPA" >&2
-			exit 1
-		fi
-		repo_added=true
+	if ! configure_php_ppa; then
+		exit 1
 	fi
 
 	#
