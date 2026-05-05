@@ -122,6 +122,7 @@ Use these project-local skills for deep procedural guidance.
 | Commands/Traits | `deploy-core-command-authoring`  | `.agents/skills/deploy-core-command-authoring/SKILL.md`  |
 | Playbooks       | `deploy-core-playbook-authoring` | `.agents/skills/deploy-core-playbook-authoring/SKILL.md` |
 | BATS            | `deploy-core-bats-testing`       | `.agents/skills/deploy-core-bats-testing/SKILL.md`       |
+| BATS Runs       | `deploy-core-bats-runner`        | `.agents/skills/deploy-core-bats-runner/SKILL.md`        |
 | GitHub Actions  | `deploy-core-gha-ci`             | `.agents/skills/deploy-core-gha-ci/SKILL.md`             |
 | Documentation   | `deploy-core-docs-policy`        | `.agents/skills/deploy-core-docs-policy/SKILL.md`        |
 

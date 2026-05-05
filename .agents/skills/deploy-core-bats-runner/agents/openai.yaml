@@ -1,0 +1,4 @@
+interface:
+  display_name: "DeployCore BATS Runner"
+  short_description: "Run costly BATS suites intentionally"
+  default_prompt: "Use $deploy-core-bats-runner to trigger the VM BATS suite on the current branch."
