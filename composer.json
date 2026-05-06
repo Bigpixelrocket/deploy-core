@@ -27,7 +27,7 @@
         "symfony/dotenv": "^7.4",
         "symfony/filesystem": "^7.4",
         "symfony/yaml": "^7.4",
-        "toin0u/digitalocean-v2": "^5.0"
+        "toin0u/digitalocean-v2": "^5.1"
     },
     "require-dev": {
         "laravel/pint": "^1.29",
